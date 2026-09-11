@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FAF7F2;
+    --background-card: #FFFFFF;
+    --background-elevated: #F5F0E8;
+    --foreground: #262420;
+    --foreground-muted: #5C574D;
+    --foreground-faint: #8B8577;
+
+    --primary: #4B5A3E;
+    --primary-foreground: #FAF7F2;
+    --primary-hover: #39452E;
+
+    --sage: #6C7A5B;
+    --sage-soft: #8B9779;
+    --sage-deep: #4B5A3E;
+    --sage-tint: #EAEEE2;
+
+    --clay: #BB9878;
+    --clay-tint: #F3E9DC;
+
+    --line: #E5DFD1;
+    --line-strong: #D2C9B5;
+
+    --success: #2D6A4F;
+    --success-bg: #E8F5E9;
+    --warning: #B76E00;
+    --warning-bg: #FFF3E0;
+    --error: #A83232;
+    --error-bg: #FDF2F2;
+    --info: #2B5B84;
+    --info-bg: #EBF3FA;
+
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    --shadow-subtle: 0 1px 3px rgba(38, 36, 32, 0.05), 0 1px 2px rgba(38, 36, 32, 0.03);
+    --shadow-md: 0 4px 12px rgba(38, 36, 32, 0.08);
+    --shadow-lg: 0 12px 28px rgba(38, 36, 32, 0.12);
+  }
+
+  .dark {
+    --background: #181715;
+    --background-card: #22201C;
+    --background-elevated: #2B2824;
+    --foreground: #F5F2EC;
+    --foreground-muted: #C2BBB0;
+    --foreground-faint: #8C867B;
+
+    --primary: #94A683;
+    --primary-foreground: #181715;
+    --primary-hover: #A7B996;
+
+    --sage: #899A77;
+    --sage-soft: #A2B292;
+    --sage-deep: #B1C2A1;
+    --sage-tint: #242B1E;
+
+    --clay: #D1B192;
+    --clay-tint: #2C261F;
+
+    --line: #33302B;
+    --line-strong: #47433C;
+
+    --success: #52B788;
+    --success-bg: #1B2E24;
+    --warning: #E0A96D;
+    --warning-bg: #332616;
+    --error: #E57373;
+    --error-bg: #351C1C;
+    --info: #64B5F6;
+    --info-bg: #1A2836;
+
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), sans-serif;
+    antialiased: true;
+    font-feature-settings: "ss01" on, "cv01" on;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  ::selection {
+    background-color: rgba(108, 122, 91, 0.25);
+    color: var(--foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), serif;
+    color: var(--foreground);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-glass {
+    background-color: rgba(250, 247, 242, 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .bg-glass {
+    background-color: rgba(24, 23, 21, 0.85);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

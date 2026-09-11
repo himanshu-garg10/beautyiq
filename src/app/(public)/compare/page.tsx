@@ -1,0 +1,582 @@
+"use client";
+
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Container } from "@/components/layout/container";
+import { ComparisonService } from "@/services/comparison.service";
+import { ProductService } from "@/services/product.service";
+import { ValueEngineService } from "@/services/value-engine.service";
+import type { Product, ProductComparisonItem, ComparisonSession } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Scale,
+  CheckCircle2,
+  X,
+  Star,
+  Plus,
+  Trash2,
+  RotateCcw,
+  Sparkles,
+  ExternalLink,
+  Info,
+  Shield,
+  Clock,
+  ArrowRight,
+  TestTube,
+  BarChart2,
+  SlidersHorizontal,
+} from "lucide-react";
+import { useComparison } from "@/context/comparison-context";
+import { useSkinProfile } from "@/context/skin-profile-context";
+import { useToast } from "@/context/toast-context";
+
+export default function CompareMatrixPage() {
+  const { selectedIds, removeFromComparison, clearComparison, addToComparison } = useComparison();
+  const { profile } = useSkinProfile();
+  const { showToast } = useToast();
+
+  const [items, setItems] = React.useState<ProductComparisonItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [history, setHistory] = React.useState<ComparisonSession[]>([]);
+  const [showAddModal, setShowAddModal] = React.useState(false);
+  const [allProducts, setAllProducts] = React.useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const hasCompletedProfile = profile.isOnboardingComplete && profile.skinType;
+
+  // Load products for comparison
+  const loadComparison = React.useCallback(
+    async (idsToCompare: string[]) => {
+      setLoading(true);
+      const res = await ComparisonService.compareProducts(idsToCompare, hasCompletedProfile ? profile : null);
+      if (res.data) {
+        setItems(res.data);
+      }
+      setLoading(false);
+    },
+    [hasCompletedProfile, profile]
+  );
+
+  React.useEffect(() => {
+    // If no items selected in context, default to demo product IDs ("p1", "p3", "p5")
+    const ids = selectedIds.length >= 2 ? selectedIds : ["p1", "p3", "p5"];
+    loadComparison(ids);
+    setHistory(ComparisonService.getComparisonHistory());
+  }, [selectedIds, loadComparison]);
+
+  // Load catalog for quick add modal
+  React.useEffect(() => {
+    ProductService.getProducts({ pageSize: 30 }).then((res) => {
+      if (res.data) setAllProducts(res.data.products);
+    });
+  }, []);
+
+  const handleRemove = (id: string) => {
+    if (items.length <= 2) {
+      showToast("Comparison requires at least 2 products.", "warning");
+      return;
+    }
+    removeFromComparison(id);
+    setItems((prev) => prev.filter((item) => item.product.id !== id));
+  };
+
+  const handleAddProduct = (id: string) => {
+    if (selectedIds.includes(id)) {
+      showToast("This product is already in your comparison matrix.", "info");
+      return;
+    }
+    const success = addToComparison(id);
+    if (success) {
+      setShowAddModal(false);
+    }
+  };
+
+  const handleReopenSession = (session: ComparisonSession) => {
+    session.productIds.forEach((id) => addToComparison(id));
+    loadComparison(session.productIds);
+    showToast(`Reopened ${session.criteria || "comparison session"}`, "success");
+  };
+
+  const handleDeleteSession = (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = ComparisonService.deleteComparisonSession(sessionId);
+    setHistory(updated);
+    showToast("Comparison history session deleted", "info");
+  };
+
+  const handleClearHistory = () => {
+    ComparisonService.clearComparisonHistory();
+    setHistory([]);
+    showToast("Cleared comparison history", "info");
+  };
+
+  const filteredCatalog = allProducts.filter(
+    (p) =>
+      !items.some((item) => item.product.id === p.id) &&
+      (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  return (
+    <Container className="py-10 space-y-10 max-w-7xl">
+      {/* Sticky Header & Toolbar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-line pb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="sage" className="flex items-center gap-1">
+              <Scale className="h-3.5 w-3.5" /> Product Comparison Engine
+            </Badge>
+            <Badge variant="default" className="font-mono text-xs">
+              {items.length} / 5 Selected
+            </Badge>
+          </div>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+            Side-by-Side Product Comparison
+          </h1>
+          <p className="text-sm text-foreground-muted">
+            Analyze objective specs, normalized unit costs (₹/ml), cross-platform prices, and personalized compatibility.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/recommendations/test-suite">
+            <Button variant="outline" size="sm" leftIcon={<TestTube className="h-4 w-4" />}>
+              Engine Test Suite
+            </Button>
+          </Link>
+
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<Plus className="h-4 w-4" />}
+            onClick={() => setShowAddModal(true)}
+            disabled={items.length >= 5}
+          >
+            Add Product ({items.length}/5)
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<RotateCcw className="h-4 w-4" />}
+            onClick={() => {
+              clearComparison();
+              setItems([]);
+            }}
+          >
+            Clear Matrix
+          </Button>
+        </div>
+      </div>
+
+      {/* Profile Suitability Alert Banner */}
+      {!hasCompletedProfile ? (
+        <div className="rounded border border-amber-300/40 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-foreground font-semibold block text-sm mb-0.5">
+                Personalized Compatibility Unavailable
+              </strong>
+              <p className="text-foreground-muted">
+                You are viewing objective product specifications. Complete your skin profile to calculate personalized compatibility scores, concern matches, and active ingredient suitability.
+              </p>
+            </div>
+          </div>
+          <Link href="/onboarding" className="flex-shrink-0">
+            <Button variant="accent" size="sm">
+              Complete Profile
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="rounded border border-sage-deep/30 bg-sage-tint/30 p-4 flex items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-2 text-sage-deep">
+            <Sparkles className="h-4 w-4" />
+            <span>
+              Personalized for <strong>{profile.skinType} Skin</strong> ({profile.concerns.join(", ") || "General Care"})
+            </span>
+          </div>
+          <Link href="/profile" className="text-xs text-sage-deep font-semibold hover:underline">
+            Edit Skin Profile
+          </Link>
+        </div>
+      )}
+
+      {/* Main Comparison Matrix Display */}
+      {loading ? (
+        <div className="h-96 rounded border border-line bg-background-card animate-pulse" />
+      ) : items.length === 0 ? (
+        <EmptyState
+          title="No Products Selected for Comparison"
+          description="Select 2 to 5 skincare products from the catalog, search results, or recommendation engine to compare them side-by-side."
+          actionLabel="Browse Products Catalog"
+          onAction={() => (window.location.href = "/products")}
+        />
+      ) : (
+        <div className="space-y-8">
+          {/* DESKTOP COMPARISON TABLE (>= 768px) */}
+          <div className="hidden md:block overflow-x-auto rounded border border-line bg-background-card shadow-subtle">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-background-elevated/50">
+                  <TableHead className="w-52 font-bold text-foreground">Feature / Metric</TableHead>
+                  {items.map((item) => (
+                    <TableHead key={item.product.id} className="min-w-[240px] max-w-[280px]">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-foreground truncate">{item.product.brand}</span>
+                        <button
+                          onClick={() => handleRemove(item.product.id)}
+                          className="text-foreground-faint hover:text-status-error transition-colors p-1"
+                          title="Remove from matrix"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {/* Product Header Row */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Product</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      <div className="space-y-2">
+                        <Link href={`/products/${item.product.id}`} className="block relative h-36 w-full rounded overflow-hidden bg-background-elevated border border-line group">
+                          <Image src={item.product.image} alt={item.product.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                        </Link>
+                        <Link href={`/products/${item.product.id}`} className="font-display font-semibold text-foreground text-sm line-clamp-2 hover:text-sage-deep transition-colors">
+                          {item.product.name}
+                        </Link>
+                        <Badge variant="default" className="text-[0.65rem]">{item.product.category}</Badge>
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Overall Compatibility Row */}
+                <TableRow className="bg-sage-tint/20">
+                  <TableCell className="font-semibold text-sage-deep">
+                    Skin Compatibility
+                  </TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      {item.suitabilityMatch !== null ? (
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-mono font-bold">
+                            <span className="text-sage-deep">{item.suitabilityMatch}% Match</span>
+                            {item.isBestCompatibilityOverall && (
+                              <Badge variant="sage" className="text-[0.6rem] py-0">Top Match</Badge>
+                            )}
+                          </div>
+                          <Progress value={item.suitabilityMatch} variant="sage" size="md" />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-foreground-faint font-mono">Profile Required</span>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Best Price & Unit Cost Row */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Price &amp; Unit Cost</TableCell>
+                  {items.map((item) => {
+                    const price = item.bestPriceListing?.price ?? null;
+                    return (
+                      <TableCell key={item.product.id} className="font-mono">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <strong className="text-foreground text-base">
+                              {price !== null ? `₹${price}` : "Unavailable"}
+                            </strong>
+                            {item.isBestPriceOverall && (
+                              <Badge variant="sage" className="text-[0.6rem]">Best Price</Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-foreground-faint block">
+                            {item.product.quantity} {item.product.unit} ({item.unitPriceLabel})
+                          </span>
+                          {item.isBestValueOverall && (
+                            <Badge variant="clay" className="text-[0.6rem] mt-1">Best Value (₹/ml)</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Customer Rating Row */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Rating &amp; Reviews</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        {item.product.rating !== null ? (
+                          <>
+                            <Star className="h-4 w-4 fill-clay text-clay" />
+                            <span className="font-bold text-foreground font-mono">{item.product.rating}</span>
+                            <span className="text-foreground-faint">({item.product.reviewCount})</span>
+                            {item.isBestRatedOverall && (
+                              <Badge variant="clay" className="text-[0.6rem] ml-1">Highest Rated</Badge>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-foreground-faint font-mono">Rating: N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Key Active Ingredients */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Key Actives</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      <div className="flex flex-wrap gap-1">
+                        {item.product.keyIngredients.map((ing) => (
+                          <Badge key={ing} variant="default" className="text-[0.68rem]">
+                            {ing}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Target Concerns */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Target Concerns</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      <div className="flex flex-wrap gap-1">
+                        {item.product.targetConcerns.map((concern) => (
+                          <Badge key={concern} variant="clay" className="text-[0.68rem]">
+                            {concern}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Safety & Ethics Profile */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Formulation Safety</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id} className="text-xs space-y-1 font-mono">
+                      <div>Cruelty-Free: <strong>{item.product.crueltyFree ? "Yes" : "No"}</strong></div>
+                      <div>Vegan: <strong>{item.product.vegan ? "Yes" : "No"}</strong></div>
+                      <div>Fragrance-Free: <strong>{item.product.fragranceFree ? "Yes" : "No"}</strong></div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Grounded Comparison Highlights */}
+                <TableRow className="bg-background-elevated/40">
+                  <TableCell className="font-semibold text-foreground-muted">Key Highlights</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      <ul className="space-y-1 text-xs text-foreground-muted">
+                        {item.reasons && item.reasons.length > 0 ? (
+                          item.reasons.map((r, idx) => (
+                            <li key={idx} className="flex items-start gap-1 font-medium text-foreground">
+                              <span>{r}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-foreground-faint">Standard formulation</li>
+                        )}
+                      </ul>
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Store Action Row */}
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Store Listings</TableCell>
+                  {items.map((item) => (
+                    <TableCell key={item.product.id}>
+                      {item.bestPriceListing?.productUrl ? (
+                        <a
+                          href={item.bestPriceListing.productUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded bg-sage-deep text-white text-xs font-semibold hover:bg-sage-deep/90 transition-colors"
+                        >
+                          Visit Seller ({item.bestPriceListing.platform}) <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : (
+                        <span className="text-xs text-foreground-faint">No external store</span>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* MOBILE RESPONSIVE COMPARISON (< 768px) */}
+          <div className="block md:hidden space-y-6">
+            {items.map((item) => (
+              <div key={item.product.id} className="rounded-lg border border-line bg-background-card p-5 space-y-4 shadow-subtle relative">
+                <button
+                  onClick={() => handleRemove(item.product.id)}
+                  className="absolute top-4 right-4 text-foreground-faint hover:text-status-error p-1"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+
+                <div className="flex items-center gap-4">
+                  <div className="relative h-20 w-20 rounded overflow-hidden bg-background-elevated flex-shrink-0 border border-line">
+                    <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                  </div>
+                  <div>
+                    <span className="text-xs uppercase font-bold text-foreground-faint block">{item.product.brand}</span>
+                    <h3 className="font-display font-semibold text-foreground text-sm line-clamp-2">{item.product.name}</h3>
+                    <span className="font-mono font-bold text-sage-deep text-base block mt-1">
+                      {item.bestPriceListing?.price ? `₹${item.bestPriceListing.price}` : "Unavailable"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs border-t border-line pt-3">
+                  <div>
+                    <span className="text-foreground-faint block">Unit Cost</span>
+                    <strong className="font-mono text-foreground">{item.unitPriceLabel}</strong>
+                  </div>
+                  <div>
+                    <span className="text-foreground-faint block">Rating</span>
+                    <strong className="font-mono text-foreground">{item.product.rating ? `${item.product.rating}★` : "N/A"}</strong>
+                  </div>
+                  <div>
+                    <span className="text-foreground-faint block">Skin Match</span>
+                    <strong className="font-mono text-sage-deep">{item.suitabilityMatch ? `${item.suitabilityMatch}%` : "N/A"}</strong>
+                  </div>
+                  <div>
+                    <span className="text-foreground-faint block">VFM Score</span>
+                    <strong className="font-mono text-clay">{item.vfmIndex}/100</strong>
+                  </div>
+                </div>
+
+                <div className="border-t border-line pt-3 text-xs space-y-1">
+                  <span className="font-semibold text-foreground block">Key Actives:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {item.product.keyIngredients.map((i) => (
+                      <Badge key={i} variant="default" className="text-[0.65rem]">{i}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* COMPARISON HISTORY SECTION */}
+          {history.length > 0 && (
+            <div className="rounded-lg border border-line bg-background-card p-6 space-y-4 shadow-subtle">
+              <div className="flex items-center justify-between border-b border-line pb-3">
+                <h3 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-sage-deep" /> Comparison History
+                </h3>
+                <Button variant="ghost" size="sm" onClick={handleClearHistory}>
+                  Clear History
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {history.map((sess) => (
+                  <div
+                    key={sess.id}
+                    onClick={() => handleReopenSession(sess)}
+                    className="p-4 rounded border border-line bg-background-elevated/50 hover:border-sage-deep cursor-pointer transition-all space-y-2 relative group"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-mono text-foreground-faint">
+                        {new Date(sess.createdAt).toLocaleDateString("en-IN")}
+                      </span>
+                      <button
+                        onClick={(e) => handleDeleteSession(sess.id, e)}
+                        className="text-foreground-faint hover:text-status-error opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <p className="font-display font-semibold text-foreground text-sm line-clamp-1">
+                      {sess.productNames?.join(" vs ") || sess.criteria}
+                    </p>
+
+                    <span className="text-xs font-semibold text-sage-deep flex items-center gap-1">
+                      Reopen Matrix <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* QUICK ADD PRODUCT MODAL */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-lg border border-line bg-background-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="font-display text-lg font-bold text-foreground">
+                Add Product to Comparison Matrix
+              </h3>
+              <button onClick={() => setShowAddModal(false)} className="text-foreground-faint hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Search product name, brand, or category..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded border border-line bg-background-elevated px-3.5 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-sage-deep"
+            />
+
+            <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+              {filteredCatalog.length === 0 ? (
+                <p className="text-xs text-foreground-faint py-4 text-center">No available products match your search query.</p>
+              ) : (
+                filteredCatalog.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => handleAddProduct(p.id)}
+                    className="flex items-center justify-between p-2.5 rounded border border-line hover:border-sage-deep hover:bg-sage-tint/20 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 rounded overflow-hidden bg-background-elevated flex-shrink-0">
+                        <Image src={p.image} alt={p.name} fill className="object-cover" />
+                      </div>
+                      <div>
+                        <span className="text-[0.65rem] uppercase font-bold text-foreground-faint block">{p.brand}</span>
+                        <h4 className="font-display text-xs font-semibold text-foreground line-clamp-1">{p.name}</h4>
+                      </div>
+                    </div>
+                    <Button variant="accent" size="sm">
+                      Add
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </Container>
+  );
+}
