@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark" | "system";
 
 interface ThemeContextType {
   theme: Theme;
@@ -15,32 +15,49 @@ const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = React.useState<Theme>("light");
 
-  React.useEffect(() => {
-    // Check saved theme preference or system preference
-    const saved = localStorage.getItem("beautyiq-theme") as Theme | null;
-    if (saved) {
-      setThemeState(saved);
-      if (saved === "dark") {
-        document.documentElement.classList.add("dark");
-      }
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setThemeState("dark");
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+  const applyTheme = React.useCallback((currentTheme: Theme) => {
+    if (typeof window === "undefined") return;
 
-  const setTheme = React.useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
-    localStorage.setItem("beautyiq-theme", newTheme);
-    if (newTheme === "dark") {
+    let isDark = false;
+    if (currentTheme === "dark") {
+      isDark = true;
+    } else if (currentTheme === "system") {
+      isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    if (isDark) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
   }, []);
 
+  React.useEffect(() => {
+    const saved = localStorage.getItem("beautyiq-theme") as Theme | null;
+    const initialTheme: Theme = saved || "system";
+    setThemeState(initialTheme);
+    applyTheme(initialTheme);
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      const current = (localStorage.getItem("beautyiq-theme") as Theme | null) || "system";
+      if (current === "system") {
+        applyTheme("system");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [applyTheme]);
+
+  const setTheme = React.useCallback((newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem("beautyiq-theme", newTheme);
+    applyTheme(newTheme);
+  }, [applyTheme]);
+
   const toggleTheme = React.useCallback(() => {
-    setTheme(theme === "light" ? "dark" : "light");
+    setTheme(theme === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
   return (
@@ -57,3 +74,4 @@ export function useTheme() {
   }
   return context;
 }
+

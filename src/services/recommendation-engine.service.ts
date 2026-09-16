@@ -35,21 +35,25 @@ export const RECOMMENDATION_WEIGHTS = {
 
 export class RecommendationEngineService {
   /**
-   * Primary entry point for deterministic recommendation generation
+   * Primary entry point for deterministic recommendation generation on real product data
    */
   static async generateRecommendations(
     engineRequest: RecommendationEngineRequest
   ): Promise<ApiResponse<RecommendationResultSet>> {
-    await simulateDelay(250);
+    await simulateDelay(150);
 
     const { requirements, priority, userProfile } = engineRequest;
 
+    // Retrieve active normalized products from AdminDataService (including verified real data)
+    const { AdminDataService } = await import("./admin-data.service");
+    const activeProducts = await AdminDataService.getProducts();
+
     // 1. Hard Constraints Filtering (Requirement #4 & #10)
-    const { candidates, eliminatedReasons } = this.applyHardConstraints(products, requirements);
+    const { candidates, eliminatedReasons } = this.applyHardConstraints(activeProducts, requirements);
 
     // 2. No Exact Match Handling (Requirement #30 & #31)
     if (candidates.length === 0) {
-      const relaxedAlternatives = this.generateRelaxedAlternatives(products, requirements);
+      const relaxedAlternatives = this.generateRelaxedAlternatives(activeProducts, requirements);
 
       const result: RecommendationResultSet = {
         status: "NO_EXACT_MATCH",
@@ -450,11 +454,17 @@ export class RecommendationEngineService {
       reasons.push(`Matches active concerns: ${matchedConcerns.join(", ")}`);
     }
 
-    const matchedIngredients = req.preferredIngredients.filter((pref) =>
-      product.keyIngredients.some((k) => k.toLowerCase().includes(pref.toLowerCase()))
-    );
-    if (matchedIngredients.length > 0) {
-      reasons.push(`Contains preferred active: ${matchedIngredients.join(", ")}`);
+    const hasIngredients = (product.allIngredients && product.allIngredients.length > 0) || (product.keyIngredients && product.keyIngredients.length > 0);
+    if (!hasIngredients) {
+      // Stage 10 Requirement #26: If ingredients are unavailable, do NOT say "Excellent ingredient match"
+      reasons.push("Ingredient information is unavailable, so ingredient compatibility could not be fully evaluated.");
+    } else {
+      const matchedIngredients = req.preferredIngredients.filter((pref) =>
+        product.keyIngredients.some((k) => k.toLowerCase().includes(pref.toLowerCase()))
+      );
+      if (matchedIngredients.length > 0) {
+        reasons.push(`Contains preferred active: ${matchedIngredients.join(", ")}`);
+      }
     }
 
     const bestListing = ProductService.getBestListingForProduct(product.id);
@@ -470,6 +480,10 @@ export class RecommendationEngineService {
       reasons.push(`Matches preferred brand: ${product.brand}`);
     }
 
+    if (product.dataConfidence >= 90) {
+      reasons.push(`High data confidence (${product.dataConfidence}%) from verified source`);
+    }
+
     if (reasons.length === 0) {
       reasons.push("High overall formula compatibility score");
     }
@@ -478,7 +492,7 @@ export class RecommendationEngineService {
   }
 
   /**
-   * Generate Data-Backed Considerations (Requirement #33)
+   * Generate Data-Backed Considerations (Requirement #33 & Stage 10 Data Quality)
    */
   private static generateConsiderations(
     product: Product,
@@ -495,7 +509,15 @@ export class RecommendationEngineService {
     }
 
     if (product.rating === null) {
-      considerations.push("Community rating unavailable for this new item");
+      considerations.push("Community rating unavailable for this catalog item");
+    }
+
+    if (product.uncertainIngredients && product.uncertainIngredients.length > 0) {
+      considerations.push(`${product.uncertainIngredients.length} ingredients could not be verified against standard INCI database`);
+    }
+
+    if (product.dataConfidence < 80) {
+      considerations.push(`Data confidence is ${product.dataConfidence}% — some retailer or formulation details are pending verification`);
     }
 
     return considerations;

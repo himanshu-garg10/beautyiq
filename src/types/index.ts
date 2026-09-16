@@ -87,7 +87,7 @@ export type RoutineStep =
 
 export type ProductUnit = "ml" | "g" | "pcs" | "sheets";
 export type ProductStatus = "Complete" | "Incomplete" | "Outdated" | "Failed";
-export type AvailabilityStatus = "Available" | "Unavailable" | "Limited Information" | "Not Available";
+export type AvailabilityStatus = "Available" | "Unavailable" | "Unknown" | "Limited Information" | "Not Available";
 
 export type IngredientCategory =
   | "Humectant"
@@ -150,6 +150,7 @@ export interface Ingredient {
   comedogenicRating: number; // 0 to 5
   suitableSkinTypes: SkinType[];
   contraindications: string[];
+  status?: "active" | "inactive";
 }
 
 export interface Platform {
@@ -157,6 +158,8 @@ export interface Platform {
   name: string;
   logoUrl?: string;
   baseUrl: string;
+  status?: "active" | "inactive";
+  listingCount?: number;
 }
 
 export interface Seller {
@@ -164,6 +167,8 @@ export interface Seller {
   name: string;
   platformId: string;
   rating?: number;
+  status?: "active" | "inactive";
+  listingCount?: number;
 }
 
 export interface ProductListing {
@@ -179,6 +184,9 @@ export interface ProductListing {
   availability: AvailabilityStatus;
   productUrl: string;
   lastUpdated: string;
+  priceLastUpdated?: string;
+  availabilityLastUpdated?: string;
+  isVerifiedSource?: boolean;
   isBestValue?: boolean;
   isBestPrice?: boolean;
   unitPricePerMl?: number;
@@ -217,6 +225,16 @@ export interface Product {
   summary: string;
   whyRecommended?: string[];
   warnings?: string[];
+  isVerified?: boolean;
+  dataSourceId?: string;
+  originalBrand?: string;
+  barcodeOrGtin?: string;
+  uncertainIngredients?: string[];
+  dataQualityFlags?: string[];
+  priceFreshnessTimestamp?: string;
+  availabilityFreshnessTimestamp?: string;
+  variantGroupId?: string;
+  variantType?: string;
 }
 
 export interface ProductComparisonItem {
@@ -317,6 +335,76 @@ export interface PrivacySettings {
   dataExportRequested?: boolean;
 }
 
+export interface NotificationPreferences {
+  reminders: boolean;
+  progressUpdates: boolean;
+  newRecommendations: boolean;
+  productAlerts: boolean;
+  educationalContent: boolean;
+}
+
+export type NotificationType =
+  | "PRODUCT_SAVED"
+  | "RECOMMENDATION_GENERATED"
+  | "PROFILE_UPDATED"
+  | "PRICE_CHANGED"
+  | "PRODUCT_UNAVAILABLE"
+  | "SYSTEM_NOTIFICATION";
+
+export interface InAppNotification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string;
+  productId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  userId: string;
+  query: string;
+  timestamp: string;
+  searchType: "keyword" | "ai-requirement" | "category" | "ingredient";
+  extractedCriteria?: any;
+}
+
+export interface RecommendationHistoryItem {
+  id: string;
+  userId: string;
+  timestamp: string;
+  querySummary: string;
+  requirements: StructuredSkincareRequirement;
+  totalRecommendations: number;
+  topRecommendation?: {
+    id: string;
+    name: string;
+    brand: string;
+    score: number;
+    image: string;
+    category: string;
+    price: number;
+  };
+  categories: string[];
+  profileContextUsed?: {
+    skinType?: string;
+    concerns?: string[];
+  };
+  isRecalculated?: boolean;
+}
+
+export interface DataExportRequest {
+  id: string;
+  userId: string;
+  requestedAt: string;
+  status: "PENDING" | "PROCESSING" | "READY";
+  downloadUrl?: string;
+  fileSizeBytes?: number;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -327,10 +415,12 @@ export interface User {
   skinProfile?: SkinProfile;
   personalProfile?: UserPersonalProfile;
   privacySettings?: PrivacySettings;
+  notificationPreferences?: NotificationPreferences;
   wishlistIds: string[];
   searchHistory: string[];
   recentlyViewed?: RecentlyViewedItem[];
   createdAt: string;
+  status?: "active" | "inactive" | "suspended";
   resetToken?: string;
   resetTokenExpiry?: number;
 }
@@ -361,6 +451,8 @@ export interface Category {
   name: RoutineStep;
   productCount: number;
   image: string;
+  description?: string;
+  status?: "active" | "inactive";
 }
 
 export interface Brand {
@@ -370,6 +462,7 @@ export interface Brand {
   philosophy: string;
   productCount: number;
   logoUrl?: string;
+  status?: "active" | "inactive";
 }
 
 // ==========================================
@@ -429,6 +522,11 @@ export interface AIRequirementParseResult {
   profileConflict: ProfileConflictInfo | null;
   processingTimeMs: number;
   stepLogs: string[];
+  medicalSafety?: {
+    hasClinicalConditions: boolean;
+    safetyDisclaimer: string;
+    recommendedAction: string;
+  };
 }
 
 export interface AIRequirementSession {
@@ -511,3 +609,225 @@ export interface RecommendationFeedback {
   comments?: string;
   createdAt: string;
 }
+
+// ==========================================
+// STAGE 9: ADMIN DASHBOARD & MANAGEMENT TYPES
+// ==========================================
+
+export type ReportType =
+  | "wrong_price"
+  | "wrong_info"
+  | "wrong_ingredients"
+  | "broken_link"
+  | "availability_issue"
+  | "duplicate"
+  | "other";
+
+export type ReportStatus = "open" | "reviewing" | "resolved" | "rejected";
+
+export interface ProductReport {
+  id: string;
+  productId: string;
+  productName: string;
+  userId?: string;
+  userEmail?: string;
+  reportType: ReportType;
+  description: string;
+  status: ReportStatus;
+  createdAt: string;
+  resolvedAt?: string;
+  adminNotes?: string;
+}
+
+export type SupportCategory = "general" | "routine" | "recommendation" | "account" | "bug";
+export type SupportPriority = "low" | "medium" | "high" | "urgent";
+export type SupportStatus = "open" | "in_progress" | "resolved" | "closed";
+
+export interface SupportRequest {
+  id: string;
+  userId?: string;
+  userName: string;
+  userEmail: string;
+  subject: string;
+  message: string;
+  category: SupportCategory;
+  priority: SupportPriority;
+  status: SupportStatus;
+  createdAt: string;
+  updatedAt: string;
+  adminResponse?: string;
+}
+
+export type AdminEntity =
+  | "product"
+  | "brand"
+  | "category"
+  | "ingredient"
+  | "platform"
+  | "seller"
+  | "listing"
+  | "customer"
+  | "report"
+  | "support"
+  | "system";
+
+export interface AdminActivityLog {
+  id: string;
+  timestamp: string;
+  adminEmail: string;
+  adminName: string;
+  action: string;
+  entity: AdminEntity;
+  entityId: string;
+  entityName: string;
+  details: string;
+  status: "success" | "warning" | "error";
+}
+
+export type DataQualityIssueType =
+  | "missing_ingredients"
+  | "missing_image"
+  | "missing_price"
+  | "missing_quantity"
+  | "missing_source"
+  | "invalid_listing"
+  | "outdated"
+  | "duplicate_candidate";
+
+export interface DataQualityIssue {
+  id: string;
+  entityType: "product" | "listing" | "ingredient";
+  entityId: string;
+  entityName: string;
+  issueType: DataQualityIssueType;
+  severity: "low" | "medium" | "high";
+  detectedAt: string;
+  status: "pending" | "resolved" | "ignored";
+  description: string;
+}
+
+export interface DuplicateCandidate {
+  id: string;
+  entityType: "product" | "brand" | "ingredient" | "listing";
+  item1: { id: string; name: string; details: string };
+  item2: { id: string; name: string; details: string };
+  similarityScore: number;
+  reasons: string[];
+  status: "pending" | "merged" | "dismissed";
+  detectedAt: string;
+}
+
+export interface AdminDashboardMetrics {
+  totalCustomers: number;
+  activeCustomers: number;
+  totalProducts: number;
+  activeProducts: number;
+  totalBrands: number;
+  totalCategories: number;
+  totalIngredients: number;
+  totalPlatforms: number;
+  totalSellers: number;
+  totalListings: number;
+  availableListings: number;
+  unavailableListings: number;
+  incompleteProducts: number;
+  reviewProducts: number;
+  duplicateCandidatesCount: number;
+  openReportsCount: number;
+  openSupportCount: number;
+  categoryDistribution: { category: string; count: number }[];
+  brandDistribution: { brand: string; count: number }[];
+  availabilityDistribution: { status: string; count: number }[];
+  dataQualityHealthScore: number;
+  recentActivity: AdminActivityLog[];
+}
+
+// ==========================================
+// STAGE 10: REAL DATA PIPELINE & QUALITY TYPES
+// ==========================================
+
+export type DataSourceType = "api" | "feed" | "dataset" | "catalog";
+export type DataSourceStatus = "active" | "inactive" | "pending";
+export type PermissionStatus = "approved" | "pending" | "rejected";
+
+export interface DataSource {
+  id: string;
+  name: string;
+  type: DataSourceType;
+  status: DataSourceStatus;
+  permissionStatus: PermissionStatus;
+  lastSuccessfulUpdate: string | null;
+  lastFailedUpdate: string | null;
+  dataCoverage: string;
+  reliabilityScore: number; // 0 - 100
+  endpoint?: string;
+  authType: "none" | "api_key" | "oauth" | "feed_url";
+  config?: Record<string, any>;
+}
+
+export type RawRecordStatus = "pending" | "processed" | "failed" | "rejected";
+
+export interface RawProductRecord {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  collectionTimestamp: string;
+  externalRecordId: string;
+  rawPayload: Record<string, any>;
+  processingStatus: RawRecordStatus;
+  failedStage?: string;
+  failureReason?: string;
+  targetProductId?: string;
+}
+
+export interface DataPipelineRunLog {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  startedAt: string;
+  completedAt: string;
+  status: "success" | "warning" | "failed";
+  recordsReceived: number;
+  recordsAccepted: number;
+  recordsRejected: number;
+  recordsUpdated: number;
+  recordsCreated: number;
+  duplicatesDetected: number;
+  validationFailures: number;
+  errors: string[];
+}
+
+export type DataQualityState = "Complete" | "Incomplete" | "Duplicate" | "Invalid" | "Outdated" | "Failed";
+
+export interface PipelineValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  fieldsValidated: string[];
+}
+
+export interface NormalizedQuantityResult {
+  quantity: number;
+  unit: ProductUnit;
+}
+
+export interface NormalizedBrandResult {
+  canonicalBrand: string;
+  originalBrand: string;
+  confidence: number;
+  isRecognized: boolean;
+}
+
+export interface NormalizedCategoryResult {
+  canonicalCategory: RoutineStep;
+  originalCategory: string;
+  confidence: number;
+  isUncertain: boolean;
+}
+
+export interface NormalizedIngredientSummary {
+  normalized: string[];
+  uncertain: string[];
+  unidentifiedCount: number;
+}
+

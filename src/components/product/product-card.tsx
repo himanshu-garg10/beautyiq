@@ -61,14 +61,14 @@ export function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
-        {/* Compatibility Score Placeholder (Requirement #6: Clearly marked as demo/placeholder) */}
+        {/* Compatibility Score */}
         <div
           className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-sage-deep/30 bg-background-card/95 backdrop-blur-xs px-2.5 py-1 shadow-subtle"
-          title="Placeholder metric until AI Recommendation engine is enabled"
+          title="Personalized Compatibility Score based on user profile and requirements"
         >
           <span className="h-2 w-2 rounded-full bg-sage-deep animate-pulse" aria-hidden="true" />
           <span className="text-[0.7rem] font-bold font-mono text-sage-deep">
-            {product.compatibilityScore ? `${product.compatibilityScore}% Demo Match` : "Match Preview"}
+            {product.compatibilityScore ? `${product.compatibilityScore}% Match` : "Match Preview"}
           </span>
         </div>
 
@@ -84,8 +84,8 @@ export function ProductCard({ product }: { product: Product }) {
           <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
         </button>
 
-        {/* Availability Badge */}
-        <div className="absolute left-3 bottom-3 flex items-center gap-1.5">
+        {/* Status Badges: Availability, Data Confidence & Verified Source */}
+        <div className="absolute left-3 bottom-3 flex flex-wrap items-center gap-1.5 max-w-[85%]">
           {availability === "Available" ? (
             <Badge variant="sage" className="text-[0.65rem] py-0.5 px-2 uppercase font-semibold">
               Available
@@ -96,13 +96,27 @@ export function ProductCard({ product }: { product: Product }) {
             </Badge>
           )}
 
-          {/* Data Confidence Indicator (Requirement #10) */}
+          {/* Data Confidence Indicator (Requirement #15: Separate from compatibility) */}
           <span
-            className="text-[0.65rem] font-mono font-medium px-2 py-0.5 rounded bg-background-card/90 text-foreground-muted border border-line"
-            title={`Data Confidence: ${product.dataConfidence}% completeness/reliability`}
+            className={`text-[0.65rem] font-mono font-medium px-2 py-0.5 rounded backdrop-blur-xs border ${
+              product.dataConfidence >= 85
+                ? "bg-background-card/95 text-sage-deep border-sage-deep/30"
+                : "bg-background-card/95 text-foreground-muted border-line"
+            }`}
+            title={`Data Confidence: ${product.dataConfidence}%. Assesses field completeness, INCI ingredient resolution, and verified source reliability.`}
           >
-            Conf: {product.dataConfidence}%
+            Confidence: {product.dataConfidence}%
           </span>
+
+          {/* Verified Source Indicator */}
+          {product.isVerified && (
+            <span
+              className="text-[0.6rem] font-medium px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-0.5"
+              title="Verified from approved catalog feed or partner API"
+            >
+              <ShieldCheck className="h-3 w-3 inline" /> Verified
+            </span>
+          )}
         </div>
       </Link>
 
@@ -179,9 +193,19 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
 
             {/* Quantity & Unit Cost (Requirement #19: Price per unit) */}
-            <span className="text-[0.7rem] font-mono text-foreground-faint">
-              {product.quantity} {product.unit} {unitPriceCalc.unitPrice !== null ? `(${unitPriceCalc.unitLabel})` : ""}
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[0.7rem] font-mono text-foreground-faint">
+                {product.quantity} {product.unit} {unitPriceCalc.unitPrice !== null ? `(${unitPriceCalc.unitLabel})` : ""}
+              </span>
+              {bestListing?.lastUpdated && (
+                <span
+                  className="text-[0.65rem] text-foreground-faint font-mono"
+                  title={`Price & availability confirmed on: ${bestListing.lastUpdated}`}
+                >
+                  • {bestListing.lastUpdated.split(" ")[0]}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

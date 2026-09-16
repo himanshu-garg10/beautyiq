@@ -146,10 +146,10 @@ export class ComparisonService {
   /**
    * Get comparison history from localStorage
    */
-  static getComparisonHistory(): ComparisonSession[] {
+  static getComparisonHistory(userId: string = "u1"): ComparisonSession[] {
     if (typeof window === "undefined") return [];
     try {
-      const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+      const stored = localStorage.getItem(`${HISTORY_STORAGE_KEY}_${userId}`);
       return stored ? JSON.parse(stored) : [];
     } catch (e) {
       console.error("Failed to read comparison history:", e);
@@ -158,10 +158,10 @@ export class ComparisonService {
   }
 
   /**
-   * Save comparison session to localStorage
+   * Save comparison session to localStorage isolated by user
    */
-  static saveComparisonSession(productIds: string[]): ComparisonSession {
-    const history = this.getComparisonHistory();
+  static saveComparisonSession(productIds: string[], userId: string = "u1"): ComparisonSession {
+    const history = this.getComparisonHistory(userId);
     const productNames = productIds
       .map((id) => products.find((p) => p.id === id)?.brand || id)
       .filter(Boolean);
@@ -178,7 +178,7 @@ export class ComparisonService {
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+        localStorage.setItem(`${HISTORY_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
       } catch (e) {
         console.error("Failed to save comparison session:", e);
       }
@@ -190,13 +190,13 @@ export class ComparisonService {
   /**
    * Delete single session from comparison history
    */
-  static deleteComparisonSession(sessionId: string): ComparisonSession[] {
-    const history = this.getComparisonHistory();
+  static deleteComparisonSession(sessionId: string, userId: string = "u1"): ComparisonSession[] {
+    const history = this.getComparisonHistory(userId);
     const updated = history.filter((s) => s.id !== sessionId);
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+        localStorage.setItem(`${HISTORY_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
       } catch (e) {
         console.error("Failed to delete comparison session:", e);
       }
@@ -206,12 +206,12 @@ export class ComparisonService {
   }
 
   /**
-   * Clear all comparison history
+   * Clear all comparison history for user
    */
-  static clearComparisonHistory(): void {
+  static clearComparisonHistory(userId: string = "u1"): void {
     if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        localStorage.removeItem(`${HISTORY_STORAGE_KEY}_${userId}`);
       } catch (e) {
         console.error("Failed to clear comparison history:", e);
       }

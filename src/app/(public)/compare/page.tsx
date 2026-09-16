@@ -34,8 +34,11 @@ import {
 import { useComparison } from "@/context/comparison-context";
 import { useSkinProfile } from "@/context/skin-profile-context";
 import { useToast } from "@/context/toast-context";
+import { useAuth } from "@/context/auth-context";
 
 export default function CompareMatrixPage() {
+  const { user } = useAuth();
+  const userId = user?.id || "u1";
   const { selectedIds, removeFromComparison, clearComparison, addToComparison } = useComparison();
   const { profile } = useSkinProfile();
   const { showToast } = useToast();
@@ -66,8 +69,8 @@ export default function CompareMatrixPage() {
     // If no items selected in context, default to demo product IDs ("p1", "p3", "p5")
     const ids = selectedIds.length >= 2 ? selectedIds : ["p1", "p3", "p5"];
     loadComparison(ids);
-    setHistory(ComparisonService.getComparisonHistory());
-  }, [selectedIds, loadComparison]);
+    setHistory(ComparisonService.getComparisonHistory(userId));
+  }, [selectedIds, loadComparison, userId]);
 
   // Load catalog for quick add modal
   React.useEffect(() => {
@@ -104,13 +107,13 @@ export default function CompareMatrixPage() {
 
   const handleDeleteSession = (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updated = ComparisonService.deleteComparisonSession(sessionId);
+    const updated = ComparisonService.deleteComparisonSession(sessionId, userId);
     setHistory(updated);
     showToast("Comparison history session deleted", "info");
   };
 
   const handleClearHistory = () => {
-    ComparisonService.clearComparisonHistory();
+    ComparisonService.clearComparisonHistory(userId);
     setHistory([]);
     showToast("Cleared comparison history", "info");
   };

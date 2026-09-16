@@ -389,6 +389,21 @@ export default function AISearchPage() {
       {/* Structured Result & Customer Confirmation Interface (Requirement #13, #15, #16, #24) */}
       {mode === "result" && requirement && (
         <div className="space-y-6">
+          {/* Medical Safety Notice (when clinical conditions like eczema/cystic acne detected) */}
+          {parseResult?.medicalSafety?.hasClinicalConditions && (
+            <div className="rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-4 space-y-2 shadow-subtle">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-semibold text-sm">
+                <ShieldCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" /> Dermatological &amp; Medical Safety Notice
+              </div>
+              <p className="text-xs text-foreground leading-relaxed">
+                {parseResult.medicalSafety.safetyDisclaimer}
+              </p>
+              <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
+                Recommended Action: {parseResult.medicalSafety.recommendedAction}
+              </p>
+            </div>
+          )}
+
           {/* Ambiguity Clarification Modal/Card (Requirement #13) */}
           {parseResult?.ambiguities.map((amb) => (
             !resolvedAmbiguities[amb.term] ? (

@@ -46,20 +46,36 @@ export default function SearchPage() {
   const [page, setPage] = React.useState(1);
 
   const [dataResult, setDataResult] = React.useState<PaginatedProductsResult | null>(null);
+  const [relaxedInfo, setRelaxedInfo] = React.useState<{ explanation: string; products: Product[] } | null>(null);
   const [loading, setLoading] = React.useState(false);
 
-  const executeSearch = React.useCallback((qString: string, pIndex: number = 1) => {
+  const executeSearch = React.useCallback(async (qString: string, pIndex: number = 1) => {
     setActiveQuery(qString);
     setLoading(true);
-    ProductService.getProducts({
+    setRelaxedInfo(null);
+
+    const res = await ProductService.getProducts({
       query: qString,
       sortBy,
       page: pIndex,
       pageSize: 9,
-    }).then((res) => {
-      if (res.data) setDataResult(res.data);
-      setLoading(false);
     });
+
+    if (res.data) {
+      setDataResult(res.data);
+      // If 0 matches, check for relaxed requirement options
+      if (res.data.products.length === 0) {
+        const { ProductSearchService } = await import("@/services/product-search.service");
+        const relaxed = await ProductSearchService.searchVerifiedProducts(qString);
+        if (relaxed.hasRelaxedFallbacks && relaxed.relaxedProducts && relaxed.relaxedProducts.length > 0) {
+          setRelaxedInfo({
+            explanation: relaxed.relaxedExplanation || "No exact match found. Showing relaxed matches:",
+            products: relaxed.relaxedProducts,
+          });
+        }
+      }
+    }
+    setLoading(false);
   }, [sortBy]);
 
   React.useEffect(() => {
@@ -249,12 +265,32 @@ export default function SearchPage() {
               ))}
             </div>
           ) : !dataResult || dataResult.products.length === 0 ? (
-            <EmptyState
-              title={`No Results for "${activeQuery}"`}
-              description="We couldn't find any products matching your specific query. Try searching for broader terms like 'Cleanser', 'Niacinamide', or 'Minimalist'."
-              actionLabel="Clear Search"
-              onAction={handleClearSearch}
-            />
+            <div className="space-y-6">
+              <div className="rounded-lg border border-amber-300 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20 p-6 space-y-3 shadow-subtle">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-base">
+                  <Sparkles className="h-5 w-5" /> No verified product currently matches all your requirements.
+                </div>
+                <p className="text-xs text-foreground leading-relaxed">
+                  {relaxedInfo ? relaxedInfo.explanation : "We strictly avoid fabricating or hallucinating products. None of our verified catalog entries meet 100% of these search terms."}
+                </p>
+                <Button variant="outline" size="sm" onClick={handleClearSearch}>
+                  Clear &amp; Reset Search
+                </Button>
+              </div>
+
+              {relaxedInfo && relaxedInfo.products.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    Relaxed Requirement Verified Matches
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {relaxedInfo.products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {dataResult.products.map((product) => (

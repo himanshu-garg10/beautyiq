@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Sparkles, User, ShieldCheck, Search } from "lucide-react";
+import { Sparkles, User, ShieldCheck, Search, Heart } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 import { useAuth } from "@/context/auth-context";
 
 const mainNavLinks = [
@@ -81,11 +82,29 @@ export function Navbar() {
                 </Button>
               </Link>
             ) : user ? (
-              <Link href="/profile">
-                <Button size="sm" variant="outline" leftIcon={<User className="h-4 w-4" />}>
-                  My Account
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <NotificationDropdown />
+
+                <Link
+                  href="/wishlist"
+                  className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background hover:bg-background-elevated hover:text-foreground text-foreground-muted transition-colors"
+                  title="My Saved Wishlist"
+                  aria-label="Wishlist"
+                >
+                  <Heart className="h-4 w-4" />
+                  {user.wishlistIds && user.wishlistIds.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay text-[0.65rem] font-bold text-white px-1 shadow-xs">
+                      {user.wishlistIds.length}
+                    </span>
+                  )}
+                </Link>
+
+                <Link href="/dashboard">
+                  <Button size="sm" variant="outline" leftIcon={<User className="h-4 w-4 text-sage-deep" />}>
+                    Dashboard
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/login">

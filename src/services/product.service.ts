@@ -51,7 +51,16 @@ export class ProductService {
    * Get best listing price for a product from its listings
    */
   static getBestListingForProduct(productId: string): ProductListing | undefined {
-    const listings = mockProductListings.filter((l) => l.productId === productId && l.price !== null);
+    let allListings: ProductListing[] = mockProductListings;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("beautyiq_admin_listings");
+        if (stored) {
+          allListings = JSON.parse(stored);
+        }
+      } catch {}
+    }
+    const listings = allListings.filter((l) => l.productId === productId && l.price !== null);
     if (listings.length === 0) return undefined;
     return listings.reduce((best, cur) => {
       if (!best) return cur;
@@ -73,53 +82,65 @@ export class ProductService {
   }
 
   /**
-   * Filter, sort, and paginate products catalog
+   * Filter, sort, and paginate products catalog using normalized real data
    */
   static async getProducts(
     filters: ProductFilterOptions = {}
   ): Promise<ApiResponse<PaginatedProductsResult>> {
-    await simulateDelay(100);
+    await simulateDelay(80);
 
-    let result = [...products];
+    // Retrieve active normalized products from AdminDataService (supports live additions & verification)
+    const { AdminDataService } = await import("./admin-data.service");
+    let result = await AdminDataService.getProducts();
 
-    // Filter by Search Query
-    if (filters.query) {
-      const q = filters.query.toLowerCase().trim();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.keyIngredients.some((i) => i.toLowerCase().includes(q)) ||
-          p.targetConcerns.some((c) => c.toLowerCase().includes(q)) ||
-          p.skinTypes.some((s) => s.toLowerCase().includes(q))
-      );
-    }
+    // Filter by Search Query with Typo Tolerance and Synonym Expansion
+    if (filters.query && filters.query.trim().length > 0) {
+      const { ProductSearchService } = await import("./product-search.service");
+      const searchRes = await ProductSearchService.searchVerifiedProducts(filters.query, {
+        category: filters.category,
+        brand: filters.brand,
+        skinType: filters.skinType,
+        concern: filters.skinConcern,
+        maxPrice: filters.maxPrice,
+      });
 
-    // Filter by Category
-    if (filters.category) {
-      const cat = filters.category.toLowerCase();
-      result = result.filter((p) => p.category.toLowerCase() === cat);
-    }
+      result = searchRes.products;
+    } else {
+      // Filter by Category
+      if (filters.category && filters.category !== "all") {
+        const cat = filters.category.toLowerCase();
+        result = result.filter((p) => p.category.toLowerCase() === cat);
+      }
 
-    // Filter by Brand
-    if (filters.brand) {
-      const brand = filters.brand.toLowerCase();
-      result = result.filter((p) => p.brand.toLowerCase() === brand);
-    }
+      // Filter by Brand
+      if (filters.brand && filters.brand !== "all") {
+        const brand = filters.brand.toLowerCase();
+        result = result.filter((p) => p.brand.toLowerCase() === brand);
+      }
 
-    // Filter by Skin Type
-    if (filters.skinType) {
-      result = result.filter((p) => p.skinTypes.includes(filters.skinType!));
-    }
+      // Filter by Skin Type
+      if (filters.skinType) {
+        result = result.filter(
+          (p) => p.skinTypes.includes(filters.skinType!) || p.skinTypes.includes("All Skin Types" as any)
+        );
+      }
 
-    // Filter by Skin Concern
-    if (filters.skinConcern) {
-      const c = filters.skinConcern.toLowerCase();
-      result = result.filter((p) =>
-        p.targetConcerns.some((concern) => concern.toLowerCase() === c)
-      );
+      // Filter by Skin Concern
+      if (filters.skinConcern && filters.skinConcern !== "all") {
+        const c = filters.skinConcern.toLowerCase();
+        result = result.filter((p) =>
+          p.targetConcerns.some((concern) => concern.toLowerCase() === c)
+        );
+      }
+
+      // Filter by Max Price
+      if (filters.maxPrice !== undefined) {
+        result = result.filter((p) => {
+          const best = this.getBestListingForProduct(p.id);
+          if (!best || best.price === null) return true;
+          return best.price <= filters.maxPrice!;
+        });
+      }
     }
 
     // Filter by Ingredient
@@ -218,10 +239,14 @@ export class ProductService {
    * Get single product by ID
    */
   static async getProductById(id: string): Promise<ApiResponse<Product>> {
-    await simulateDelay(80);
-    const product = products.find((p) => p.id === id);
+    await simulateDelay(60);
+    const { AdminDataService } = await import("./admin-data.service");
+    const product = await AdminDataService.getProductById(id);
 
     if (!product) {
+      // Fallback check in mock products
+      const fallback = products.find((p) => p.id === id);
+      if (fallback) return createSuccessResponse(fallback);
       return createErrorResponse("NOT_FOUND", `Product with ID ${id} was not found.`);
     }
 
@@ -232,9 +257,16 @@ export class ProductService {
    * Get platform & seller price listings for a product
    */
   static async getProductPriceListings(productId: string): Promise<ApiResponse<ProductListing[]>> {
-    await simulateDelay(80);
-    const listings = mockProductListings.filter((l) => l.productId === productId);
-    return createSuccessResponse(listings);
+    await simulateDelay(60);
+    const { AdminDataService } = await import("./admin-data.service");
+    const storedListings = await AdminDataService.getListings({ productId });
+
+    if (storedListings && storedListings.length > 0) {
+      return createSuccessResponse(storedListings);
+    }
+
+    const fallbackListings = mockProductListings.filter((l) => l.productId === productId);
+    return createSuccessResponse(fallbackListings);
   }
 
   /**
@@ -243,13 +275,15 @@ export class ProductService {
   static async getProductPriceDetails(
     productId: string
   ): Promise<ApiResponse<import("@/types").ProductPriceComparisonDetails>> {
-    await simulateDelay(80);
-    const product = products.find((p) => p.id === productId);
-    if (!product) {
+    await simulateDelay(60);
+    const prodRes = await this.getProductById(productId);
+    if (!prodRes.data) {
       return createErrorResponse("NOT_FOUND", `Product with ID ${productId} was not found.`);
     }
+    const product = prodRes.data;
 
-    const listings = mockProductListings.filter((l) => l.productId === productId);
+    const listingsRes = await this.getProductPriceListings(productId);
+    const listings = listingsRes.data || [];
     const validPrices = listings.map((l) => l.price).filter((p): p is number => p !== null);
     const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : null;
     const maxPrice = validPrices.length > 0 ? Math.max(...validPrices) : null;
@@ -261,7 +295,8 @@ export class ProductService {
     // Stale data check (listings older than 30 days)
     const now = new Date().getTime();
     const hasStaleData = listings.some((l) => {
-      const updated = new Date(l.lastUpdated).getTime();
+      const dateStr = l.priceLastUpdated || l.lastUpdated;
+      const updated = new Date(dateStr).getTime();
       return now - updated > 30 * 24 * 60 * 60 * 1000;
     });
 

@@ -141,7 +141,7 @@ export class AuthService {
     }
 
     // Determine redirect route based on onboarding completion & role
-    let redirectRoute = "/profile";
+    let redirectRoute = "/dashboard";
     if (user.role === "admin") {
       redirectRoute = "/admin/dashboard";
     } else if (user.skinProfile && !user.skinProfile.isOnboardingComplete) {
@@ -213,6 +213,95 @@ export class AuthService {
     this.saveUsers(users);
 
     return createSuccessResponse(true);
+  }
+
+  /**
+   * Change user password with current password verification
+   */
+  static async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<ApiResponse<boolean>> {
+    await simulateDelay(250);
+
+    if (!newPassword || newPassword.length < 8) {
+      return createErrorResponse("VALIDATION_ERROR", "New password must be at least 8 characters long.");
+    }
+
+    const users = this.getUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) {
+      return createErrorResponse("NOT_FOUND", "User not found.");
+    }
+
+    const currentHash = await hashPassword(currentPassword);
+    if (user.passwordHash && user.passwordHash !== currentHash) {
+      return createErrorResponse("AUTHENTICATION_ERROR", "Current password provided is incorrect.");
+    }
+
+    user.passwordHash = await hashPassword(newPassword);
+    this.saveUsers(users);
+
+    return createSuccessResponse(true);
+  }
+
+  /**
+   * Update Account basic details (Name, Email)
+   */
+  static async updateAccountDetails(
+    userId: string,
+    name: string,
+    email: string
+  ): Promise<ApiResponse<User>> {
+    await simulateDelay(200);
+
+    if (!name || name.trim().length < 2) {
+      return createErrorResponse("VALIDATION_ERROR", "Name must be at least 2 characters.");
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email.trim())) {
+      return createErrorResponse("VALIDATION_ERROR", "Valid email address is required.");
+    }
+
+    const users = this.getUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) {
+      return createErrorResponse("NOT_FOUND", "User not found.");
+    }
+
+    // Check email uniqueness if changed
+    const existing = users.find((u) => u.id !== userId && u.email.toLowerCase() === email.trim().toLowerCase());
+    if (existing) {
+      return createErrorResponse("DUPLICATE_DATA", "Another account is already using this email.");
+    }
+
+    user.name = name.trim();
+    user.email = email.trim().toLowerCase();
+    this.saveUsers(users);
+
+    return createSuccessResponse(user);
+  }
+
+  /**
+   * Update Notification Preferences
+   */
+  static async updateNotificationPreferences(
+    userId: string,
+    preferences: import("@/types").NotificationPreferences
+  ): Promise<ApiResponse<User>> {
+    await simulateDelay(150);
+
+    const users = this.getUsers();
+    const user = users.find((u) => u.id === userId);
+    if (!user) {
+      return createErrorResponse("NOT_FOUND", "User not found.");
+    }
+
+    user.notificationPreferences = preferences;
+    this.saveUsers(users);
+
+    return createSuccessResponse(user);
   }
 
   /**

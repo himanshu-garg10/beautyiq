@@ -103,11 +103,25 @@ export function MobileNav({ links }: { links: NavLink[] }) {
                   </Button>
                 </Link>
               ) : user ? (
-                <Link href="/profile" onClick={() => setOpen(false)}>
-                  <Button variant="outline" size="lg" className="w-full" leftIcon={<User className="h-4 w-4" />}>
-                    My Profile & Routine
-                  </Button>
-                </Link>
+                <div className="space-y-2">
+                  <Link href="/dashboard" onClick={() => setOpen(false)}>
+                    <Button variant="accent" size="lg" className="w-full" leftIcon={<User className="h-4 w-4" />}>
+                      Customer Command Center
+                    </Button>
+                  </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href="/wishlist" onClick={() => setOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Wishlist
+                      </Button>
+                    </Link>
+                    <Link href="/notifications" onClick={() => setOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Notifications
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   <Link href="/login" onClick={() => setOpen(false)}>

@@ -16,6 +16,7 @@ import type {
   AIRequirementSession,
 } from "@/types";
 import { simulateDelay } from "./api-client";
+import { MedicalSafetyService } from "@/lib/security/medical-safety";
 
 const REQUIREMENT_SESSIONS_KEY = "beautyiq_ai_requirement_sessions";
 
@@ -73,6 +74,13 @@ export class AIRequirementService {
       }
     }
 
+    // Step 7: Medical & Dermatological Safety Evaluation
+    stepLogs.push("Step 7: Evaluating medical & dermatological safety constraints...");
+    const medicalSafety = MedicalSafetyService.evaluateText(cleanedText);
+    if (medicalSafety.hasClinicalConditions) {
+      stepLogs.push(`Medical Notice: Clinical conditions detected (${medicalSafety.detectedTerms.join(", ")}). Safety disclaimer attached.`);
+    }
+
     const processingTimeMs = Date.now() - startTime;
     stepLogs.push(`Processing completed in ${processingTimeMs}ms.`);
 
@@ -106,6 +114,11 @@ export class AIRequirementService {
       profileConflict,
       processingTimeMs,
       stepLogs,
+      medicalSafety: {
+        hasClinicalConditions: medicalSafety.hasClinicalConditions,
+        safetyDisclaimer: medicalSafety.safetyDisclaimer,
+        recommendedAction: medicalSafety.recommendedAction,
+      },
     };
   }
 
@@ -522,6 +535,16 @@ export class AIRequirementService {
     }
 
     return session;
+  }
+
+  public static saveRequirementSession(
+    rawQuery: string,
+    req: StructuredSkincareRequirement
+  ): AIRequirementSession {
+    return this.saveConfirmedSession({
+      ...req,
+      rawQuery: rawQuery || req.rawQuery,
+    });
   }
 
   public static getRequirementHistory(): AIRequirementSession[] {
