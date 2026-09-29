@@ -32,3 +32,9 @@ Thumbs.db
 
 # temporary & extracted
 requirements_extracted.txt
+
+# database files
+data/*.db
+data/*.db-*
+*.db
+

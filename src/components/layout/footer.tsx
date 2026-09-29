@@ -7,7 +7,7 @@ const footerColumns = [
     title: "Discovery",
     links: [
       { label: "Products Catalog", href: "/products" },
-      { label: "AI Requirement Search", href: "/search" },
+      { label: "AI Requirement Search", href: "/ai-search" },
       { label: "Categories", href: "/categories" },
       { label: "Ingredient Intelligence", href: "/ingredients" },
       { label: "Brand Index", href: "/brands" },
@@ -51,21 +51,27 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-4 pt-1">
               <a
-                href="#"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="BeautyIQ on Instagram"
                 className="text-foreground-faint transition-colors hover:text-sage-deep"
               >
                 <Instagram className="h-[18px] w-[18px]" />
               </a>
               <a
-                href="#"
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="BeautyIQ on Twitter"
                 className="text-foreground-faint transition-colors hover:text-sage-deep"
               >
                 <Twitter className="h-[18px] w-[18px]" />
               </a>
               <a
-                href="#"
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="BeautyIQ on YouTube"
                 className="text-foreground-faint transition-colors hover:text-sage-deep"
               >

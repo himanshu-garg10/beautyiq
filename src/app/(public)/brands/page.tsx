@@ -48,7 +48,7 @@ export default function BrandsPage() {
           <Link
             key={b.id}
             href={`/brands/${b.id}`}
-            className="group rounded border border-line bg-background-card p-6 space-y-4 shadow-subtle hover:border-line-strong hover:shadow-md transition-all flex flex-col justify-between"
+            className="group rounded-xl border border-line bg-background-card p-6 space-y-4 shadow-subtle hover:border-line-strong hover:shadow-md transition-all flex flex-col justify-between"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">

@@ -5,6 +5,7 @@ import type { SkinProfile } from "@/types";
 import { sampleDefaultProfile } from "@/lib/mock-data";
 import { useAuth } from "./auth-context";
 import { AuthService } from "@/services/auth.service";
+import { NotificationService } from "@/services/notification.service";
 
 interface SkinProfileContextType {
   profile: SkinProfile;
@@ -31,6 +32,12 @@ export function SkinProfileProvider({ children }: { children: React.ReactNode })
     setProfile(newProfile);
     if (user) {
       await AuthService.updateSkinProfile(user.id, newProfile);
+      NotificationService.createNotification(user.id, {
+        type: "PROFILE_UPDATED",
+        title: "Skin Profile Updated",
+        message: "Your diagnostic skin parameters were updated and saved.",
+        link: "/profile",
+      });
     }
   };
 

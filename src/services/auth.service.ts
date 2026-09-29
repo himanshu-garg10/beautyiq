@@ -1,6 +1,7 @@
-import { mockUsers, sampleDefaultProfile } from "@/lib/mock-data";
+import { products, mockUsers, sampleDefaultProfile } from "@/lib/mock-data";
 import type { User, UserRole, SkinProfile, UserPersonalProfile, PrivacySettings } from "@/types";
 import { ApiResponse, createSuccessResponse, createErrorResponse, simulateDelay } from "./api-client";
+import { NotificationService } from "./notification.service";
 
 // Web Crypto SHA-256 password hashing helper
 export async function hashPassword(password: string): Promise<string> {
@@ -16,24 +17,52 @@ export class AuthService {
   private static SESSION_KEY = "beautyiq_session";
 
   // In-memory or persisted users store helper
-  private static getUsers(): User[] {
-    if (typeof window === "undefined") return mockUsers;
+  static getUsers(): User[] {
+    if (typeof window === "undefined") return [];
     const stored = localStorage.getItem(this.USERS_STORAGE_KEY);
     if (!stored) {
-      localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(mockUsers));
-      return mockUsers;
+      return [];
     }
     try {
       return JSON.parse(stored);
     } catch {
-      return mockUsers;
+      return [];
     }
   }
 
-  private static saveUsers(users: User[]): void {
+  static saveUsers(users: User[]): void {
     if (typeof window !== "undefined") {
       localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(users));
     }
+  }
+
+  /**
+   * Get active authenticated session from storage
+   */
+  static getCurrentSession(): { userId: string; token: string; expiresAt: number } | null {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(this.SESSION_KEY);
+    if (!raw) return null;
+    try {
+      const session = JSON.parse(raw);
+      if (session.expiresAt && Date.now() > session.expiresAt) {
+        localStorage.removeItem(this.SESSION_KEY);
+        return null;
+      }
+      return session;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Get active authenticated user record
+   */
+  static getCurrentUser(): User | null {
+    const session = this.getCurrentSession();
+    if (!session) return null;
+    const users = this.getUsers();
+    return users.find((u) => u.id === session.userId) || null;
   }
 
   /**
@@ -120,6 +149,13 @@ export class AuthService {
   ): Promise<ApiResponse<{ user: User; token: string; redirectRoute: string }>> {
     await simulateDelay(300);
 
+    if (!email || !email.trim()) {
+      return createErrorResponse("VALIDATION_ERROR", "Email address is required.");
+    }
+    if (!password) {
+      return createErrorResponse("VALIDATION_ERROR", "Password is required.");
+    }
+
     const users = this.getUsers();
     const user = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
 
@@ -127,12 +163,10 @@ export class AuthService {
       return createErrorResponse("AUTHENTICATION_ERROR", "Invalid email or password.");
     }
 
-    // If password provided, verify hash
-    if (password) {
-      const inputHash = await hashPassword(password);
-      if (user.passwordHash && user.passwordHash !== inputHash) {
-        return createErrorResponse("AUTHENTICATION_ERROR", "Invalid email or password.");
-      }
+    // Verify cryptographic SHA-256 password hash
+    const inputHash = await hashPassword(password);
+    if (!user.passwordHash || user.passwordHash !== inputHash) {
+      return createErrorResponse("AUTHENTICATION_ERROR", "Invalid email or password.");
     }
 
     const token = `session-${user.id}-${Date.now()}`;
@@ -374,18 +408,39 @@ export class AuthService {
    * Toggle Wishlist
    */
   static async toggleWishlist(userId: string, productId: string): Promise<ApiResponse<string[]>> {
-    await simulateDelay(150);
+    await simulateDelay(100);
     const users = this.getUsers();
     const user = users.find((u) => u.id === userId);
     if (!user) return createErrorResponse("NOT_FOUND", "User not found.");
 
-    if (user.wishlistIds.includes(productId)) {
-      user.wishlistIds = user.wishlistIds.filter((id) => id !== productId);
-    } else {
+    const isAdding = !user.wishlistIds.includes(productId);
+    if (isAdding) {
       user.wishlistIds.push(productId);
+      const product = products.find((p) => p.id === productId);
+      NotificationService.createNotification(userId, {
+        type: "PRODUCT_SAVED",
+        title: "Product Saved to Wishlist",
+        message: product
+          ? `${product.brand} ${product.name} was added to your saved products.`
+          : "Product added to your saved products.",
+        link: "/wishlist",
+        productId,
+      });
+    } else {
+      user.wishlistIds = user.wishlistIds.filter((id) => id !== productId);
     }
 
     this.saveUsers(users);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`beautyiq_wishlist_ids_${userId}`, JSON.stringify(user.wishlistIds));
+        window.dispatchEvent(new CustomEvent("beautyiq_wishlist_update", { detail: { userId, ids: user.wishlistIds } }));
+      } catch (e) {
+        console.warn("Failed to sync wishlist ids:", e);
+      }
+    }
+
     return createSuccessResponse(user.wishlistIds);
   }
 }

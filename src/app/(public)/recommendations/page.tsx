@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { RecommendationEngineService } from "@/services/recommendation-engine.service";
 import { AIRequirementService } from "@/services/ai-requirement.service";
+import { RecommendationHistoryService } from "@/services/recommendation-history.service";
+import { NotificationService } from "@/services/notification.service";
 import { useSkinProfile } from "@/context/skin-profile-context";
+import { useAuth } from "@/context/auth-context";
 import type {
   StructuredSkincareRequirement,
   RecommendationPriority,
@@ -60,6 +63,7 @@ function RecommendationsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile } = useSkinProfile();
+  const { user } = useAuth();
 
   const [priority, setPriority] = React.useState<RecommendationPriority>("best-match");
   const [requirement, setRequirement] = React.useState<StructuredSkincareRequirement | null>(null);
@@ -108,10 +112,20 @@ function RecommendationsContent() {
       priority,
       userProfile: profile,
     }).then((res) => {
-      if (res.data) setResult(res.data);
+      if (res.data) {
+        setResult(res.data);
+        const uid = user?.id || "u1";
+        RecommendationHistoryService.saveRecommendationSession(uid, requirement, res.data, profile);
+        NotificationService.createNotification(uid, {
+          type: "RECOMMENDATION_GENERATED",
+          title: "New Recommendations Generated",
+          message: `Precision recommendations ranked for ${requirement.category || "your skincare needs"}.`,
+          link: "/recommendations",
+        });
+      }
       setLoading(false);
     });
-  }, [requirement, priority, profile]);
+  }, [requirement, priority, profile, user]);
 
   React.useEffect(() => {
     if (requirement) {
@@ -138,11 +152,6 @@ function RecommendationsContent() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/recommendations/test-suite">
-            <Button variant="outline" size="sm" leftIcon={<TestTube className="h-4 w-4 text-sage-deep" />}>
-              Test Suite (28 Scenarios)
-            </Button>
-          </Link>
           <Link href="/ai-search">
             <Button variant="accent" size="sm" leftIcon={<Edit3 className="h-4 w-4" />}>
               Edit Requirements

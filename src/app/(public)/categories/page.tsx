@@ -28,8 +28,8 @@ export default function CategoriesPage() {
         {categories.map((cat) => (
           <Link
             key={cat.id}
-            href={`/products?category=${encodeURIComponent(cat.name)}`}
-            className="group relative overflow-hidden rounded border border-line bg-background-card shadow-subtle transition-all hover:shadow-md"
+            href={`/categories/${cat.id}`}
+            className="group relative overflow-hidden rounded-xl border border-line bg-background-card shadow-subtle transition-all hover:shadow-md hover:border-line-strong"
           >
             <div className="relative h-48 w-full bg-background-elevated overflow-hidden">
               <Image

@@ -87,7 +87,7 @@ export default function AboutPage() {
                 Build Skin Profile
               </Button>
             </Link>
-            <Link href="/search">
+            <Link href="/ai-search">
               <Button variant="outline" size="lg">
                 Try AI Search
               </Button>

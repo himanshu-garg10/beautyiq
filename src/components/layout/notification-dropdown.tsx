@@ -37,6 +37,9 @@ export function NotificationDropdown() {
 
   React.useEffect(() => {
     loadNotifications();
+    const handleUpdate = () => loadNotifications();
+    window.addEventListener("beautyiq_notification_update", handleUpdate);
+    return () => window.removeEventListener("beautyiq_notification_update", handleUpdate);
   }, [loadNotifications]);
 
   // Close dropdown on outside click
@@ -96,13 +99,13 @@ export function NotificationDropdown() {
           setIsOpen(!isOpen);
           loadNotifications();
         }}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background hover:bg-background-elevated hover:text-foreground text-foreground-muted transition-colors"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated hover:text-foreground text-foreground-muted transition-colors shadow-subtle"
         aria-label={`Notifications (${unreadCount} unread)`}
         title="In-App Notifications"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sage-deep text-[0.65rem] font-bold text-white px-1 shadow-xs">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sage-deep text-[0.62rem] font-bold text-white px-1 shadow-xs">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -131,8 +134,14 @@ export function NotificationDropdown() {
 
           <div className="max-h-80 overflow-y-auto divide-y divide-line/60">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-xs text-foreground-muted">
-                No notifications right now.
+              <div className="p-8 text-center text-xs text-foreground-muted space-y-2">
+                <div className="h-9 w-9 rounded-full bg-sage-tint text-sage-deep mx-auto flex items-center justify-center">
+                  <Check className="h-4 w-4" />
+                </div>
+                <p className="font-medium text-foreground">You&apos;re all caught up</p>
+                <p className="text-[0.72rem] text-foreground-muted max-w-[220px] mx-auto">
+                  No pending routine reminders or product price drops at this time.
+                </p>
               </div>
             ) : (
               notifications.slice(0, 5).map((n) => (

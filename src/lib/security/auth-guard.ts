@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { mockUsers } from "@/lib/mock-data";
+import { DbService } from "@/lib/db";
 import type { User, UserRole } from "@/types";
 
 export interface AuthContext {
@@ -23,60 +23,60 @@ export interface AuthContext {
 
 export class AuthGuard {
   /**
-   * Resolve user from in-memory / persisted storage
+   * Resolve user from persistent database storage
    */
   static findUserById(id: string): User | undefined {
-    return mockUsers.find((u) => u.id === id);
+    const user = DbService.findUserById(id);
+    return user || undefined;
   }
 
   /**
    * Extract and verify caller identity from request headers / cookies
    */
   static getAuthenticatedUser(req: NextRequest): AuthContext {
-    const roleHeader = req.headers.get("x-user-role");
-    const userIdHeader = req.headers.get("x-user-id");
     const authHeader = req.headers.get("authorization");
+    const sessionCookie = req.cookies.get("beautyiq_session")?.value;
 
-    let userId: string | null = userIdHeader;
-    let role: UserRole | null = (roleHeader as UserRole) || null;
+    let userId: string | null = null;
 
-    // 1. Inspect Authorization Header (Bearer session-<userId>-<timestamp>)
+    // 1. Inspect Authorization Header (Bearer <token>)
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7).trim();
-      const parts = token.split("-");
-      if (parts.length >= 2 && parts[0] === "session") {
-        userId = parts[1];
+      const session = DbService.getSession(token);
+      if (session) {
+        userId = session.userId;
       }
     }
 
     // 2. Inspect Session Cookie
-    if (!userId) {
-      const sessionCookie = req.cookies.get("beautyiq_session")?.value;
-      if (sessionCookie) {
-        try {
-          const parsed = JSON.parse(decodeURIComponent(sessionCookie));
-          if (parsed.userId) {
-            userId = parsed.userId;
-          }
-        } catch {
-          // invalid cookie format
+    if (!userId && sessionCookie) {
+      // Could be raw token string or JSON string { token, userId }
+      let token = sessionCookie;
+      try {
+        const parsed = JSON.parse(decodeURIComponent(sessionCookie));
+        if (parsed.token) token = parsed.token;
+        else if (parsed.userId) userId = parsed.userId;
+      } catch {
+        // Raw token string
+      }
+
+      if (token) {
+        const session = DbService.getSession(token);
+        if (session) {
+          userId = session.userId;
         }
       }
     }
 
-    // 3. Fallback to test/internal role if explicitly specified
-    if (!userId && roleHeader === "admin") {
-      const adminUser = mockUsers.find((u) => u.role === "admin");
-      if (adminUser) {
-        return {
-          authenticated: true,
-          user: adminUser,
-          role: "admin",
-        };
+    // 3. Header overrides for development/testing if user exists
+    if (!userId) {
+      const headerUserId = req.headers.get("x-user-id");
+      if (headerUserId) {
+        userId = headerUserId;
       }
     }
 
-    if (!userId && !roleHeader) {
+    if (!userId) {
       return {
         authenticated: false,
         error: {
@@ -87,32 +87,13 @@ export class AuthGuard {
       };
     }
 
-    // If userId was identified, load user profile
-    const user = userId ? this.findUserById(userId) : undefined;
+    // Load full user from database
+    const user = this.findUserById(userId);
     if (user) {
       return {
         authenticated: true,
         user,
         role: user.role,
-      };
-    }
-
-    // If role was explicitly specified as admin in authenticated context
-    if (role === "admin") {
-      const defaultAdmin = mockUsers.find((u) => u.role === "admin");
-      return {
-        authenticated: true,
-        user: defaultAdmin,
-        role: "admin",
-      };
-    }
-
-    // If explicit customer role header without matching valid user
-    if (roleHeader === "customer" || roleHeader === "guest") {
-      return {
-        authenticated: true,
-        user: mockUsers.find((u) => u.role === "customer"),
-        role: roleHeader as UserRole,
       };
     }
 

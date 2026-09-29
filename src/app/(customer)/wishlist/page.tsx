@@ -38,6 +38,12 @@ export default function CustomerWishlistPage() {
     loadWishlist();
   }, [loadWishlist, user?.wishlistIds]);
 
+  React.useEffect(() => {
+    const handleUpdate = () => loadWishlist();
+    window.addEventListener("beautyiq_wishlist_update", handleUpdate);
+    return () => window.removeEventListener("beautyiq_wishlist_update", handleUpdate);
+  }, [loadWishlist]);
+
   const handleClearWishlist = async () => {
     if (!user) return;
     await WishlistService.clearWishlist(user.id);

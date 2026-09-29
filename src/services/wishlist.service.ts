@@ -10,17 +10,27 @@ export class WishlistService {
    * Helper to retrieve wishlist product IDs from localStorage or user record
    */
   static getWishlistIds(userId?: string): string[] {
+    const targetUser = userId || "u1";
     if (typeof window === "undefined") {
-      const defaultUser = mockUsers.find((u) => u.id === (userId || "u1"));
+      const defaultUser = mockUsers.find((u) => u.id === targetUser);
       return defaultUser?.wishlistIds || ["p1", "p4"];
     }
     try {
-      const stored = localStorage.getItem(`${WISHLIST_STORAGE_KEY}_${userId || "u1"}`);
+      const storedUsers = localStorage.getItem("beautyiq_users_db") || localStorage.getItem("beautyiq_users");
+      if (storedUsers) {
+        const users = JSON.parse(storedUsers);
+        const u = users.find((item: any) => item.id === targetUser);
+        if (u && Array.isArray(u.wishlistIds)) {
+          return u.wishlistIds;
+        }
+      }
+      const stored = localStorage.getItem(`${WISHLIST_STORAGE_KEY}_${targetUser}`);
       if (stored) {
         return JSON.parse(stored);
       }
-      const initial = ["p1", "p4"];
-      localStorage.setItem(`${WISHLIST_STORAGE_KEY}_${userId || "u1"}`, JSON.stringify(initial));
+      const defaultUser = mockUsers.find((u) => u.id === targetUser);
+      const initial = defaultUser?.wishlistIds || ["p1", "p4"];
+      localStorage.setItem(`${WISHLIST_STORAGE_KEY}_${targetUser}`, JSON.stringify(initial));
       return initial;
     } catch {
       return ["p1", "p4"];
@@ -28,12 +38,26 @@ export class WishlistService {
   }
 
   /**
-   * Helper to persist wishlist product IDs
+   * Helper to persist wishlist product IDs and sync across user state
    */
   private static saveWishlistIds(userId: string, ids: string[]): void {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`${WISHLIST_STORAGE_KEY}_${userId}`, JSON.stringify(ids));
+        const syncUserKey = (key: string) => {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const users = JSON.parse(stored);
+            const uIdx = users.findIndex((u: any) => u.id === userId);
+            if (uIdx !== -1) {
+              users[uIdx].wishlistIds = ids;
+              localStorage.setItem(key, JSON.stringify(users));
+            }
+          }
+        };
+        syncUserKey("beautyiq_users_db");
+        syncUserKey("beautyiq_users");
+        window.dispatchEvent(new CustomEvent("beautyiq_wishlist_update", { detail: { userId, ids } }));
       } catch (e) {
         console.warn("Failed to persist wishlist to localStorage:", e);
       }
@@ -68,7 +92,7 @@ export class WishlistService {
       const updated = [...current, productId];
       this.saveWishlistIds(userId, updated);
 
-      // Trigger in-app notification
+      // Trigger real in-app notification
       NotificationService.createNotification(userId, {
         type: "PRODUCT_SAVED",
         title: "Product Saved to Wishlist",

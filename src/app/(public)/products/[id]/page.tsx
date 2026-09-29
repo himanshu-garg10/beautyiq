@@ -282,12 +282,13 @@ export default function ProductDetailPage() {
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4 pt-2 border-t border-line">
             <Button
-              variant={isSaved ? "danger" : "accent"}
+              variant={isSaved ? "outline" : "accent"}
               size="lg"
-              leftIcon={<Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />}
+              className={isSaved ? "border-rose-300 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-100/50" : ""}
+              leftIcon={<Heart className={`h-4 w-4 ${isSaved ? "fill-rose-500 text-rose-500" : ""}`} />}
               onClick={handleWishlist}
             >
-              {isSaved ? "Product Saved" : "Save Product"}
+              {isSaved ? "Saved to Wishlist" : "Save to Wishlist"}
             </Button>
 
             <Button
@@ -296,8 +297,16 @@ export default function ProductDetailPage() {
               leftIcon={<Scale className="h-4 w-4" />}
               onClick={handleCompare}
             >
-              {isCompared ? "Added to Comparison" : "Compare Product"}
+              {isCompared ? "In Comparison Matrix" : "Compare Product"}
             </Button>
+
+            {isCompared && (
+              <Link href="/compare">
+                <Button variant="ghost" size="lg" className="text-sage-deep font-semibold hover:bg-sage-tint/30">
+                  Open Matrix →
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Metadata & Source Info (Requirement #21, #22) */}

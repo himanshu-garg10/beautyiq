@@ -1,68 +1,95 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowRight, Sparkles, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { AiSearch } from "@/components/home/ai-search";
 
 const specimens = [
-  { label: "Niacinamide", value: "10%", note: "Oil control", rotate: -3, top: "4%", left: "6%" },
-  { label: "Hyaluronic Acid", value: "1.5%", note: "Hydration", rotate: 2, top: "34%", left: "46%" },
-  { label: "Salicylic Acid", value: "2%", note: "Acne care", rotate: -2, top: "62%", left: "10%" },
-  { label: "Ceramides", value: "3%", note: "Barrier repair", rotate: 3, top: "16%", left: "58%" },
+  { label: "Niacinamide", value: "10%", note: "Sebum regulation & barrier care", rotate: -3, top: "6%", left: "6%" },
+  { label: "Hyaluronic Acid", value: "2%", note: "Multi-depth epidermal hydration", rotate: 2, top: "34%", left: "46%" },
+  { label: "Salicylic Acid", value: "2% BHA", note: "Pore decongestion & acne care", rotate: -2, top: "62%", left: "10%" },
+  { label: "Ceramides Complex", value: "3%", note: "Lipid barrier reconstruction", rotate: 3, top: "14%", left: "56%" },
 ];
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-line">
-      <Container className="grid grid-cols-1 items-center gap-16 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+    <section className="relative overflow-hidden border-b border-line bg-gradient-to-b from-background to-background-elevated/30">
+      <Container className="grid grid-cols-1 items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="space-y-6"
         >
-          <div className="mb-6 flex items-center gap-2 text-sm text-sage-deep">
-            <span className="h-1.5 w-1.5 rounded-full bg-sage-deep" />
-            Skincare intelligence, not guesswork
+          {/* Eyebrow Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-sage-deep/30 bg-sage-tint/60 text-xs font-semibold text-sage-deep dark:bg-sage-deep/15">
+            <Sparkles className="h-3.5 w-3.5 text-sage-deep" />
+            <span>AI Powered Skincare &amp; Ingredient Intelligence</span>
           </div>
 
-          <h1 className="text-balance font-display text-[2.6rem] leading-[1.08] text-ink sm:text-[3.2rem] lg:text-[3.6rem]">
-            Skincare that
+          {/* Heading */}
+          <h1 className="text-balance font-display text-[2.5rem] leading-[1.12] text-foreground sm:text-[3.2rem] lg:text-[3.75rem] font-bold tracking-tight">
+            Skincare discovery
             <br />
-            understands your skin.
+            rooted in <span className="italic text-sage-deep font-normal">chemistry</span>,
+            <br />
+            not hype.
           </h1>
 
-          <p className="mt-6 max-w-md text-[1.05rem] leading-relaxed text-ink-soft">
-            Describe your skin in plain words. BeautyIQ reads the ingredient
-            list on every product, compares it against your needs, and tells
-            you exactly what will work — and why.
+          {/* Subheading */}
+          <p className="max-w-xl text-[1.05rem] leading-relaxed text-foreground-muted">
+            Describe your skin in your own natural words. BeautyIQ parses every active concentration,
+            checks contraindications, and matches dermatologically verified products at the lowest cross-platform price.
           </p>
 
-          <div className="mt-9 max-w-xl">
+          {/* AI Requirement Input Section */}
+          <div className="pt-2 max-w-xl">
             <AiSearch />
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Button size="lg" variant="accent">
-              Get My Recommendations
-            </Button>
-            <Button size="lg" variant="ghost">
-              See how it works
-            </Button>
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link href="/onboarding">
+              <Button size="lg" variant="accent" className="font-semibold shadow-md gap-2">
+                Build Skin Profile
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="#how-it-works">
+              <Button size="lg" variant="outline" className="font-medium">
+                See How It Works
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust Guarantees */}
+          <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-foreground-faint font-medium">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-sage-deep" />
+              <span>Zero Sponsored Rankings</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-sage-deep" />
+              <span>Dermatological Ingredient Checks</span>
+            </div>
           </div>
         </motion.div>
 
+        {/* Visual Floating Specimen Cards */}
         <motion.div
-          className="relative mx-auto hidden h-[420px] w-full max-w-md md:block"
+          className="relative mx-auto hidden h-[440px] w-full max-w-md lg:block"
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
         >
-          <div className="absolute inset-x-10 inset-y-8 rounded-lg border border-line-strong bg-ivory-deep/60" />
+          <div className="absolute inset-x-8 inset-y-6 rounded-2xl border border-line bg-background-elevated/40 backdrop-blur-xs" />
           {specimens.map((s, i) => (
             <motion.div
               key={s.label}
-              className="absolute w-[188px] rounded-md border border-line-strong bg-white p-4 shadow-[0_10px_30px_rgba(38,36,32,0.07)]"
+              className="absolute w-[200px] rounded-xl border border-line bg-background-card p-4 shadow-md transition-shadow hover:shadow-lg"
               style={{
                 top: s.top,
                 left: s.left,
@@ -70,17 +97,17 @@ export function Hero() {
               }}
               initial={{ opacity: 0, y: 16, rotate: 0 }}
               animate={{ opacity: 1, y: 0, rotate: s.rotate }}
-              transition={{ duration: 0.5, delay: 0.4 + i * 0.12, ease: "easeOut" }}
-              whileHover={{ rotate: 0, y: -4 }}
+              transition={{ duration: 0.5, delay: 0.3 + i * 0.1, ease: "easeOut" }}
+              whileHover={{ rotate: 0, y: -4, scale: 1.03 }}
             >
               <div className="flex items-baseline justify-between">
-                <span className="font-display text-lg text-ink">{s.value}</span>
-                <span className="font-mono text-[0.65rem] text-ink-faint">
+                <span className="font-display text-xl font-bold text-foreground">{s.value}</span>
+                <span className="font-mono text-[0.65rem] font-bold text-sage-deep bg-sage-tint px-1.5 py-0.5 rounded">
                   ACTIVE
                 </span>
               </div>
-              <p className="mt-2 text-sm font-medium text-ink">{s.label}</p>
-              <p className="mt-1 text-xs text-ink-soft">{s.note}</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">{s.label}</p>
+              <p className="mt-1 text-xs text-foreground-muted leading-snug">{s.note}</p>
             </motion.div>
           ))}
         </motion.div>

@@ -121,14 +121,24 @@ export default function CustomerDashboardPage() {
   // Load activity data
   React.useEffect(() => {
     if (!user) return;
-    WishlistService.getWishlist(user.id).then((res) => {
-      if (res.data) setWishlistProducts(res.data);
-    });
-    setRecentlyViewed(RecentlyViewedService.getRecentlyViewedDetails().slice(0, 4));
-    setRecentSearches(SearchHistoryService.getSearchHistory(user.id).slice(0, 5));
-    setRecentRecs(RecommendationHistoryService.getRecommendationHistory(user.id).slice(0, 4));
-    setRecentComparisons(ComparisonService.getComparisonHistory(user.id).slice(0, 4));
-  }, [user]);
+    const refreshData = () => {
+      WishlistService.getWishlist(user.id).then((res) => {
+        if (res.data) setWishlistProducts(res.data);
+      });
+      setRecentlyViewed(RecentlyViewedService.getRecentlyViewedDetails().slice(0, 4));
+      setRecentSearches(SearchHistoryService.getSearchHistory(user.id).slice(0, 5));
+      setRecentRecs(RecommendationHistoryService.getRecommendationHistory(user.id).slice(0, 4));
+      setRecentComparisons(ComparisonService.getComparisonHistory(user.id).slice(0, 4));
+    };
+
+    refreshData();
+    window.addEventListener("beautyiq_wishlist_update", refreshData);
+    window.addEventListener("beautyiq_notification_update", refreshData);
+    return () => {
+      window.removeEventListener("beautyiq_wishlist_update", refreshData);
+      window.removeEventListener("beautyiq_notification_update", refreshData);
+    };
+  }, [user, user?.wishlistIds]);
 
   const handleCompareProduct = (id: string, name: string) => {
     if (isInComparison(id)) {

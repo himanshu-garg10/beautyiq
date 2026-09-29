@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AIRequirementService } from "@/services/ai-requirement.service";
 import { useSkinProfile } from "@/context/skin-profile-context";
 import type {
@@ -57,11 +57,19 @@ const testScenarios = [
   { label: "14. Profile Conflict test", query: "I have dry skin." },
 ];
 
-export default function AISearchPage() {
+const loadingSteps = [
+  "Understanding your request...",
+  "Checking skincare requirements & entities...",
+  "Structuring your preferences & validating constraints...",
+  "Preparing your requirement confirmation...",
+];
+
+function AISearchContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { profile } = useSkinProfile();
 
-  const [queryText, setQueryText] = React.useState("");
+  const [queryText, setQueryText] = React.useState(searchParams?.get("q") || "");
   const [mode, setMode] = React.useState<"input" | "processing" | "result" | "manual" | "error">("input");
   const [loadingStepIndex, setLoadingStepIndex] = React.useState(0);
 
@@ -72,14 +80,7 @@ export default function AISearchPage() {
   const [resolvedProfileConflict, setResolvedProfileConflict] = React.useState<boolean>(false);
   const [showTestSuite, setShowTestSuite] = React.useState(false);
 
-  const loadingSteps = [
-    "Understanding your request...",
-    "Checking skincare requirements & entities...",
-    "Structuring your preferences & validating constraints...",
-    "Preparing your requirement confirmation...",
-  ];
-
-  const handleAnalyze = async (textToParse: string) => {
+  const handleAnalyze = React.useCallback(async (textToParse: string) => {
     if (textToParse === "TRIGGER_FAIL") {
       setMode("processing");
       setLoadingStepIndex(0);
@@ -105,7 +106,7 @@ export default function AISearchPage() {
     setResolvedContradictions({});
     setResolvedProfileConflict(false);
     setMode("result");
-  };
+  }, [profile]);
 
   const handleSelectAmbiguityOption = (
     ambiguity: AmbiguityClarification,
@@ -170,6 +171,16 @@ export default function AISearchPage() {
     setResolvedProfileConflict(true);
   };
 
+  const hasAutoTriggered = React.useRef(false);
+  React.useEffect(() => {
+    const qParam = searchParams?.get("q");
+    if (qParam && !hasAutoTriggered.current) {
+      hasAutoTriggered.current = true;
+      setQueryText(qParam);
+      handleAnalyze(qParam);
+    }
+  }, [searchParams, handleAnalyze]);
+
   const handleConfirmAndProceed = () => {
     if (!requirement) return;
     // Persist confirmed requirement session
@@ -182,6 +193,12 @@ export default function AISearchPage() {
     if (requirement.concerns.length > 0) params.set("q", requirement.concerns[0]);
 
     router.push(`/products?${params.toString()}`);
+  };
+
+  const handleGoToRecommendations = () => {
+    if (!requirement) return;
+    AIRequirementService.saveConfirmedSession(requirement);
+    router.push("/recommendations");
   };
 
   const handleStartOver = () => {
@@ -495,6 +512,7 @@ export default function AISearchPage() {
             requirement={requirement}
             onChange={(updated) => setRequirement(updated)}
             onConfirm={handleConfirmAndProceed}
+            onViewRecommendations={handleGoToRecommendations}
             onReset={handleStartOver}
             onSwitchToManual={() => setMode("manual")}
           />
@@ -511,5 +529,21 @@ export default function AISearchPage() {
         </div>
       )}
     </Container>
+  );
+}
+
+export default function AISearchPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <Container className="py-16 text-center text-sm text-foreground-muted">
+          <div className="h-48 rounded border border-line bg-background-card animate-pulse max-w-xl mx-auto flex items-center justify-center">
+            Initializing AI Requirement Assistant...
+          </div>
+        </Container>
+      }
+    >
+      <AISearchContent />
+    </React.Suspense>
   );
 }

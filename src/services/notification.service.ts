@@ -5,21 +5,21 @@ const NOTIFICATIONS_STORAGE_KEY = "beautyiq_notifications";
 
 export class NotificationService {
   /**
-   * Retrieve in-app notifications for customer
+   * Retrieve in-app notifications for customer.
+   * Defaults to empty array if no real application events have occurred yet.
    */
   static getNotifications(userId: string = "u1"): InAppNotification[] {
     if (typeof window === "undefined") {
-      return mockNotifications.filter((n) => n.userId === userId);
+      return [];
     }
     try {
       const stored = localStorage.getItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`);
       if (stored) {
         return JSON.parse(stored);
       }
-      localStorage.setItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`, JSON.stringify(mockNotifications));
-      return mockNotifications;
+      return [];
     } catch {
-      return mockNotifications;
+      return [];
     }
   }
 
@@ -32,7 +32,7 @@ export class NotificationService {
   }
 
   /**
-   * Create a new in-app notification
+   * Create a new in-app notification from real application events
    */
   static createNotification(
     userId: string = "u1",
@@ -63,6 +63,7 @@ export class NotificationService {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent("beautyiq_notification_update", { detail: { userId } }));
       } catch (e) {
         console.warn("Failed to persist notification:", e);
       }
@@ -81,6 +82,7 @@ export class NotificationService {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent("beautyiq_notification_update", { detail: { userId } }));
       } catch (e) {
         console.warn("Failed to update notification status:", e);
       }
@@ -99,6 +101,7 @@ export class NotificationService {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent("beautyiq_notification_update", { detail: { userId } }));
       } catch (e) {
         console.warn("Failed to mark all notifications as read:", e);
       }
@@ -117,6 +120,7 @@ export class NotificationService {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent("beautyiq_notification_update", { detail: { userId } }));
       } catch (e) {
         console.warn("Failed to delete notification:", e);
       }
@@ -132,6 +136,7 @@ export class NotificationService {
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(`${NOTIFICATIONS_STORAGE_KEY}_${userId}`);
+        window.dispatchEvent(new CustomEvent("beautyiq_notification_update", { detail: { userId } }));
       } catch (e) {
         console.warn("Failed to clear notifications:", e);
       }

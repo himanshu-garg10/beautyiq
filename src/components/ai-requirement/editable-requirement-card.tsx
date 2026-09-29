@@ -32,6 +32,7 @@ interface EditableRequirementCardProps {
   requirement: StructuredSkincareRequirement;
   onChange: (updated: StructuredSkincareRequirement) => void;
   onConfirm: () => void;
+  onViewRecommendations?: () => void;
   onReset: () => void;
   onSwitchToManual: () => void;
 }
@@ -65,6 +66,7 @@ export function EditableRequirementCard({
   requirement,
   onChange,
   onConfirm,
+  onViewRecommendations,
   onReset,
   onSwitchToManual,
 }: EditableRequirementCardProps) {
@@ -464,21 +466,30 @@ export function EditableRequirementCard({
         </div>
       </div>
 
-      {/* Confirmation Actions Bar (Requirement #16) */}
+      {/* Confirmation Actions Bar */}
       <div className="pt-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
         <Button variant="outline" size="md" onClick={onSwitchToManual}>
-          Switch to Manual Form Mode
+          Switch to Manual Form
         </Button>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <Button
-            variant="accent"
-            size="lg"
+            variant="outline"
+            size="md"
             className="w-full sm:w-auto"
             onClick={onConfirm}
+          >
+            Browse Matched Products
+          </Button>
+
+          <Button
+            variant="accent"
+            size="md"
+            className="w-full sm:w-auto font-semibold"
+            onClick={onViewRecommendations || onConfirm}
             rightIcon={<ArrowRight className="h-4 w-4" />}
           >
-            Confirm &amp; Proceed to Recommendations
+            View Recommendations
           </Button>
         </div>
       </div>

@@ -31,7 +31,7 @@ export class AIGuardrailService {
       resultSet.bestForMainConcern?.product,
       resultSet.bestIngredientMatch?.product,
       resultSet.bestBudgetOption?.product,
-      ...(resultSet.rankedCandidates?.map((c) => c.product) || []),
+      ...(resultSet.alternatives?.map((c) => c.product) || []),
     ].filter(Boolean) as Product[];
 
     for (const prod of candidateProducts) {

@@ -3,20 +3,27 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bookmark, Scale, Star, Heart, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
+import { Scale, Star, Heart, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { Product, ProductListing } from "@/types";
+import type { Product } from "@/types";
 import { ProductService } from "@/services/product.service";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
 import { useComparison } from "@/context/comparison-context";
+import { cn } from "@/lib/utils";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  className,
+}: {
+  product: Product;
+  className?: string;
+}) {
   const { user, toggleWishlist } = useAuth();
   const { addToast } = useToast();
   const { isInComparison, addToComparison, removeFromComparison } = useComparison();
 
-  const isSaved = user?.wishlistIds.includes(product.id) || false;
+  const isSaved = user?.wishlistIds?.includes(product.id) || false;
   const isCompared = isInComparison(product.id);
 
   const bestListing = ProductService.getBestListingForProduct(product.id);
@@ -34,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
     toggleWishlist(product.id);
     addToast({
       type: isSaved ? "info" : "success",
-      title: isSaved ? "Product removed from saved items" : "Product saved",
+      title: isSaved ? "Removed from Wishlist" : "Added to Wishlist",
       description: `${product.brand} ${product.name}`,
     });
   };
@@ -44,141 +51,136 @@ export function ProductCard({ product }: { product: Product }) {
     e.stopPropagation();
     if (isCompared) {
       removeFromComparison(product.id);
+      addToast({
+        type: "info",
+        title: "Removed from Comparison",
+        description: `${product.name}`,
+      });
     } else {
       addToComparison(product.id);
+      addToast({
+        type: "success",
+        title: "Added to Comparison Matrix",
+        description: `${product.name}`,
+      });
     }
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded border border-line bg-background-card transition-all duration-300 hover:shadow-lg hover:border-line-strong relative">
-      {/* Primary Image Container */}
-      <Link href={`/products/${product.id}`} className="relative h-56 w-full overflow-hidden bg-background-elevated block">
-        <Image
-          src={product.image}
-          alt={`${product.brand} ${product.name}`}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+    <div
+      className={cn(
+        "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-background-card transition-all duration-300 hover:border-line-strong hover:shadow-md h-full",
+        className
+      )}
+    >
+      {/* Top Image Box */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-background-elevated">
+        <Link href={`/products/${product.id}`} className="block h-full w-full">
+          <Image
+            src={product.image}
+            alt={`${product.brand} ${product.name}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        </Link>
 
-        {/* Compatibility Score */}
-        <div
-          className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-sage-deep/30 bg-background-card/95 backdrop-blur-xs px-2.5 py-1 shadow-subtle"
-          title="Personalized Compatibility Score based on user profile and requirements"
-        >
-          <span className="h-2 w-2 rounded-full bg-sage-deep animate-pulse" aria-hidden="true" />
-          <span className="text-[0.7rem] font-bold font-mono text-sage-deep">
-            {product.compatibilityScore ? `${product.compatibilityScore}% Match` : "Match Preview"}
-          </span>
-        </div>
-
-        {/* Save/Wishlist Button */}
+        {/* Wishlist Button (Top Left) */}
         <button
           onClick={handleWishlist}
-          aria-label={isSaved ? "Remove from saved wishlist" : "Save product"}
-          title={isSaved ? "Remove from wishlist" : "Save product"}
-          className={`absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card/90 backdrop-blur-xs transition-colors hover:border-sage-deep ${
-            isSaved ? "text-status-error bg-rose-50 dark:bg-rose-950/40 border-rose-200" : "text-foreground-muted hover:text-sage-deep"
-          }`}
+          aria-label={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+          title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+          className={cn(
+            "absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line/80 bg-background-card/90 backdrop-blur-xs transition-all hover:scale-110 shadow-xs",
+            isSaved
+              ? "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200"
+              : "text-foreground-muted hover:text-rose-500"
+          )}
         >
-          <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
+          <Heart className={cn("h-4 w-4", isSaved && "fill-current")} />
         </button>
 
-        {/* Status Badges: Availability, Data Confidence & Verified Source */}
-        <div className="absolute left-3 bottom-3 flex flex-wrap items-center gap-1.5 max-w-[85%]">
-          {availability === "Available" ? (
-            <Badge variant="sage" className="text-[0.65rem] py-0.5 px-2 uppercase font-semibold">
-              Available
-            </Badge>
-          ) : (
-            <Badge variant="warning" className="text-[0.65rem] py-0.5 px-2 uppercase font-semibold">
-              {availability}
-            </Badge>
-          )}
+        {/* Compatibility Match Pill (Top Right) */}
+        {product.compatibilityScore ? (
+          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-sage-deep/30 bg-background-card/95 backdrop-blur-xs px-2.5 py-0.5 shadow-xs">
+            <Sparkles className="h-3 w-3 text-sage-deep shrink-0" />
+            <span className="text-[0.7rem] font-bold text-sage-deep font-mono">
+              {product.compatibilityScore}% Match
+            </span>
+          </div>
+        ) : null}
 
-          {/* Data Confidence Indicator (Requirement #15: Separate from compatibility) */}
-          <span
-            className={`text-[0.65rem] font-mono font-medium px-2 py-0.5 rounded backdrop-blur-xs border ${
-              product.dataConfidence >= 85
-                ? "bg-background-card/95 text-sage-deep border-sage-deep/30"
-                : "bg-background-card/95 text-foreground-muted border-line"
-            }`}
-            title={`Data Confidence: ${product.dataConfidence}%. Assesses field completeness, INCI ingredient resolution, and verified source reliability.`}
-          >
-            Confidence: {product.dataConfidence}%
+        {/* Category Pill (Bottom Left) */}
+        <div className="absolute bottom-2.5 left-3">
+          <span className="text-[0.65rem] font-medium tracking-wide text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
+            {product.category}
+          </span>
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
+        {/* Brand & Rating Bar */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[0.72rem] font-bold uppercase tracking-wider text-sage-deep truncate">
+            {product.brand}
           </span>
 
-          {/* Verified Source Indicator */}
-          {product.isVerified && (
-            <span
-              className="text-[0.6rem] font-medium px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-0.5"
-              title="Verified from approved catalog feed or partner API"
-            >
-              <ShieldCheck className="h-3 w-3 inline" /> Verified
-            </span>
-          )}
-        </div>
-      </Link>
-
-      {/* Card Content Body */}
-      <div className="flex flex-1 flex-col p-5 space-y-3">
-        {/* Brand, Category & Rating */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-bold tracking-wider text-foreground-faint">
-              {product.brand}
-            </span>
-            <span className="text-foreground-faint">•</span>
-            <span className="text-xs text-foreground-muted font-medium">{product.category}</span>
-          </div>
-
-          {/* Rating Display (Requirement #9: Null rating displayed as Not Available, not fake 0) */}
-          <div className="flex items-center gap-1 text-xs text-foreground-muted">
+          {/* Star Rating */}
+          <div className="flex items-center gap-1 text-xs shrink-0">
             {product.rating !== null ? (
               <>
                 <Star className="h-3.5 w-3.5 fill-clay text-clay" aria-hidden="true" />
-                <span className="font-semibold text-foreground">{product.rating}</span>
-                <span className="text-foreground-faint">({product.reviewCount.toLocaleString("en-IN")})</span>
+                <span className="font-semibold text-foreground text-xs">{product.rating}</span>
+                <span className="text-foreground-faint text-[0.7rem]">
+                  ({product.reviewCount.toLocaleString()})
+                </span>
               </>
             ) : (
-              <span className="text-foreground-faint font-mono text-[0.7rem]">Rating: N/A</span>
+              <span className="text-foreground-faint text-[0.68rem] font-mono">New</span>
             )}
           </div>
         </div>
 
         {/* Product Title */}
         <Link href={`/products/${product.id}`} className="block">
-          <h3 className="font-display text-base font-semibold leading-snug text-foreground hover:text-sage-deep transition-colors line-clamp-2">
+          <h3 className="font-display text-[0.98rem] font-bold leading-snug text-foreground group-hover:text-sage-deep transition-colors line-clamp-2">
             {product.name}
           </h3>
         </Link>
 
-        {/* Key Ingredients & Concerns */}
-        <div className="flex flex-wrap gap-1 min-h-[44px]">
+        {/* Key Actives & Benefits Pills */}
+        <div className="flex flex-wrap items-center gap-1 min-h-[32px]">
           {product.keyIngredients.slice(0, 2).map((ing) => (
-            <Badge key={ing} variant="default" className="text-[0.7rem] py-0 px-2">
+            <span
+              key={ing}
+              className="text-[0.68rem] font-medium px-2 py-0.5 rounded bg-sage-tint/60 text-sage-deep dark:bg-sage-deep/15"
+            >
               {ing}
-            </Badge>
+            </span>
           ))}
           {product.targetConcerns.slice(0, 1).map((concern) => (
-            <Badge key={concern} variant="clay" className="text-[0.7rem] py-0 px-2">
+            <span
+              key={concern}
+              className="text-[0.68rem] font-medium px-2 py-0.5 rounded bg-clay-tint/70 text-clay dark:bg-clay-tint/20"
+            >
               {concern}
-            </Badge>
+            </span>
           ))}
         </div>
 
-        {/* Price, Unit Price & Comparison Action */}
-        <div className="mt-auto border-t border-line pt-3.5 flex items-center justify-between">
-          <div className="flex flex-col">
+        {/* Price & Action Row */}
+        <div className="mt-auto pt-3 border-t border-line/60 flex items-center justify-between gap-3">
+          <div>
             <div className="flex items-baseline gap-1.5">
               {price !== null ? (
                 <>
-                  <span className="font-display text-lg font-bold text-foreground">
-                    ₹{price.toLocaleString("en-IN")}
+                  <span className="font-display text-base sm:text-lg font-bold text-foreground">
+                    ₹{price.toLocaleString()}
                   </span>
                   {originalPrice && originalPrice > price && (
                     <span className="text-xs text-foreground-faint line-through">
-                      ₹{originalPrice.toLocaleString("en-IN")}
+                      ₹{originalPrice.toLocaleString()}
                     </span>
                   )}
                   {discountPercent ? (
@@ -188,40 +190,39 @@ export function ProductCard({ product }: { product: Product }) {
                   ) : null}
                 </>
               ) : (
-                <span className="text-sm font-semibold text-foreground-muted">Price: Unavailable</span>
+                <span className="text-xs font-semibold text-foreground-muted">Check Availability</span>
               )}
             </div>
 
-            {/* Quantity & Unit Cost (Requirement #19: Price per unit) */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[0.7rem] font-mono text-foreground-faint">
-                {product.quantity} {product.unit} {unitPriceCalc.unitPrice !== null ? `(${unitPriceCalc.unitLabel})` : ""}
-              </span>
-              {bestListing?.lastUpdated && (
-                <span
-                  className="text-[0.65rem] text-foreground-faint font-mono"
-                  title={`Price & availability confirmed on: ${bestListing.lastUpdated}`}
-                >
-                  • {bestListing.lastUpdated.split(" ")[0]}
-                </span>
-              )}
-            </div>
+            {/* Normalized Unit Price */}
+            <span className="block text-[0.68rem] font-mono text-foreground-faint">
+              {product.quantity} {product.unit} {unitPriceCalc.unitPrice !== null ? `• ${unitPriceCalc.unitLabel}` : ""}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCompare}
-              title={isCompared ? "Remove from comparison" : "Add to comparison"}
-              className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded border transition-colors ${
-                isCompared
-                  ? "border-sage-deep bg-sage-tint text-sage-deep font-semibold"
-                  : "border-line text-foreground-muted hover:border-line-strong hover:text-foreground"
-              }`}
-            >
-              <Scale className="h-3.5 w-3.5" />
-              {isCompared ? "Added" : "Compare"}
-            </button>
-          </div>
+          {/* Compare Button */}
+          <button
+            onClick={handleCompare}
+            title={isCompared ? "Remove from comparison" : "Add to comparison"}
+            className={cn(
+              "flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all shrink-0",
+              isCompared
+                ? "border-sage-deep bg-sage-deep text-white shadow-xs"
+                : "border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground"
+            )}
+          >
+            {isCompared ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <Scale className="h-3.5 w-3.5 text-sage-deep" />
+                <span>Compare</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

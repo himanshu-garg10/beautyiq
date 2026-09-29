@@ -100,7 +100,6 @@ export function AdminSidebar({ className }: { className?: string }) {
       items: [
         { label: "Activity Logs", href: "/admin/logs", icon: ClipboardList },
         { label: "Settings", href: "/admin/settings", icon: Settings },
-        { label: "Admin Test Suite", href: "/admin/test-suite", icon: Sparkles },
       ],
     },
   ];

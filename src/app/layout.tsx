@@ -48,13 +48,13 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-sage-tint selection:text-foreground">
         <ThemeProvider>
-          <AuthProvider>
-            <SkinProfileProvider>
-              <ToastProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <SkinProfileProvider>
                 <ComparisonProvider>{children}</ComparisonProvider>
-              </ToastProvider>
-            </SkinProfileProvider>
-          </AuthProvider>
+              </SkinProfileProvider>
+            </AuthProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

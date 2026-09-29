@@ -8,36 +8,52 @@ import { useToast } from "@/context/toast-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { addToast } = useToast();
 
-  const [email, setEmail] = React.useState("customer@beautyiq.com");
-  const [password, setPassword] = React.useState("password123");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [fieldErrors, setFieldErrors] = React.useState<{ [key: string]: string }>({});
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    const errors: { [key: string]: string } = {};
 
-    if (!email || !password) {
-      setError("Please fill in both email and password.");
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      errors.email = "Please enter your email address.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      errors.password = "Please enter your password.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
     setLoading(true);
+
     try {
-      const redirectPath = await login(email, password);
+      const redirectPath = await login(trimmedEmail, password);
       addToast({
         type: "success",
         title: "Welcome back!",
-        description: `Signed in as ${email}`,
+        description: `Signed in as ${trimmedEmail}`,
       });
-      router.push(redirectPath);
+      router.push(redirectPath || "/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid email or password.");
     } finally {
@@ -47,7 +63,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-background">
-      <div className="w-full max-w-md space-y-6 rounded border border-line bg-background-card p-8 shadow-md">
+      <div className="w-full max-w-md space-y-6 rounded-2xl border border-line bg-background-card p-8 shadow-xl">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block">
             <span className="font-display text-2xl tracking-tight text-foreground">
@@ -68,20 +84,28 @@ export default function LoginPage() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <Input
+            id="page-login-email"
             label="Email Address"
             type="email"
             placeholder="e.g. name@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: "" }));
+            }}
+            error={fieldErrors.email}
             leftIcon={<Mail className="h-4 w-4" />}
             required
           />
 
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted">
+              <label
+                htmlFor="page-login-password"
+                className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted"
+              >
                 Password
               </label>
               <Link href="/forgot-password" className="text-xs text-sage-deep font-semibold hover:underline">
@@ -89,20 +113,36 @@ export default function LoginPage() {
               </Link>
             </div>
             <Input
-              type="password"
+              id="page-login-password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: "" }));
+              }}
+              error={fieldErrors.password}
               leftIcon={<Lock className="h-4 w-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-foreground-muted hover:text-foreground focus:outline-none p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              }
               required
             />
           </div>
 
           <Button
             type="submit"
+            id="page-login-submit"
             variant="accent"
             size="lg"
-            className="w-full"
+            className="w-full font-semibold shadow-subtle"
             isLoading={loading}
             disabled={loading}
             rightIcon={<ArrowRight className="h-4 w-4" />}
@@ -111,39 +151,13 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="pt-4 text-center text-xs text-foreground-muted border-t border-line space-y-3">
+        <div className="pt-4 text-center text-xs text-foreground-muted border-t border-line">
           <p>
             Don&apos;t have an account?{" "}
             <Link href="/register" className="text-sage-deep font-semibold hover:underline">
               Create Account
             </Link>
           </p>
-
-          <div className="rounded bg-background-elevated p-3 space-y-1 text-left">
-            <span className="font-semibold text-foreground block">Quick Demo Login Shortcuts:</span>
-            <div className="flex items-center justify-between text-xs font-mono">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("customer@beautyiq.com");
-                  setPassword("password123");
-                }}
-                className="text-sage-deep hover:underline"
-              >
-                Customer Account
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("admin@beautyiq.com");
-                  setPassword("admin123");
-                }}
-                className="text-clay hover:underline"
-              >
-                Admin Account
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

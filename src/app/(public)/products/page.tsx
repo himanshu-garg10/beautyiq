@@ -92,7 +92,7 @@ const sortOptions = [
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "best-value", label: "Best Value Index" },
-  { value: "compatibility", label: "Demo Compatibility" },
+  { value: "compatibility", label: "Highest Compatibility" },
 ];
 
 function ProductsCatalogContent() {
@@ -100,13 +100,15 @@ function ProductsCatalogContent() {
   const initialCategory = searchParams?.get("category") || "";
   const initialBrand = searchParams?.get("brand") || "";
   const initialQuery = searchParams?.get("q") || "";
+  const initialSkinType = searchParams?.get("skinType") || "";
+  const initialMaxPrice = searchParams?.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!, 10) : 3000;
 
   const [searchQuery, setSearchQuery] = React.useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
   const [selectedBrand, setSelectedBrand] = React.useState<string>(initialBrand);
-  const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>([]);
+  const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>(initialSkinType ? [initialSkinType] : []);
   const [selectedConcerns, setSelectedConcerns] = React.useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = React.useState<number>(3000);
+  const [maxPrice, setMaxPrice] = React.useState<number>(initialMaxPrice);
   const [minRating, setMinRating] = React.useState<string>("");
   const [availability, setAvailability] = React.useState<string>("");
   const [crueltyFreeOnly, setCrueltyFreeOnly] = React.useState(false);

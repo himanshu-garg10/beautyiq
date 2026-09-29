@@ -30,6 +30,7 @@ import {
   TestTube,
   BarChart2,
   SlidersHorizontal,
+  Heart,
 } from "lucide-react";
 import { useComparison } from "@/context/comparison-context";
 import { useSkinProfile } from "@/context/skin-profile-context";
@@ -37,7 +38,7 @@ import { useToast } from "@/context/toast-context";
 import { useAuth } from "@/context/auth-context";
 
 export default function CompareMatrixPage() {
-  const { user } = useAuth();
+  const { user, toggleWishlist } = useAuth();
   const userId = user?.id || "u1";
   const { selectedIds, removeFromComparison, clearComparison, addToComparison } = useComparison();
   const { profile } = useSkinProfile();
@@ -148,12 +149,6 @@ export default function CompareMatrixPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/recommendations/test-suite">
-            <Button variant="outline" size="sm" leftIcon={<TestTube className="h-4 w-4" />}>
-              Engine Test Suite
-            </Button>
-          </Link>
-
           <Button
             variant="outline"
             size="sm"
@@ -260,7 +255,28 @@ export default function CompareMatrixPage() {
                         <Link href={`/products/${item.product.id}`} className="font-display font-semibold text-foreground text-sm line-clamp-2 hover:text-sage-deep transition-colors">
                           {item.product.name}
                         </Link>
-                        <Badge variant="default" className="text-[0.65rem]">{item.product.category}</Badge>
+                        <div className="flex items-center justify-between gap-1 pt-1">
+                          <Badge variant="default" className="text-[0.65rem]">{item.product.category}</Badge>
+                          <button
+                            onClick={() => {
+                              toggleWishlist(item.product.id);
+                              const isSaved = user?.wishlistIds?.includes(item.product.id);
+                              showToast(
+                                isSaved ? `Removed ${item.product.name} from wishlist` : `Saved ${item.product.name} to wishlist`,
+                                isSaved ? "info" : "success"
+                              );
+                            }}
+                            className={`flex items-center gap-1 text-[0.68rem] px-2 py-0.5 rounded border transition-colors ${
+                              user?.wishlistIds?.includes(item.product.id)
+                                ? "bg-rose-50 dark:bg-rose-950/30 text-rose-500 border-rose-200"
+                                : "text-foreground-muted hover:text-rose-500 border-line bg-background"
+                            }`}
+                            title="Save to Wishlist"
+                          >
+                            <Heart className={`h-3 w-3 ${user?.wishlistIds?.includes(item.product.id) ? "fill-current" : ""}`} />
+                            <span>{user?.wishlistIds?.includes(item.product.id) ? "Saved" : "Save"}</span>
+                          </button>
+                        </div>
                       </div>
                     </TableCell>
                   ))}
