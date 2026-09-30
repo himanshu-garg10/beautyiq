@@ -29,6 +29,8 @@
       "@/types/*": ["./src/types/*"],
       "@/config": ["./src/config/index"],
       "@/config/*": ["./src/config/*"],
+      "@/services": ["./src/services/index", "./src/server/services/index"],
+      "@/services/*": ["./src/services/*", "./src/server/services/*"],
       "@/lib/*": ["./src/lib/*"]
     }
   },
