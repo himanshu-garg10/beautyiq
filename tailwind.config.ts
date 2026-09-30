@@ -39,6 +39,16 @@ const config: Config = {
           DEFAULT: "var(--clay)",
           tint: "var(--clay-tint)",
         },
+        champagne: {
+          DEFAULT: "var(--champagne)",
+          tint: "var(--champagne-tint)",
+          deep: "var(--champagne-deep)",
+        },
+        blush: {
+          DEFAULT: "var(--blush)",
+          tint: "var(--blush-tint)",
+          deep: "var(--blush-deep)",
+        },
         line: {
           DEFAULT: "var(--line)",
           strong: "var(--line-strong)",

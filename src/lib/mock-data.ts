@@ -1,6 +1,7 @@
 /**
- * BeautyIQ Mock Datasets & Seeds Facade (Backward-Compatibility Layer)
- * For new code, import directly from `@/database/seeds` or `@/database`
+ * BeautyIQ Mock Datasets & Seeds Facade
+ * All datasets are cleanly organized under `src/data/`.
+ * Re-exported here for backward compatibility.
  */
 
-export * from "@/database/seeds";
+export * from "@/data";

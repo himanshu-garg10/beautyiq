@@ -1,6 +1,6 @@
 # BeautyIQ Architecture & Project Structure Guide
 
-Welcome to the BeautyIQ project structure! This document details the architectural layout, directory organization, and expansion patterns across the **Frontend**, **Backend**, and **Database** layers.
+Welcome to the BeautyIQ project structure! This document details the architectural layout, directory organization, and patterns across the **UI Components**, **Context State**, **Backend Services & Security**, **Database**, and **Next.js App Router** layers.
 
 ---
 
@@ -8,26 +8,10 @@ Welcome to the BeautyIQ project structure! This document details the architectur
 
 ```
 beautyiq/
+├── public/                   # 🖼️ Static assets (images, icons, robots.txt)
+├── data/                     # 💾 SQLite database storage (beautyiq.db)
 ├── src/
-│   ├── frontend/             # 🎨 ALL FRONTEND CODE (UI components, layouts, context state)
-│   │   ├── components/       # Reusable UI & Domain components
-│   │   ├── context/          # React State Providers (auth, theme, toast, skin-profile, etc.)
-│   │   └── index.ts          # Unified frontend barrel export
-│   │
-│   ├── backend/              # ⚙️ ALL BACKEND LOGIC (services, business logic, security)
-│   │   ├── services/         # Business services (auth, products, recommendations, pipeline)
-│   │   ├── security/         # Security guards, AI guardrails, rate limiting, validators
-│   │   └── index.ts          # Unified backend barrel export
-│   │
-│   ├── database/             # 🗄️ ALL DATABASE CODE (SQLite client, schema, repositories, seeds)
-│   │   ├── connection.ts     # Better-SQLite3 singleton with WAL mode & busy timeout
-│   │   ├── schema.ts         # SQL DDL table migrations (users, profiles, sessions, etc.)
-│   │   ├── repositories.ts   # DbService query methods & transactions
-│   │   ├── crypto.ts         # Secure scrypt password hashing & verification
-│   │   ├── seeds.ts          # Seed catalog data (brands, products, ingredients)
-│   │   └── index.ts          # Unified database barrel export
-│   │
-│   ├── app/                  # 🌐 NEXT.JS APP ROUTER (Pages, Layouts & HTTP Route Handlers)
+│   ├── app/                  # 🌐 Next.js App Router (Pages, Layouts & HTTP Route Handlers)
 │   │   ├── (auth)/           # Authentication pages (login, register, forgot-password)
 │   │   ├── (customer)/       # Customer dashboard & settings pages
 │   │   ├── (public)/         # Public marketplace pages (browse, search, compare)
@@ -37,130 +21,137 @@ beautyiq/
 │   │   ├── layout.tsx        # Root HTML layout & global providers
 │   │   └── page.tsx          # Homepage
 │   │
-│   ├── types/                # 📐 Domain TypeScript definitions and data interfaces
-│   │   └── index.ts
+│   ├── components/           # 🎨 Reusable UI & Domain React components
+│   │   ├── admin/            # Admin portal components (tables, stat cards, modals)
+│   │   ├── ai-requirement/   # AI skincare questionnaire & requirement forms
+│   │   ├── auth/             # Login/Register modals and route guards
+│   │   ├── home/             # Homepage feature sections (hero, discovery, comparisons)
+│   │   ├── layout/           # Structural layout (navbar, footer, sidebar, container)
+│   │   ├── product/          # Product cards, listings, search inputs
+│   │   ├── recommendations/  # AI recommendation widgets & breakdown modals
+│   │   ├── theme/            # Theme switcher toggle
+│   │   └── ui/               # Design system primitives (button, input, modal, badge, etc.)
 │   │
-│   ├── shared/               # 🔄 Shared cross-layer exports (types & utilities)
-│   │   └── index.ts
+│   ├── context/              # 🔄 React State Providers
+│   │   ├── auth-context.tsx          # User session, login/logout, role permissions
+│   │   ├── comparison-context.tsx    # Multi-product comparison tray
+│   │   ├── skin-profile-context.tsx  # User skin profile & quiz data
+│   │   ├── theme-context.tsx         # Dark/Light mode theme state
+│   │   └── toast-context.tsx         # Global toast notification alerts
 │   │
-│   ├── lib/                  # 🛡️ Utilities & backward-compatibility re-exports
-│   │   ├── utils.ts          # Styling and general helper functions
+│   ├── database/             # 🗄️ SQLite Database Layer (better-sqlite3)
+│   │   ├── connection.ts     # Better-SQLite3 singleton with WAL mode & busy timeout
+│   │   ├── schema.ts         # SQL DDL table migrations (users, profiles, sessions, etc.)
+│   │   ├── repositories.ts   # DbService query methods & transactions
+│   │   ├── crypto.ts         # Secure scrypt password hashing & verification
+│   │   ├── seeds.ts          # Seed catalog data (brands, products, ingredients)
+│   │   └── index.ts          # Unified database barrel export
+│   │
+│   ├── services/             # ⚙️ Business Logic Services & Data Pipeline
+│   │   ├── data-pipeline/    # 7-stage automated data ingestion and quality calculator
+│   │   ├── admin-data.service.ts
+│   │   ├── ai-requirement.service.ts
+│   │   ├── api-client.ts
+│   │   ├── auth.service.ts
+│   │   ├── comparison.service.ts
+│   │   ├── data-export.service.ts
+│   │   ├── ingredient.service.ts
+│   │   ├── notification.service.ts
+│   │   ├── product-search.service.ts
+│   │   ├── product.service.ts
+│   │   ├── recently-viewed.service.ts
+│   │   ├── recommendation-engine.service.ts
+│   │   ├── recommendation-history.service.ts
+│   │   ├── search-history.service.ts
+│   │   ├── value-engine.service.ts
+│   │   └── wishlist.service.ts
+│   │
+│   ├── lib/                  # 🛡️ Utilities & Security
+│   │   ├── security/         # Security guards, AI guardrails, rate limiting, validators
+│   │   ├── utils.ts          # Tailwind cn() class merge helper
 │   │   ├── db.ts             # Facade re-exporting from @/database
 │   │   └── mock-data.ts      # Facade re-exporting from @/database/seeds
 │   │
-│   └── middleware.ts         # Next.js edge route guard middleware
+│   ├── types/                # 📐 Domain TypeScript definitions and data interfaces
+│   │   └── index.ts
+│   │
+│   └── middleware.ts         # 🛡️ Next.js edge route guard middleware
 │
-├── data/                     # 💾 SQLite database storage (beautyiq.db)
-└── package.json              # Project dependencies and npm scripts
+├── package.json              # Project dependencies and npm scripts
+├── next.config.js            # Next.js build and image optimization settings
+├── tailwind.config.ts        # Design tokens and theme styling
+└── tsconfig.json             # TypeScript compiler settings & path aliases
 ```
 
 ---
 
-## 🎨 1. Frontend Layer (`src/frontend/`)
+## 🎨 1. Components Layer (`src/components/`)
 
-Everything related to visual presentation and client-side state is stored here.
-
-### Organization:
-- **`src/frontend/components/ui/`**: Atomic design system primitives:
+All UI components and presentation logic are cleanly categorized:
+- **`src/components/ui/`**: Atomic design system primitives:
   - `button.tsx`, `input.tsx`, `modal.tsx`, `badge.tsx`, `toast.tsx`, `table.tsx`, `tabs.tsx`, etc.
-- **`src/frontend/components/layout/`**: Structural layout components:
-  - `navbar.tsx`, `footer.tsx`, `container.tsx`, `customer-sidebar.tsx`, `admin-sidebar.tsx`, etc.
-- **`src/frontend/components/home/`**: Homepage-specific sections:
-  - `hero.tsx`, `featured-products.tsx`, `ai-search.tsx`, `price-comparison.tsx`, etc.
-- **`src/frontend/components/product/`**: Product browsing & comparison cards:
+- **`src/components/layout/`**: Structural layout components:
+  - `navbar.tsx`, `footer.tsx`, `container.tsx`, `customer-sidebar.tsx`, `admin-sidebar.tsx`, `mobile-nav.tsx`, etc.
+- **`src/components/home/`**: Homepage-specific sections:
+  - `hero.tsx`, `featured-products.tsx`, `ai-search.tsx`, `price-comparison.tsx`, `trust-strip.tsx`, etc.
+- **`src/components/product/`**: Product browsing & comparison cards:
   - `product-card.tsx`, `grouped-search-input.tsx`
-- **`src/frontend/components/admin/`**: Admin portal components:
+- **`src/components/admin/`**: Admin portal components:
   - `admin-table.tsx`, `admin-stat-card.tsx`, `admin-confirm-modal.tsx`
-- **`src/frontend/context/`**: React Context state management:
-  - `auth-context.tsx`: User login session, role checking, permissions.
-  - `theme-context.tsx`: Light/Dark mode state and toggle.
-  - `toast-context.tsx`: Global notification toast system.
-  - `skin-profile-context.tsx`: User personalized skin profile & quiz data.
-  - `comparison-context.tsx`: Multi-product ingredient comparison tray.
-
-### How to Expand:
-- To add a new UI element: Create a component under `src/frontend/components/ui/` or the relevant domain folder.
-- To add a new state provider: Create a new context inside `src/frontend/context/` and export it in `src/frontend/index.ts`.
-- Path aliases:
-  ```ts
-  import { Button } from "@/frontend/components/ui/button";
-  import { useAuth } from "@/frontend/context/auth-context";
-  // or via barrel:
-  import { Button, useAuth } from "@/frontend";
-  ```
+- **`src/components/auth/`**: Authentication UI:
+  - `auth-modal.tsx`, `protected-route.tsx`
 
 ---
 
-## ⚙️ 2. Backend Layer (`src/backend/`)
+## 🔄 2. State & Context Layer (`src/context/`)
 
-Contains business rules, server-side data processors, algorithms, and security guards.
+React Context providers manage client-side state:
+- `auth-context.tsx`: User login session, role checking, permissions.
+- `theme-context.tsx`: Light/Dark mode state and toggle.
+- `toast-context.tsx`: Global notification toast alerts.
+- `skin-profile-context.tsx`: User personalized skin profile & quiz data.
+- `comparison-context.tsx`: Multi-product ingredient comparison tray.
 
-### Organization:
-- **`src/backend/services/`**: Core domain logic:
+---
+
+## ⚙️ 3. Backend Services Layer (`src/services/` & `src/lib/security/`)
+
+Contains business rules, server-side data processors, algorithms, and security guards:
+- **`src/services/`**: Core domain logic:
   - `auth.service.ts`: Session tokens, cookie parsing, login, and registration.
   - `product.service.ts`: Product retrieval, filtering, and catalog management.
   - `recommendation-engine.service.ts`: AI & heuristic ingredient compatibility matching.
   - `comparison.service.ts`: Side-by-side product price & ingredient comparison.
   - `admin-data.service.ts`: Platform administration metrics, seller data, listings.
   - `data-pipeline/`: 7-stage automated data ingestion and quality calculator pipeline.
-- **`src/backend/security/`**: Policy enforcement & protection:
+- **`src/lib/security/`**: Policy enforcement & protection:
   - `auth-guard.ts`: Role-based route protection (`admin`, `customer`).
   - `ai-guardrail.service.ts`: Prompt injection and hallucination safety filters.
   - `medical-safety.ts`: Disclaimers and dermatological restriction checks.
   - `rate-limiter.ts`: Sliding-window request throttling.
   - `input-validator.ts`: XSS, SQLi, and payload sanitization.
 
-### How to Expand:
-- To add a new business workflow: Create a service file under `src/backend/services/` (e.g. `order.service.ts`).
-- To add a security rule: Create a validator under `src/backend/security/`.
-- Path aliases:
-  ```ts
-  import { ProductService } from "@/backend/services/product.service";
-  import { AuthGuard } from "@/backend/security/auth-guard";
-  // or via barrel:
-  import { ProductService, AuthGuard } from "@/backend";
-  ```
-
 ---
 
-## 🗄️ 3. Database Layer (`src/database/`)
+## 🗄️ 4. Database Layer (`src/database/`)
 
-Encapsulates data persistence, schema migrations, and database access.
-
-### Organization:
-- **`connection.ts`**: Better-SQLite3 singleton connection. Configured with:
+Encapsulates data persistence, schema migrations, and database access:
+- **`connection.ts`**: Better-SQLite3 singleton connection.
   - `WAL` (Write-Ahead Logging) mode for high concurrency.
   - `busy_timeout = 5000` to prevent `SQLITE_BUSY` file locks under load.
   - Foreign key constraint enforcement (`foreign_keys = ON`).
 - **`schema.ts`**: Auto-migrated table DDL schemas:
-  - `users`: User identity and role management.
-  - `user_profiles`: JSON-stored skin concerns, preferences, and privacy.
-  - `sessions`: Persistent auth session tokens.
-  - `wishlists`: Saved user bookmarks.
-  - `saved_products`: Products marked for comparison or future purchase.
-  - `recommendation_history`: Log of personalized recommendation sessions.
+  - `users`, `user_profiles`, `sessions`, `wishlists`, `saved_products`, `recommendation_history`.
 - **`repositories.ts`**: `DbService` data access layer exposing typed methods for all tables.
 - **`crypto.ts`**: Scrypt-based password hashing with cryptographic salt and timing-safe equality checks.
 - **`seeds.ts`**: Default catalog dataset (mock products, brands, platforms, ingredients).
 
-### How to Expand:
-- To add a new table: Add a `CREATE TABLE IF NOT EXISTS` statement in `src/database/schema.ts`.
-- To add query methods: Add static methods to `DbService` inside `src/database/repositories.ts`.
-- To seed new records: Add them to `src/database/seeds.ts`.
-- Path aliases:
-  ```ts
-  import { db, DbService } from "@/database";
-  ```
-
 ---
 
-## 🌐 4. Routing & API (`src/app/`)
+## 🌐 5. Routing & API Layer (`src/app/`)
 
-Next.js App Router connects incoming HTTP requests to Frontend components and Backend services.
-
-### Organization:
-- **`src/app/api/`**: Server-side API endpoints (`GET`, `POST`, `PUT`, `DELETE`).
-  - Calls `src/backend/services` and `src/database` to process requests.
+Next.js App Router connects incoming HTTP requests to components and services:
+- **`src/app/api/`**: Server-side REST API route handlers (`GET`, `POST`, `PUT`, `DELETE`).
 - **`src/app/(public)/`**: Public UI pages (landing, browse, product details, ingredients, compare).
 - **`src/app/(customer)/`**: Customer UI pages (account dashboard, profile, history, wishlist).
 - **`src/app/(auth)/`**: Login, registration, and password recovery pages.
@@ -170,33 +161,28 @@ Next.js App Router connects incoming HTTP requests to Frontend components and Ba
 
 ## 🛠️ TypeScript Path Aliases
 
-The project is configured in `tsconfig.json` with direct shortcuts for every domain:
+Configured in `tsconfig.json`:
 
 | Alias | Target Directory | Description |
 |---|---|---|
-| `@/frontend` | `src/frontend/index.ts` | Frontend barrel exports |
-| `@/frontend/*` | `src/frontend/*` | Components, Context, Layouts |
-| `@/backend` | `src/backend/index.ts` | Backend barrel exports |
-| `@/backend/*` | `src/backend/*` | Services, Security, Pipeline |
-| `@/database` | `src/database/index.ts` | Database singleton, schema, repo |
+| `@/*` | `src/*` | Universal source root shortcut |
+| `@/database` | `src/database/index.ts` | Database singleton, schema, repositories |
 | `@/database/*` | `src/database/*` | Direct database modules |
-| `@/shared` | `src/shared/index.ts` | Common types & utilities |
-| `@/types` | `src/types/index.ts` | TypeScript interfaces & types |
-| `@/*` | `src/*` | General project root fallback |
-
-*All legacy paths (`@/components/*`, `@/services/*`, `@/lib/db`, `@/lib/mock-data`) remain 100% supported through compatibility facades.*
 
 ---
 
 ## 🚀 Running the Project Locally
 
 ```bash
-# 1. Start the development server
+# 1. Install dependencies
+npm install
+
+# 2. Start the development server
 npm run dev
 
-# 2. Build for production
+# 3. Build for production
 npm run build
 
-# 3. Start the production server
+# 4. Start the production server
 npm run start
 ```

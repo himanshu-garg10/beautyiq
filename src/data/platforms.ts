@@ -1,0 +1,95 @@
+import type { Platform, Seller } from "@/types";
+
+export const mockPlatforms: Platform[] = [
+  {
+    id: "nykaa",
+    name: "Nykaa",
+    baseUrl: "https://www.nykaa.com",
+    status: "active",
+    listingCount: 5,
+    logoUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=120&auto=format&fit=crop",
+  },
+  {
+    id: "amazon",
+    name: "Amazon India",
+    baseUrl: "https://www.amazon.in",
+    status: "active",
+    listingCount: 3,
+    logoUrl: "https://images.unsplash.com/photo-1523474255658-40e13c236371?q=80&w=120&auto=format&fit=crop",
+  },
+  {
+    id: "flipkart",
+    name: "Flipkart",
+    baseUrl: "https://www.flipkart.com",
+    status: "active",
+    listingCount: 2,
+    logoUrl: "https://images.unsplash.com/photo-1572021335469-31706a17aaef?q=80&w=120&auto=format&fit=crop",
+  },
+  {
+    id: "brand-store",
+    name: "Brand Direct Store",
+    baseUrl: "https://beminimalist.co",
+    status: "active",
+    listingCount: 6,
+    logoUrl: "https://images.unsplash.com/photo-1512290900676-26c2a48f4134?q=80&w=120&auto=format&fit=crop",
+  },
+  {
+    id: "maccaron",
+    name: "Maccaron Beauty",
+    baseUrl: "https://maccaron.in",
+    status: "active",
+    listingCount: 2,
+    logoUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=120&auto=format&fit=crop",
+  },
+  {
+    id: "tira",
+    name: "Tira Beauty",
+    baseUrl: "https://www.tirabeauty.com",
+    status: "inactive",
+    listingCount: 0,
+    logoUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=120&auto=format&fit=crop",
+  },
+];
+
+export const mockSellers: Seller[] = [
+  {
+    id: "seller-nykaa",
+    name: "Nykaa Retail Pvt Ltd",
+    platformId: "nykaa",
+    rating: 4.8,
+    status: "active",
+    listingCount: 5,
+  },
+  {
+    id: "seller-appario",
+    name: "Appario Retail India",
+    platformId: "amazon",
+    rating: 4.6,
+    status: "active",
+    listingCount: 2,
+  },
+  {
+    id: "seller-supercom",
+    name: "SuperComNet Sellers",
+    platformId: "flipkart",
+    rating: 4.4,
+    status: "active",
+    listingCount: 2,
+  },
+  {
+    id: "seller-minimalist-direct",
+    name: "Uprising Science Direct",
+    platformId: "brand-store",
+    rating: 4.9,
+    status: "active",
+    listingCount: 4,
+  },
+  {
+    id: "seller-maccaron",
+    name: "Maccaron Official India",
+    platformId: "maccaron",
+    rating: 4.7,
+    status: "active",
+    listingCount: 2,
+  },
+];

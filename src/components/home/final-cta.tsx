@@ -1,55 +1,66 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
-import { Section } from "@/components/layout/section";
 
 export function FinalCta() {
   return (
-    <Section className="border-t border-line bg-gradient-to-b from-background-elevated/40 to-background-card">
-      <Container className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between py-6">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.45 }}
-          className="max-w-xl space-y-3"
-        >
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-sage-deep">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Smart Skincare Made Simple</span>
-          </div>
-          <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
-            Your skin is unique. Your skincare routine should be too.
-          </h2>
-          <p className="text-sm md:text-base text-foreground-muted leading-relaxed">
-            Stop wasting money on viral products that cause breakouts. Build your verified profile or describe your skin in natural language.
-          </p>
-        </motion.div>
+    <section className="relative overflow-hidden border-t border-line bg-gradient-to-b from-background via-champagne-tint/30 to-background py-16 sm:py-20">
+      {/* Subtle ambient luxury blur */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[280px] rounded-full bg-champagne-tint/70 blur-3xl opacity-60 dark:opacity-20"
+      />
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.45, delay: 0.1 }}
-          className="flex flex-wrap items-center gap-3 shrink-0"
-        >
-          <Link href="/onboarding">
-            <Button size="lg" variant="accent" className="font-semibold shadow-md gap-2">
-              <span>Build Free Skin Profile</span>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/ai-search">
-            <Button size="lg" variant="outline" className="font-semibold">
-              Try AI Search
-            </Button>
-          </Link>
-        </motion.div>
+      <Container className="relative">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-champagne/40 bg-background-card/90 p-8 sm:p-12 text-center shadow-lg backdrop-blur-sm space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-champagne/40 bg-champagne-tint/70 text-xs font-semibold text-champagne-deep">
+            <Sparkles className="h-3.5 w-3.5 text-champagne-deep" />
+            <span>Personalized Intelligence Engine</span>
+          </div>
+
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight">
+            Find Your Beauty Match
+          </h2>
+
+          <p className="max-w-xl mx-auto text-base sm:text-lg text-foreground-muted leading-relaxed">
+            Stop guessing. Let BeautyIQ help you discover products that fit your preferences.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+            <Link href="/onboarding">
+              <Button
+                size="lg"
+                variant="accent"
+                className="rounded-full px-8 py-3.5 font-semibold text-sm shadow-md hover:shadow-lg transition-all gap-2 bg-foreground text-background hover:bg-foreground/90 dark:bg-champagne-deep dark:text-white"
+              >
+                <span>Start Your Beauty Journey</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+
+            <Link href="/products">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-6 py-3.5 font-medium text-sm border-line hover:border-champagne/60 bg-background hover:bg-background-elevated"
+              >
+                <span>Explore Products</span>
+              </Button>
+            </Link>
+          </div>
+
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-foreground-faint font-medium border-t border-line/60">
+            <span>✓ 100% Free to Use</span>
+            <span>✓ No Sponsored Rankings</span>
+            <span>✓ 350+ Clinical Actives Verified</span>
+          </div>
+        </div>
       </Container>
-    </Section>
+    </section>
   );
 }

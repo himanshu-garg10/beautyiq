@@ -1,136 +1,170 @@
 import Link from "next/link";
-import { Instagram, Twitter, Youtube, ShieldAlert } from "lucide-react";
+import { Instagram, Twitter, Youtube, Linkedin, Sparkles, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/layout/container";
-
-const footerColumns = [
-  {
-    title: "Discovery",
-    links: [
-      { label: "Products Catalog", href: "/products" },
-      { label: "AI Requirement Search", href: "/ai-search" },
-      { label: "Categories", href: "/categories" },
-      { label: "Ingredient Intelligence", href: "/ingredients" },
-      { label: "Brand Index", href: "/brands" },
-    ],
-  },
-  {
-    title: "Platform",
-    links: [
-      { label: "About BeautyIQ", href: "/about" },
-      { label: "How It Works", href: "/how-it-works" },
-      { label: "AI Safety & Governance", href: "/ai-safety" },
-      { label: "Skin Profile Questionnaire", href: "/onboarding" },
-      { label: "Compare Matrix", href: "/compare" },
-    ],
-  },
-  {
-    title: "Support & Legal",
-    links: [
-      { label: "Contact Us", href: "/contact" },
-      { label: "Frequently Asked Questions", href: "/faq" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Skincare Safety Disclaimer", href: "/ai-safety" },
-    ],
-  },
-];
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-background-elevated/60 text-foreground">
-      <Container className="py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div className="max-w-sm space-y-4">
-            <Link href="/" className="inline-block">
-              <span className="font-display text-2xl tracking-tight text-foreground">
-                Beauty<span className="italic text-sage-deep">IQ</span>
+    <footer className="border-t border-line bg-background-elevated/50 text-foreground">
+      <Container className="py-14 sm:py-16">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
+          {/* Column 1: Brand & Narrative */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="inline-block group">
+              <span className="font-display text-2xl font-bold tracking-tight text-foreground group-hover:text-champagne-deep transition-colors">
+                Beauty<span className="italic font-normal text-champagne-deep">IQ</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-foreground-muted">
-              AI-powered personalized skincare product discovery, ingredient intelligence, and cross-platform price comparison platform. Discover products matched to your unique skin profile.
+
+            <p className="text-xs sm:text-sm leading-relaxed text-foreground-muted max-w-sm">
+              AI-powered personalized cosmetics recommendation and cross-platform product comparison platform. Bringing scientific transparency and price clarity to beauty discovery.
             </p>
-            <div className="flex items-center gap-4 pt-1">
+
+            {/* Social Icons */}
+            <div className="flex items-center gap-3 pt-2">
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="BeautyIQ on Instagram"
-                className="text-foreground-faint transition-colors hover:text-sage-deep"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-background hover:bg-champagne-tint hover:text-champagne-deep transition-colors"
               >
-                <Instagram className="h-[18px] w-[18px]" />
+                <Instagram className="h-4 w-4" />
               </a>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="BeautyIQ on Twitter"
-                className="text-foreground-faint transition-colors hover:text-sage-deep"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-background hover:bg-champagne-tint hover:text-champagne-deep transition-colors"
               >
-                <Twitter className="h-[18px] w-[18px]" />
+                <Twitter className="h-4 w-4" />
               </a>
               <a
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="BeautyIQ on YouTube"
-                className="text-foreground-faint transition-colors hover:text-sage-deep"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-background hover:bg-champagne-tint hover:text-champagne-deep transition-colors"
               >
-                <Youtube className="h-[18px] w-[18px]" />
+                <Youtube className="h-4 w-4" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="BeautyIQ on LinkedIn"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-background hover:bg-champagne-tint hover:text-champagne-deep transition-colors"
+              >
+                <Linkedin className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {footerColumns.map((col) => (
-            <div key={col.title}>
-              <h4 className="mb-4 font-display text-sm font-semibold text-foreground uppercase tracking-wider">
-                {col.title}
-              </h4>
-              <ul className="flex flex-col gap-2.5">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-foreground-muted transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+          {/* Column 2: Discover */}
+          <div className="space-y-3">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-foreground">
+              Discover
+            </h4>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li>
+                <Link href="/products" className="hover:text-foreground transition-colors">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link href="/categories" className="hover:text-foreground transition-colors">
+                  Product Categories
+                </Link>
+              </li>
+              <li>
+                <Link href="/brands" className="hover:text-foreground transition-colors">
+                  Verified Brands
+                </Link>
+              </li>
+              <li>
+                <Link href="/ai-search" className="hover:text-foreground transition-colors flex items-center gap-1">
+                  <span>AI Natural Search</span>
+                  <Sparkles className="h-2.5 w-2.5 text-champagne-deep" />
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-        {/* Safety Disclaimer Banner */}
-        <div className="mt-14 rounded border border-line bg-background-card p-5">
-          <div className="flex items-start gap-3">
-            <ShieldAlert className="h-5 w-5 shrink-0 text-status-warning mt-0.5" />
-            <div className="text-xs leading-relaxed text-foreground-muted space-y-1">
-              <p className="font-semibold text-foreground">
-                Important Skincare & AI Safety Notice
-              </p>
-              <p>
-                BeautyIQ provides ingredient information, compatibility scores, and product discovery for general informational guidance only. BeautyIQ does not offer medical or dermatological advice, nor does it diagnose, treat, or cure skin medical conditions. Always consult a qualified board-certified dermatologist for persistent or severe skin conditions.
-              </p>
-            </div>
+          {/* Column 3: Compare & Intelligence */}
+          <div className="space-y-3">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-foreground">
+              Intelligence
+            </h4>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li>
+                <Link href="/compare" className="hover:text-foreground transition-colors">
+                  Product Compare Matrix
+                </Link>
+              </li>
+              <li>
+                <Link href="/recommendations" className="hover:text-foreground transition-colors">
+                  AI Recommendations
+                </Link>
+              </li>
+              <li>
+                <Link href="/ingredients" className="hover:text-foreground transition-colors">
+                  Ingredient Database
+                </Link>
+              </li>
+              <li>
+                <Link href="/onboarding" className="hover:text-foreground transition-colors">
+                  Skin Profile Quiz
+                </Link>
+              </li>
+              <li>
+                <Link href="/how-it-works" className="hover:text-foreground transition-colors">
+                  How It Works
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: About & Legal */}
+          <div className="space-y-3">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-foreground">
+              About &amp; Legal
+            </h4>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li>
+                <Link href="/about" className="hover:text-foreground transition-colors">
+                  About BeautyIQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-foreground transition-colors">
+                  Contact &amp; Support
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-foreground transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/ai-safety" className="hover:text-foreground transition-colors">
+                  AI Safety &amp; Disclaimers
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-line pt-6 flex flex-col gap-4 text-xs text-foreground-faint sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} BeautyIQ Platform. All rights reserved.</span>
-          <div className="flex flex-wrap gap-5">
-            <Link href="/privacy" className="hover:text-foreground">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-foreground">
-              Terms of Service
-            </Link>
-            <Link href="/ai-safety" className="hover:text-foreground">
-              AI Safety
-            </Link>
-            <Link href="/contact" className="hover:text-foreground">
-              Contact Support
-            </Link>
+        {/* Bottom Disclaimer & Copyright */}
+        <div className="mt-12 pt-6 border-t border-line/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-foreground-faint">
+          <p>© {new Date().getFullYear()} BeautyIQ Platform. All rights reserved.</p>
+          <div className="flex items-center gap-1.5 text-[0.72rem]">
+            <ShieldCheck className="h-3.5 w-3.5 text-champagne-deep" />
+            <span>Independent cosmetic analysis • Non-medical cosmetic guidance</span>
           </div>
         </div>
       </Container>

@@ -1,10 +1,8 @@
 /**
- * BeautyIQ Database Layer
- * SQLite connection singleton, auto-migrated schema, secure credentials hashing, and data repositories.
+ * BeautyIQ Database Layer Facade
+ * Database configuration is in `src/server/database/` and repositories in `src/server/repositories/`.
+ * Re-exported here for backward compatibility.
  */
 
-export * from "./connection";
-export * from "./schema";
-export * from "./crypto";
-export * from "./repositories";
-export * from "./seeds";
+export * from "@/server/database";
+export * from "@/server/repositories";
