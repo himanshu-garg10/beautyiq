@@ -1,0 +1,145 @@
+// Prisma Schema for BeautyIQ
+// Local development uses SQLite; can be switched to PostgreSQL for production by setting provider = "postgresql"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                 String              @id
+  name               String
+  brand              String
+  category           String              // RoutineStep (Serum, Moisturizer, Face Wash, Sunscreen, etc.)
+  description        String
+  images             String              // JSON array of image URLs
+  image              String              // Primary thumbnail / cover image
+  quantity           Float
+  unit               String              // ml, g, pcs
+  rating             Float?
+  reviewCount        Int                 @default(0)
+  productStatus      String              @default("Complete")
+  dataConfidence     Int                 @default(100)
+  source             String?
+  lastUpdated        String?
+  compatibilityScore Int?
+  skinTypes          String              // JSON array of SkinType strings
+  targetConcerns     String              // JSON array of DetailedSkinConcern strings
+  pHLevel            Float?
+  crueltyFree        Boolean             @default(false)
+  vegan              Boolean             @default(false)
+  fragranceFree      Boolean             @default(false)
+  parabenFree        Boolean             @default(false)
+  siliconeFree       Boolean             @default(false)
+  usageTime          String              @default("Both") // Morning, Night, Both
+  summary            String?
+  whyRecommended     String?             // JSON array of bullet strings
+  warnings           String?             // JSON array of warning strings
+  isVerified         Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  productIngredients ProductIngredient[]
+  prices             Price[]
+
+  @@index([category])
+  @@index([brand])
+}
+
+model Ingredient {
+  id                 String              @id // slug / identifier (e.g. "niacinamide")
+  name               String
+  commonNames        String?             // JSON array
+  synonyms           String?             // JSON array
+  description        String
+  function           String
+  category           String              // IngredientCategory
+  concentration      String?
+  concernTags        String              // JSON array of concerns
+  safetyRating       String              // Low Hazard, Moderate Hazard, High Hazard
+  comedogenicRating  Int                 @default(0) // 0-5
+  suitableSkinTypes  String              // JSON array of SkinType
+  contraindications  String?             // JSON array of incompatible ingredients
+  status             String              @default("active")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  productIngredients ProductIngredient[]
+
+  @@index([category])
+  @@index([safetyRating])
+}
+
+model ProductIngredient {
+  id            String     @id @default(cuid())
+  productId     String
+  ingredientId  String
+  isKey         Boolean    @default(false)
+  concentration String?
+  orderIndex    Int        @default(0)
+  createdAt     DateTime   @default(now())
+
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, ingredientId])
+  @@index([productId])
+  @@index([ingredientId])
+}
+
+model Price {
+  id               String   @id @default(cuid())
+  productId        String
+  platform         String   // Nykaa, Amazon, Flipkart, Brand Store, Maccaron, etc.
+  seller           String
+  price            Float?   // null if unavailable
+  originalPrice    Float?
+  discountPercent  Float?
+  quantity         Float
+  unit             String
+  availability     String   @default("Available")
+  productUrl       String
+  deliveryEstimate String?
+  isBestValue      Boolean  @default(false)
+  isBestPrice      Boolean  @default(false)
+  unitPricePerMl   Float?
+  valueScore       Float?
+  lastUpdated      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([platform])
+}
+
+model SkinProfile {
+  id                    String   @id @default(cuid())
+  userId                String?  @unique
+  skinType              String   // Oily, Dry, Combination, Normal, Sensitive
+  concerns              String   // JSON array of concerns
+  goals                 String?  // JSON array of goals
+  sensitivityLevel      String?  // Low, Medium, High, Not sure
+  reactionFrequency     String?  // Never, Rarely, Sometimes, Frequently
+  knownAllergies        String?  // JSON array
+  preferredIngredients  String?  // JSON array
+  avoidIngredients      String?  // JSON array
+  preferredBrands       String?  // JSON array
+  excludedBrands        String?  // JSON array
+  preferredCategories   String?  // JSON array
+  minBudget             Float?   @default(0)
+  maxBudget             Float?   @default(2000)
+  fragranceFree         Boolean  @default(false)
+  crueltyFree           Boolean  @default(false)
+  vegan                 Boolean  @default(false)
+  parabenFree           Boolean  @default(false)
+  siliconeFree          Boolean  @default(false)
+  isOnboardingComplete  Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

@@ -7,6 +7,20 @@ export class IngredientService {
    * Get all active skincare ingredients
    */
   static async getAllIngredients(): Promise<ApiResponse<Ingredient[]>> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/ingredients");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Fetch from /api/ingredients failed, using fallback", err);
+      }
+    }
+
     await simulateDelay(80);
     return createSuccessResponse(ingredients);
   }
@@ -15,6 +29,24 @@ export class IngredientService {
    * Get single ingredient by ID or slug
    */
   static async getIngredientById(id: string): Promise<ApiResponse<Ingredient>> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/ingredients?q=${encodeURIComponent(id)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            const q = id.toLowerCase();
+            const matched = json.data.find(
+              (i: Ingredient) => i.id.toLowerCase() === q || i.name.toLowerCase() === q
+            );
+            if (matched) return createSuccessResponse(matched);
+          }
+        }
+      } catch (err) {
+        console.warn(`Fetch ingredient ${id} failed, using fallback`, err);
+      }
+    }
+
     await simulateDelay(80);
     const q = id.toLowerCase();
     const item = ingredients.find((i) => i.id.toLowerCase() === q || i.name.toLowerCase() === q);
@@ -33,6 +65,24 @@ export class IngredientService {
     query?: string,
     category?: IngredientCategory | string
   ): Promise<ApiResponse<Ingredient[]>> {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams();
+        if (query) params.set("q", query);
+        if (category) params.set("category", category);
+
+        const res = await fetch(`/api/ingredients?${params.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Fetch from /api/ingredients failed, using fallback", err);
+      }
+    }
+
     await simulateDelay(80);
     let result = [...ingredients];
 

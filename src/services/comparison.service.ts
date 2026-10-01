@@ -41,6 +41,20 @@ export class ComparisonService {
       );
     }
 
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/compare?ids=${uniqueIds.join(",")}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Fetch from /api/compare failed, using fallback", err);
+      }
+    }
+
     // Build base requirements if userProfile exists
     const hasProfile = userProfile && userProfile.isOnboardingComplete && userProfile.skinType;
     const reqObj = hasProfile
