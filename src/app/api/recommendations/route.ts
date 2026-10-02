@@ -58,6 +58,20 @@ export async function POST(request: NextRequest) {
       userProfile?.budget?.min ||
       0;
 
+    if (isNaN(maxBudget) || maxBudget < 0) {
+      return NextResponse.json(
+        { success: false, error: "maxPrice/maxBudget must be a positive number." },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(minBudget) || minBudget < 0) {
+      return NextResponse.json(
+        { success: false, error: "minPrice/minBudget must be a non-negative number." },
+        { status: 400 }
+      );
+    }
+
     const preferredIngredients: string[] =
       requirements.preferredIngredients ||
       body.preferredIngredients ||

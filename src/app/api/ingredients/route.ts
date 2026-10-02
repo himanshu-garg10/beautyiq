@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       where.category = { equals: category };
     }
 
-    if (safetyRating) {
+    if (safetyRating && safetyRating !== "All" && safetyRating !== "") {
       where.safetyRating = { equals: safetyRating };
     }
 
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       const q = query.trim().toLowerCase();
       where.OR = [
         { name: { contains: q } },
+        { slug: { contains: q } },
         { description: { contains: q } },
         { function: { contains: q } },
         { commonNames: { contains: q } },
@@ -50,8 +51,11 @@ export async function GET(request: NextRequest) {
       try { suitableSkinTypes = JSON.parse(ing.suitableSkinTypes); } catch {}
       try { contraindications = ing.contraindications ? JSON.parse(ing.contraindications) : []; } catch {}
 
+      const stableId = ing.slug || ing.legacyId || ing.id;
+
       return {
-        id: ing.id,
+        id: stableId,
+        slug: stableId,
         name: ing.name,
         commonNames,
         synonyms,
@@ -77,7 +81,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("GET /api/ingredients error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to fetch ingredients" },
+      { success: false, error: error.message || "Internal server error fetching ingredients" },
       { status: 500 }
     );
   }

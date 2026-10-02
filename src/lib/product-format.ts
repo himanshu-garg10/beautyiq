@@ -16,15 +16,22 @@ export function formatProduct(p: any): Product & { prices?: any[] } {
   const keyIngredients = p.productIngredients
     ? p.productIngredients
         .filter((pi: any) => pi.isKey)
-        .map((pi: any) => pi.ingredient?.name || pi.ingredientId)
+        .map((pi: any) => pi.ingredient?.name || pi.ingredient?.slug || pi.ingredientId)
     : p.keyIngredients || [];
 
   const allIngredients = p.productIngredients
-    ? p.productIngredients.map((pi: any) => pi.ingredient?.name || pi.ingredientId)
+    ? p.productIngredients.map((pi: any) => pi.ingredient?.name || pi.ingredient?.slug || pi.ingredientId)
     : p.allIngredients || [];
 
+  const stableId = p.slug || p.legacyId || p.id;
+
+  const formattedPrices = (p.prices || []).map((pr: any) => ({
+    ...pr,
+    productId: stableId,
+  }));
+
   return {
-    id: p.id,
+    id: stableId,
     name: p.name,
     brand: p.brand,
     category: p.category as RoutineStep,
@@ -55,6 +62,6 @@ export function formatProduct(p: any): Product & { prices?: any[] } {
     isVerified: p.isVerified,
     keyIngredients,
     allIngredients,
-    prices: p.prices || [],
+    prices: formattedPrices,
   };
 }

@@ -1,17 +1,18 @@
-// Prisma Schema for BeautyIQ
-// Local development uses SQLite; can be switched to PostgreSQL for production by setting provider = "postgresql"
+// Prisma Schema for BeautyIQ (MongoDB Atlas)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Product {
-  id                 String              @id
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  slug               String              @unique // Stable identifier e.g. "p1", "p2" for clean URLs and matching
+  legacyId           String?             @unique // Secondary legacy alias (e.g. "p1")
   name               String
   brand              String
   category           String              // RoutineStep (Serum, Moisturizer, Face Wash, Sunscreen, etc.)
@@ -51,7 +52,9 @@ model Product {
 }
 
 model Ingredient {
-  id                 String              @id // slug / identifier (e.g. "niacinamide")
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  slug               String              @unique // Stable identifier e.g. "niacinamide", "hyaluronic-acid"
+  legacyId           String?             @unique // Secondary alias
   name               String
   commonNames        String?             // JSON array
   synonyms           String?             // JSON array
@@ -75,11 +78,11 @@ model Ingredient {
 }
 
 model ProductIngredient {
-  id            String     @id @default(cuid())
-  productId     String
-  ingredientId  String
-  isKey         Boolean    @default(false)
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  productId     String     @db.ObjectId
+  ingredientId  String     @db.ObjectId
   concentration String?
+  isKey         Boolean    @default(false)
   orderIndex    Int        @default(0)
   createdAt     DateTime   @default(now())
 
@@ -92,8 +95,8 @@ model ProductIngredient {
 }
 
 model Price {
-  id               String   @id @default(cuid())
-  productId        String
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId        String   @db.ObjectId
   platform         String   // Nykaa, Amazon, Flipkart, Brand Store, Maccaron, etc.
   seller           String
   price            Float?   // null if unavailable
@@ -116,10 +119,11 @@ model Price {
 
   @@index([productId])
   @@index([platform])
+  @@index([price])
 }
 
 model SkinProfile {
-  id                    String   @id @default(cuid())
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   userId                String?  @unique
   skinType              String   // Oily, Dry, Combination, Normal, Sensitive
   concerns              String   // JSON array of concerns

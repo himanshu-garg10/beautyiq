@@ -225,25 +225,26 @@ const additionalProductListings = [
 ];
 
 async function main() {
-  console.log("🌱 Starting BeautyIQ Database Seed...");
+  console.log("🌱 Starting BeautyIQ Database Seed (MongoDB Atlas)...");
 
-  // 1. Clear existing records
-  await prisma.price.deleteMany();
-  await prisma.productIngredient.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.ingredient.deleteMany();
-  await prisma.skinProfile.deleteMany();
+  // 1. Clear existing collections to guarantee no duplicate records
+  await prisma.price.deleteMany({});
+  await prisma.productIngredient.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.ingredient.deleteMany({});
+  await prisma.skinProfile.deleteMany({});
 
-  console.log("🧹 Cleaned existing tables.");
+  console.log("🧹 Cleaned existing MongoDB collections.");
 
   // 2. Seed Ingredients
   const allIngredientsToSeed = [...ingredients, ...additionalIngredients];
-  const seededIngredientsMap = new Map<string, string>(); // name/slug -> id
+  const seededIngredientsMap = new Map<string, string>(); // name/slug -> ObjectId
 
   for (const ing of allIngredientsToSeed) {
     const created = await prisma.ingredient.create({
       data: {
-        id: ing.id,
+        slug: ing.id,
+        legacyId: ing.id,
         name: ing.name,
         commonNames: ing.commonNames ? JSON.stringify(ing.commonNames) : null,
         synonyms: ing.synonyms ? JSON.stringify(ing.synonyms) : null,
@@ -270,10 +271,13 @@ async function main() {
   console.log(`✅ Seeded ${allIngredientsToSeed.length} ingredients.`);
 
   // 3. Seed Products (p1 to p13)
+  const seededProductsMap = new Map<string, string>(); // legacy id "p1" -> ObjectId
+
   for (const p of products) {
-    await prisma.product.create({
+    const createdProduct = await prisma.product.create({
       data: {
-        id: p.id,
+        slug: p.id,
+        legacyId: p.id,
         name: p.name,
         brand: p.brand,
         category: p.category,
@@ -305,6 +309,8 @@ async function main() {
       },
     });
 
+    seededProductsMap.set(p.id, createdProduct.id);
+
     // 4. Link ProductIngredients
     const linkedIngredientIds = new Set<string>();
 
@@ -317,7 +323,7 @@ async function main() {
         linkedIngredientIds.add(matchedIngId);
         await prisma.productIngredient.create({
           data: {
-            productId: p.id,
+            productId: createdProduct.id,
             ingredientId: matchedIngId,
             isKey: true,
             orderIndex: i + 1,
@@ -335,7 +341,7 @@ async function main() {
         linkedIngredientIds.add(matchedIngId);
         await prisma.productIngredient.create({
           data: {
-            productId: p.id,
+            productId: createdProduct.id,
             ingredientId: matchedIngId,
             isKey: false,
             orderIndex: p.keyIngredients.length + j + 1,
@@ -355,10 +361,12 @@ async function main() {
     if (uniqueListingIds.has(l.id)) continue;
     uniqueListingIds.add(l.id);
 
+    const productObjectId = seededProductsMap.get(l.productId);
+    if (!productObjectId) continue;
+
     await prisma.price.create({
       data: {
-        id: l.id,
-        productId: l.productId,
+        productId: productObjectId,
         platform: l.platform,
         seller: l.seller,
         price: l.price,
@@ -406,7 +414,7 @@ async function main() {
   });
 
   console.log("✅ Seeded default SkinProfile for user u1.");
-  console.log("🎉 Database seeding completed successfully!");
+  console.log("🎉 MongoDB Atlas database seeding completed successfully!");
 }
 
 function findIngredientId(name: string, map: Map<string, string>): string | undefined {
@@ -414,23 +422,23 @@ function findIngredientId(name: string, map: Map<string, string>): string | unde
   if (map.has(clean)) return map.get(clean);
 
   // Common substring / alias matches
-  if (clean.includes("niacinamide")) return "niacinamide";
-  if (clean.includes("hyaluronic")) return "hyaluronic-acid";
-  if (clean.includes("salicylic")) return "salicylic-acid";
-  if (clean.includes("vitamin c") || clean.includes("ascorb")) return "vitamin-c";
-  if (clean.includes("ceramide")) return "ceramides";
-  if (clean.includes("retinol") || clean.includes("retinoid")) return "retinol";
-  if (clean.includes("squalane")) return "squalane";
-  if (clean.includes("centella") || clean.includes("cica") || clean.includes("madecassoside")) return "centella-asiatica";
-  if (clean.includes("zinc oxide")) return "zinc-oxide";
-  if (clean.includes("glycolic")) return "glycolic-acid";
-  if (clean.includes("petrolatum") || clean.includes("paraffin")) return "petrolatum";
-  if (clean.includes("coco-glucoside")) return "coco-glucoside";
-  if (clean.includes("zinc pca")) return "zinc-pca";
-  if (clean.includes("aloe")) return "aloe-vera";
-  if (clean.includes("tea tree")) return "tea-tree";
-  if (clean.includes("caffeine")) return "caffeine";
-  if (clean.includes("lactic")) return "lactic-acid";
+  if (clean.includes("niacinamide")) return map.get("niacinamide");
+  if (clean.includes("hyaluronic")) return map.get("hyaluronic-acid");
+  if (clean.includes("salicylic")) return map.get("salicylic-acid");
+  if (clean.includes("vitamin c") || clean.includes("ascorb")) return map.get("vitamin-c");
+  if (clean.includes("ceramide")) return map.get("ceramides");
+  if (clean.includes("retinol") || clean.includes("retinoid")) return map.get("retinol");
+  if (clean.includes("squalane")) return map.get("squalane");
+  if (clean.includes("centella") || clean.includes("cica") || clean.includes("madecassoside")) return map.get("centella-asiatica");
+  if (clean.includes("zinc oxide")) return map.get("zinc-oxide");
+  if (clean.includes("glycolic")) return map.get("glycolic-acid");
+  if (clean.includes("petrolatum") || clean.includes("paraffin")) return map.get("petrolatum");
+  if (clean.includes("coco-glucoside")) return map.get("coco-glucoside");
+  if (clean.includes("zinc pca")) return map.get("zinc-pca");
+  if (clean.includes("aloe")) return map.get("aloe-vera");
+  if (clean.includes("tea tree")) return map.get("tea-tree");
+  if (clean.includes("caffeine")) return map.get("caffeine");
+  if (clean.includes("lactic")) return map.get("lactic-acid");
 
   return undefined;
 }

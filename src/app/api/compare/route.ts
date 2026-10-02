@@ -5,6 +5,10 @@ import type { ProductComparisonItem, ProductListing } from "@/types";
 
 export const dynamic = "force-dynamic";
 
+function isValidObjectId(str: string): boolean {
+  return /^[0-9a-fA-F]{24}$/.test(str);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -19,19 +23,37 @@ export async function GET(request: NextRequest) {
       requestedIds = idsParam.flatMap((s) => s.split(",")).map((s) => s.trim()).filter(Boolean);
     }
 
+    // Input validation
     if (requestedIds.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "Please provide product IDs via ?ids=p1,p2 or multiple ?ids= params",
+          error: "Please provide product IDs via ?ids=p1,p2 or multiple ?ids= query parameters.",
         },
         { status: 400 }
       );
     }
 
+    if (requestedIds.length > 10) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "A maximum of 10 products can be compared simultaneously.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const validObjectIds = requestedIds.filter(isValidObjectId);
+
+    // Match by slug, legacyId (e.g. "p1"), or MongoDB ObjectId
     const rawProducts = await prisma.product.findMany({
       where: {
-        id: { in: requestedIds },
+        OR: [
+          { slug: { in: requestedIds } },
+          { legacyId: { in: requestedIds } },
+          ...(validObjectIds.length > 0 ? [{ id: { in: validObjectIds } }] : []),
+        ],
       },
       include: {
         prices: true,
@@ -50,17 +72,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "No matching products found for the provided IDs",
+          error: "No matching products were found for the provided identifiers.",
         },
         { status: 404 }
       );
     }
 
-    // Preserve the order of requested IDs
-    const productMap = new Map(rawProducts.map((p) => [p.id, p]));
+    // Preserve the order of requested IDs using map by id/slug/legacyId
+    const productMap = new Map<string, any>();
+    rawProducts.forEach((p) => {
+      productMap.set(p.id, p);
+      if (p.slug) productMap.set(p.slug, p);
+      if (p.legacyId) productMap.set(p.legacyId, p);
+    });
+
     const orderedProducts = requestedIds
       .map((id) => productMap.get(id))
-      .filter((p): p is NonNullable<typeof p> => p !== undefined);
+      .filter((p, index, self): p is NonNullable<typeof p> => Boolean(p) && self.indexOf(p) === index);
 
     // Build comparison items
     const comparisonItems: ProductComparisonItem[] = orderedProducts.map((raw) => {
@@ -137,7 +165,7 @@ export async function GET(request: NextRequest) {
       item.isBestValueOverall = item.vfmIndex === maxVfm;
     });
 
-    // Extract common & conflicting ingredients
+    // Extract common ingredients
     const allIngredientsLists = comparisonItems.map((item) => item.product.allIngredients);
     const commonIngredients =
       allIngredientsLists.length > 0
@@ -160,7 +188,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("GET /api/compare error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to compare products" },
+      { success: false, error: error.message || "Internal server error comparing products." },
       { status: 500 }
     );
   }

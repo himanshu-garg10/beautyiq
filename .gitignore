@@ -37,4 +37,4 @@ requirements_extracted.txt
 data/*.db
 data/*.db-*
 *.db
-
+prisma/dev.db

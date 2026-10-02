@@ -23,17 +23,32 @@ export async function GET(request: NextRequest) {
     const parabenFree = searchParams.get("parabenFreeOnly") === "true";
     const sortBy = searchParams.get("sortBy") || "relevance";
 
+    // Input validation
+    if (maxPrice !== undefined && (isNaN(maxPrice) || maxPrice < 0)) {
+      return NextResponse.json(
+        { success: false, error: "maxPrice must be a valid positive number" },
+        { status: 400 }
+      );
+    }
+
+    if (minRating !== undefined && (isNaN(minRating) || minRating < 0 || minRating > 5)) {
+      return NextResponse.json(
+        { success: false, error: "minRating must be a number between 0 and 5" },
+        { status: 400 }
+      );
+    }
+
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
 
     // Build Prisma where filter
     const where: any = {};
 
-    if (category && category !== "All" && category !== "") {
+    if (category && category !== "All" && category !== "all" && category !== "") {
       where.category = { equals: category };
     }
 
-    if (brand && brand !== "All" && brand !== "") {
+    if (brand && brand !== "All" && brand !== "all" && brand !== "") {
       where.brand = { equals: brand };
     }
 
@@ -46,12 +61,13 @@ export async function GET(request: NextRequest) {
       where.rating = { gte: minRating };
     }
 
-    // Query text search across name, brand, description, and summary
+    // Query text search across name, brand, slug, description, and summary
     if (query && query.trim()) {
       const q = query.trim().toLowerCase();
       where.OR = [
         { name: { contains: q } },
         { brand: { contains: q } },
+        { slug: { contains: q } },
         { description: { contains: q } },
         { summary: { contains: q } },
       ];
@@ -73,7 +89,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Post-filter JSON fields (concern, skinType) and maxPrice (which depends on lowest price in prices)
+    // Post-filter JSON fields (concern, skinType) and maxPrice
     if (concern) {
       const normalizedConcern = concern.toLowerCase();
       rawProducts = rawProducts.filter((p) => {
@@ -120,14 +136,14 @@ export async function GET(request: NextRequest) {
       });
     } else if (sortBy === "price-desc") {
       rawProducts.sort((a, b) => {
-        const aMin = Math.min(...(a.prices.map((p) => p.price ?? 0)));
-        const bMin = Math.min(...(b.prices.map((p) => p.price ?? 0)));
+        const aMin = Math.max(...(a.prices.map((p) => p.price ?? 0)));
+        const bMin = Math.max(...(b.prices.map((p) => p.price ?? 0)));
         return bMin - aMin;
       });
     }
 
     const total = rawProducts.length;
-    const totalPages = Math.ceil(total / pageSize);
+    const totalPages = Math.ceil(total / pageSize) || 1;
     const paginated = rawProducts.slice((page - 1) * pageSize, page * pageSize);
 
     // Format products for frontend consumption
@@ -148,7 +164,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("GET /api/products error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to fetch products" },
+      { success: false, error: error.message || "Internal server error fetching products" },
       { status: 500 }
     );
   }
