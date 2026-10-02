@@ -40,6 +40,24 @@ export class RecommendationEngineService {
   static async generateRecommendations(
     engineRequest: RecommendationEngineRequest
   ): Promise<ApiResponse<RecommendationResultSet>> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(engineRequest),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Fetch from /api/recommendations failed, using fallback engine", err);
+      }
+    }
+
     await simulateDelay(150);
 
     const { requirements, priority, userProfile } = engineRequest;

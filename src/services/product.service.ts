@@ -87,6 +87,43 @@ export class ProductService {
   static async getProducts(
     filters: ProductFilterOptions = {}
   ): Promise<ApiResponse<PaginatedProductsResult>> {
+    // If running in browser environment, query the database-backed Next.js API route
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams();
+        if (filters.category && filters.category !== "all" && filters.category !== "All") {
+          params.set("category", filters.category);
+        }
+        if (filters.brand && filters.brand !== "all" && filters.brand !== "All") {
+          params.set("brand", filters.brand);
+        }
+        if (filters.skinType) params.set("skinType", filters.skinType);
+        if (filters.skinConcern && filters.skinConcern !== "all") {
+          params.set("concern", filters.skinConcern);
+        }
+        if (filters.maxPrice !== undefined) params.set("maxPrice", filters.maxPrice.toString());
+        if (filters.minRating !== undefined) params.set("minRating", filters.minRating.toString());
+        if (filters.query) params.set("q", filters.query);
+        if (filters.crueltyFreeOnly) params.set("crueltyFreeOnly", "true");
+        if (filters.veganOnly) params.set("veganOnly", "true");
+        if (filters.fragranceFreeOnly) params.set("fragranceFreeOnly", "true");
+        if (filters.parabenFreeOnly) params.set("parabenFreeOnly", "true");
+        if (filters.sortBy) params.set("sortBy", filters.sortBy);
+        if (filters.page) params.set("page", filters.page.toString());
+        if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+
+        const res = await fetch(`/api/products?${params.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Fetch from /api/products failed, falling back to local dataset", err);
+      }
+    }
+
     await simulateDelay(80);
 
     // Retrieve active normalized products from AdminDataService (supports live additions & verification)
@@ -239,6 +276,20 @@ export class ProductService {
    * Get single product by ID
    */
   static async getProductById(id: string): Promise<ApiResponse<Product>> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/products/${encodeURIComponent(id)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return createSuccessResponse(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn(`Fetch from /api/products/${id} failed, falling back to local dataset`, err);
+      }
+    }
+
     await simulateDelay(60);
     const { AdminDataService } = await import("./admin-data.service");
     const product = await AdminDataService.getProductById(id);
@@ -257,6 +308,20 @@ export class ProductService {
    * Get platform & seller price listings for a product
    */
   static async getProductPriceListings(productId: string): Promise<ApiResponse<ProductListing[]>> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/products/${encodeURIComponent(productId)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data?.prices && json.data.prices.length > 0) {
+            return createSuccessResponse(json.data.prices);
+          }
+        }
+      } catch (err) {
+        console.warn(`Fetch listings for /api/products/${productId} failed, falling back`, err);
+      }
+    }
+
     await simulateDelay(60);
     const { AdminDataService } = await import("./admin-data.service");
     const storedListings = await AdminDataService.getListings({ productId });
