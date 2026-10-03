@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { SkinProfileProvider } from "@/context/skin-profile-context";
 import { ToastProvider } from "@/context/toast-context";
 import { ComparisonProvider } from "@/context/comparison-context";
+import { NextAuthSessionProvider } from "@/components/auth/session-provider";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -49,11 +50,13 @@ export default function RootLayout({
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-sage-tint selection:text-foreground">
         <ThemeProvider>
           <ToastProvider>
-            <AuthProvider>
-              <SkinProfileProvider>
-                <ComparisonProvider>{children}</ComparisonProvider>
-              </SkinProfileProvider>
-            </AuthProvider>
+            <NextAuthSessionProvider>
+              <AuthProvider>
+                <SkinProfileProvider>
+                  <ComparisonProvider>{children}</ComparisonProvider>
+                </SkinProfileProvider>
+              </AuthProvider>
+            </NextAuthSessionProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>

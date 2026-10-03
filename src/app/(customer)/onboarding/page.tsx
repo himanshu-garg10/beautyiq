@@ -152,6 +152,33 @@ export default function CustomerOnboardingPage() {
       completedStepsCount: 7,
     });
 
+    if (user) {
+      const answers = {
+        skinType,
+        concerns: selectedConcerns,
+        goals: selectedGoals,
+        sensitivityLevel,
+        reactionFrequency,
+        knownAllergies,
+        preferredIngredients: pref,
+        avoidIngredients: avoid,
+        texturePreference,
+        finishPreference,
+        fragrancePreference,
+        essentialOilPreference,
+        properties: selectedProperties,
+        skincareExperience: experience,
+        sunExposure,
+        climate,
+        budget: { min: 200, max: maxBudget, monthlyBudget },
+      };
+      await fetch("/api/quiz-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers }),
+      });
+    }
+
     addToast({
       type: "success",
       title: "Onboarding Completed!",

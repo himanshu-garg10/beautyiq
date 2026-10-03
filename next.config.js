@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require("path");
+
 const nextConfig = {
   images: {
     unoptimized: true,
@@ -10,7 +12,24 @@ const nextConfig = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ["better-sqlite3"],
+    serverComponentsExternalPackages: ["better-sqlite3", "bcryptjs"],
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      const ignored = [
+        "**/node_modules/**",
+        "**/.git/**",
+        "**/.next/**",
+        "**/Untitled/**",
+        path.join(__dirname, "Untitled"),
+      ];
+      config.watchOptions = {
+        ...(config.watchOptions || {}),
+        ignored,
+        poll: 1000,
+      };
+    }
+    return config;
   },
   async rewrites() {
     return [

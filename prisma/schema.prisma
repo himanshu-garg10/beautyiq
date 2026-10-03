@@ -122,11 +122,27 @@ model Price {
   @@index([price])
 }
 
+model User {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  email         String         @unique
+  name          String
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+
+  skinProfile   SkinProfile?
+  savedProducts SavedProduct[]
+  quizResults   QuizResult[]
+}
+
 model SkinProfile {
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId                String?  @unique
+  userId                String   @unique @db.ObjectId
   skinType              String   // Oily, Dry, Combination, Normal, Sensitive
-  concerns              String   // JSON array of concerns
+  concerns              String[]
+  budgetMin             Float?   @default(0)
+  budgetMax             Float?   @default(2000)
+  allergies             String[]
+  preferences           String?
   goals                 String?  // JSON array of goals
   sensitivityLevel      String?  // Low, Medium, High, Not sure
   reactionFrequency     String?  // Never, Rarely, Sometimes, Frequently
@@ -146,4 +162,29 @@ model SkinProfile {
   isOnboardingComplete  Boolean  @default(true)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SavedProduct {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  productId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model QuizResult {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  answers   Json
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
