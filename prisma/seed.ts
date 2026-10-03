@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { products, mockProductListings } from "../src/data/products";
 import { ingredients } from "../src/data/ingredients";
-import { sampleDefaultProfile } from "../src/data/users";
 
 const prisma = new PrismaClient();
 
@@ -386,34 +385,6 @@ async function main() {
   }
 
   console.log(`✅ Seeded ${uniqueListingIds.size} price listings.`);
-
-  // 6. Seed SkinProfile
-  await prisma.skinProfile.create({
-    data: {
-      userId: "u1",
-      skinType: sampleDefaultProfile.skinType,
-      concerns: JSON.stringify(sampleDefaultProfile.concerns),
-      goals: JSON.stringify(sampleDefaultProfile.goals),
-      sensitivityLevel: sampleDefaultProfile.sensitivityLevel,
-      reactionFrequency: sampleDefaultProfile.reactionFrequency,
-      knownAllergies: JSON.stringify(sampleDefaultProfile.knownAllergies),
-      preferredIngredients: JSON.stringify(sampleDefaultProfile.preferredIngredients),
-      avoidIngredients: JSON.stringify(sampleDefaultProfile.avoidIngredients),
-      preferredBrands: JSON.stringify(sampleDefaultProfile.preferredBrands),
-      excludedBrands: JSON.stringify(sampleDefaultProfile.excludedBrands),
-      preferredCategories: JSON.stringify(sampleDefaultProfile.preferredCategories),
-      minBudget: sampleDefaultProfile.budget.min,
-      maxBudget: sampleDefaultProfile.budget.max,
-      fragranceFree: sampleDefaultProfile.fragrancePreference === "Fragrance free",
-      crueltyFree: sampleDefaultProfile.properties.includes("Cruelty free"),
-      vegan: sampleDefaultProfile.properties.includes("Vegan"),
-      parabenFree: sampleDefaultProfile.properties.includes("Non comedogenic"),
-      siliconeFree: false,
-      isOnboardingComplete: sampleDefaultProfile.isOnboardingComplete,
-    },
-  });
-
-  console.log("✅ Seeded default SkinProfile for user u1.");
   console.log("🎉 MongoDB Atlas database seeding completed successfully!");
 }
 
