@@ -1,0 +1,56 @@
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { signupSchema } from "@/lib/auth/validation";
+import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
+import { InputValidator } from "@/lib/security/input-validator";
+
+const BCRYPT_COST = 12;
+
+export async function POST(req: NextRequest) {
+  try {
+    const limited = enforceAuthRateLimit(req, "signup");
+    if (limited) return limited;
+
+    const body = await req.json().catch(() => null);
+    const parsed = signupSchema.safeParse(body);
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message || "Invalid signup details.";
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message } },
+        { status: 400 }
+      );
+    }
+
+    const { name, email, password } = parsed.data;
+    const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+
+    const user = await prisma.user.create({
+      data: {
+        name: InputValidator.sanitizeString(name),
+        email,
+        passwordHash,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: user }, { status: 201 });
+  } catch (error: unknown) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "EMAIL_IN_USE", message: "Could not create account. Please try a different email or log in." },
+        },
+        { status: 409 }
+      );
+    }
+    return InputValidator.createSafeErrorResponse(error, "Failed to create account.");
+  }
+}

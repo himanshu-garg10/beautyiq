@@ -18,6 +18,6 @@ export const PAGINATION = {
 };
 
 export const RATE_LIMITS = {
-  maxRequests: 60,
-  windowMs: 60000,
+  maxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 60,
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
 };

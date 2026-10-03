@@ -207,7 +207,16 @@ export function Navbar() {
                   </Button>
                 </Link>
               ) : user ? (
-                <div className="relative" ref={accountRef}>
+                <div className="relative flex items-center gap-2" ref={accountRef}>
+                  <Link href="/account" className="hidden sm:inline-block">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="font-semibold text-xs"
+                    >
+                      Account
+                    </Button>
+                  </Link>
                   <button
                     onClick={() => setAccountMenuOpen(!accountMenuOpen)}
                     className="flex items-center gap-1.5 h-9 px-2.5 rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground text-xs font-semibold transition-all shadow-subtle"
@@ -231,6 +240,14 @@ export function Navbar() {
                         <p className="text-[0.7rem] text-foreground-faint truncate">{user.email}</p>
                       </div>
                       <div className="py-1">
+                        <Link
+                          href="/account"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-background-elevated transition-colors"
+                        >
+                          <User className="h-3.5 w-3.5 text-champagne-deep" />
+                          <span>My Account</span>
+                        </Link>
                         <Link
                           href="/dashboard"
                           onClick={() => setAccountMenuOpen(false)}
@@ -266,22 +283,25 @@ export function Navbar() {
                           className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-status-error hover:bg-status-error-bg/60 transition-colors"
                         >
                           <LogOut className="h-3.5 w-3.5" />
-                          <span>Log Out</span>
+                          <span>Log out</span>
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => openAuthModal("login")}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
-                  title="Sign In / Register"
-                  aria-label="Sign In"
-                >
-                  <User className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <Link href="/login">
+                    <Button size="sm" variant="outline" className="font-semibold text-xs">
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link href="/signup" className="hidden sm:inline-block">
+                    <Button size="sm" variant="accent" className="font-semibold text-xs">
+                      Sign up
+                    </Button>
+                  </Link>
+                </div>
               )}
 
               {/* Subtle CTA: "Find My Products" */}

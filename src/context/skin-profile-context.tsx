@@ -4,7 +4,6 @@ import * as React from "react";
 import type { SkinProfile } from "@/types";
 import { sampleDefaultProfile } from "@/lib/mock-data";
 import { useAuth } from "./auth-context";
-import { AuthService } from "@/services/auth.service";
 import { NotificationService } from "@/services/notification.service";
 
 interface SkinProfileContextType {
@@ -15,8 +14,38 @@ interface SkinProfileContextType {
 
 const SkinProfileContext = React.createContext<SkinProfileContextType | undefined>(undefined);
 
+function persistProfilePayload(profile: SkinProfile) {
+  return {
+    skinType: profile.skinType,
+    concerns: profile.concerns,
+    allergies: profile.knownAllergies,
+    budgetMin: profile.budget?.min,
+    budgetMax: profile.budget?.max,
+    preferences: JSON.stringify({
+      texturePreference: profile.texturePreference,
+      finishPreference: profile.finishPreference,
+      fragrancePreference: profile.fragrancePreference,
+      essentialOilPreference: profile.essentialOilPreference,
+      properties: profile.properties,
+      skincareExperience: profile.skincareExperience,
+      sunExposure: profile.sunExposure,
+      climate: profile.climate,
+      monthlyBudget: profile.budget?.monthlyBudget,
+    }),
+    goals: profile.goals,
+    sensitivityLevel: profile.sensitivityLevel,
+    reactionFrequency: profile.reactionFrequency,
+    preferredIngredients: profile.preferredIngredients,
+    avoidIngredients: profile.avoidIngredients,
+    fragranceFree: profile.fragrancePreference === "Fragrance free",
+    crueltyFree: profile.properties?.includes("Cruelty free"),
+    vegan: profile.properties?.includes("Vegan"),
+    isOnboardingComplete: profile.isOnboardingComplete,
+  };
+}
+
 export function SkinProfileProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [profile, setProfile] = React.useState<SkinProfile>(
     user?.skinProfile || sampleDefaultProfile
   );
@@ -30,13 +59,17 @@ export function SkinProfileProvider({ children }: { children: React.ReactNode })
   const updateProfile = async (updated: Partial<SkinProfile>) => {
     const newProfile = { ...profile, ...updated };
     setProfile(newProfile);
-    if (user) {
-      await AuthService.updateSkinProfile(user.id, newProfile);
+    if (isAuthenticated && user) {
+      await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(persistProfilePayload(newProfile)),
+      });
       NotificationService.createNotification(user.id, {
         type: "PROFILE_UPDATED",
         title: "Skin Profile Updated",
         message: "Your diagnostic skin parameters were updated and saved.",
-        link: "/profile",
+        link: "/account",
       });
     }
   };

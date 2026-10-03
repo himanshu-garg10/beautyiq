@@ -144,8 +144,8 @@ export function AuthModal() {
         description: `Signed in as ${emailTrimmed}`,
       });
       closeAuthModal();
-    } catch (err: any) {
-      setGeneralError(err.message || "Invalid email or password. Please verify your credentials.");
+    } catch {
+      setGeneralError("Invalid email or password");
     } finally {
       setLoading(false);
     }

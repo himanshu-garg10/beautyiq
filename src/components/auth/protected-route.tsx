@@ -16,10 +16,18 @@ export function ProtectedRoute({
   children,
   allowedRoles = ["customer", "admin"],
 }: ProtectedRouteProps) {
-  const { user, role, openAuthModal } = useAuth();
+  const { user, role, openAuthModal, sessionStatus } = useAuth();
+
+  if (sessionStatus === "loading" || (sessionStatus === "authenticated" && !user)) {
+    return (
+      <div className="container mx-auto px-4 py-24 flex justify-center text-sm text-foreground-muted">
+        Checking your session...
+      </div>
+    );
+  }
 
   // Visitor not authenticated
-  if (!user) {
+  if (sessionStatus !== "authenticated" || !user) {
     return (
       <div className="container mx-auto px-4 py-24 flex flex-col items-center justify-center max-w-md text-center space-y-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-sage-tint text-sage-deep shadow-xs">

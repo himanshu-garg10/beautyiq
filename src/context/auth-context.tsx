@@ -1,14 +1,17 @@
 "use client";
 
 import * as React from "react";
-import type { User, UserRole, UserPersonalProfile, PrivacySettings } from "@/types";
+import { signIn, signOut, useSession } from "next-auth/react";
+import type { User, UserRole, UserPersonalProfile, PrivacySettings, SkinProfile } from "@/types";
 import { AuthService } from "@/services/auth.service";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { toAppSkinProfileFromPublic } from "@/lib/auth/profile-map";
 
 interface AuthContextType {
   user: User | null;
   role: UserRole;
   isAuthenticated: boolean;
+  sessionStatus: "loading" | "authenticated" | "unauthenticated";
   isAuthModalOpen: boolean;
   authModalMode: "login" | "register" | "forgot-password";
   openAuthModal: (mode?: "login" | "register" | "forgot-password") => void;
@@ -29,23 +32,71 @@ interface AuthContextType {
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
+function mapSessionUser(
+  sessionUser: { id: string; name?: string | null; email?: string | null },
+  extras?: { wishlistIds?: string[]; skinProfile?: SkinProfile }
+): User {
+  return {
+    id: sessionUser.id,
+    name: sessionUser.name || "BeautyIQ Member",
+    email: sessionUser.email || "",
+    role: "customer",
+    wishlistIds: extras?.wishlistIds || [],
+    searchHistory: [],
+    createdAt: new Date().toISOString(),
+    skinProfile: extras?.skinProfile,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Visitor starts in logged-out state unless an active session exists
+  const { data: session, status } = useSession();
   const [user, setUser] = React.useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
   const [authModalMode, setAuthModalMode] = React.useState<"login" | "register" | "forgot-password">("login");
 
-  // Restore authenticated session from storage on client mount
   React.useEffect(() => {
-    const activeUser = AuthService.getCurrentUser();
-    if (activeUser) {
-      setUser(activeUser);
+    if (status === "unauthenticated") {
+      setUser(null);
+      return;
     }
-  }, []);
+    if (status !== "authenticated" || !session?.user?.id) {
+      return;
+    }
 
-  // Automatic 5-second popup for logged-out visitors
+    const sessionUser = session.user;
+    let cancelled = false;
+
+    async function loadAccount() {
+      try {
+        const [profileRes, savedRes] = await Promise.all([
+          fetch("/api/profile"),
+          fetch("/api/saved-products"),
+        ]);
+        const profileJson = profileRes.ok ? await profileRes.json() : { data: null };
+        const savedJson = savedRes.ok ? await savedRes.json() : { data: [] };
+        if (cancelled) return;
+
+        const wishlistIds = Array.isArray(savedJson.data)
+          ? savedJson.data.map((item: { productId: string }) => item.productId)
+          : [];
+        const skinProfile = profileJson.data ? toAppSkinProfileFromPublic(profileJson.data) : undefined;
+
+        setUser(mapSessionUser(sessionUser, { wishlistIds, skinProfile }));
+      } catch {
+        if (!cancelled) {
+          setUser(mapSessionUser(sessionUser));
+        }
+      }
+    }
+
+    loadAccount();
+    return () => {
+      cancelled = true;
+    };
+  }, [session, status]);
+
   React.useEffect(() => {
-    if (user) return;
+    if (user || status === "loading" || status === "authenticated") return;
     if (typeof window === "undefined") return;
 
     const isDismissed = sessionStorage.getItem("beautyiq_auth_popup_dismissed");
@@ -53,15 +104,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const timer = setTimeout(() => {
       const dismissedNow = sessionStorage.getItem("beautyiq_auth_popup_dismissed");
-      const activeSession = AuthService.getCurrentSession();
-      if (!dismissedNow && !activeSession) {
+      if (!dismissedNow) {
         setAuthModalMode("login");
         setIsAuthModalOpen(true);
       }
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, status]);
 
   const openAuthModal = (mode: "login" | "register" | "forgot-password" = "login") => {
     setAuthModalMode(mode);
@@ -78,16 +128,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const role: UserRole = user ? user.role : "guest";
 
   const login = async (email: string, password?: string): Promise<string> => {
-    const res = await AuthService.login(email, password);
-    if (!res.success || !res.data) {
-      throw new Error(res.error?.message || "Invalid credentials");
+    const result = await signIn("credentials", {
+      email,
+      password: password || "",
+      redirect: false,
+    });
+    if (!result?.ok) {
+      throw new Error("Invalid email or password");
     }
-    setUser(res.data.user);
     if (typeof window !== "undefined") {
       sessionStorage.setItem("beautyiq_auth_popup_dismissed", "true");
     }
     setIsAuthModalOpen(false);
-    return res.data.redirectRoute;
+    return "/account";
   };
 
   const register = async (params: {
@@ -96,11 +149,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string;
     confirmPassword: string;
   }): Promise<void> => {
-    const res = await AuthService.register(params);
-    if (!res.success || !res.data) {
-      throw new Error(res.error?.message || "Registration failed");
+    const response = await fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: params.name,
+        email: params.email,
+        password: params.password,
+      }),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload?.error?.message || "Registration failed");
     }
-    setUser(res.data.user);
+
+    const result = await signIn("credentials", {
+      email: params.email,
+      password: params.password,
+      redirect: false,
+    });
+    if (!result?.ok) {
+      throw new Error("Account created. Please log in.");
+    }
     if (typeof window !== "undefined") {
       sessionStorage.setItem("beautyiq_auth_popup_dismissed", "true");
     }
@@ -108,13 +178,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await AuthService.logout();
+    await signOut({ redirect: false });
     setUser(null);
   };
 
   const deleteAccount = async () => {
-    if (!user) return;
-    await AuthService.deleteAccount(user.id);
+    const response = await fetch("/api/delete-account", { method: "DELETE" });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.error?.message || "Failed to delete account");
+    }
+    await signOut({ redirect: false });
     setUser(null);
   };
 
@@ -122,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     const res = await AuthService.updatePersonalProfile(user.id, personal, privacy);
     if (res.success && res.data) {
-      setUser(res.data);
+      setUser({ ...user, personalProfile: res.data.personalProfile, privacySettings: res.data.privacySettings });
     }
   };
 
@@ -132,26 +206,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  React.useEffect(() => {
-    const handleWishlistUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<{ userId: string; ids: string[] }>;
-      if (user && customEvent.detail && customEvent.detail.userId === user.id) {
-        setUser((prev) => (prev ? { ...prev, wishlistIds: customEvent.detail.ids } : null));
-      }
-    };
-    window.addEventListener("beautyiq_wishlist_update", handleWishlistUpdate);
-    return () => window.removeEventListener("beautyiq_wishlist_update", handleWishlistUpdate);
-  }, [user]);
-
   const toggleWishlist = async (productId: string) => {
     if (!user) {
       openAuthModal("login");
       return;
     }
-    const res = await AuthService.toggleWishlist(user.id, productId);
-    if (res.success && res.data) {
-      setUser({ ...user, wishlistIds: res.data });
-    }
+    const isSaved = user.wishlistIds.includes(productId);
+    const response = isSaved
+      ? await fetch(`/api/saved-products?productId=${encodeURIComponent(productId)}`, { method: "DELETE" })
+      : await fetch("/api/saved-products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId }),
+        });
+    if (!response.ok) return;
+    const nextIds = isSaved
+      ? user.wishlistIds.filter((id) => id !== productId)
+      : [...user.wishlistIds, productId];
+    setUser({ ...user, wishlistIds: nextIds });
   };
 
   return (
@@ -160,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         role,
         isAuthenticated: !!user,
+        sessionStatus: status,
         isAuthModalOpen,
         authModalMode,
         openAuthModal,
@@ -186,4 +259,3 @@ export function useAuth() {
   }
   return context;
 }
-

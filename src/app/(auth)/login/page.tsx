@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,16 @@ import { Alert } from "@/components/ui/alert";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LoginForm />
+    </React.Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const { addToast } = useToast();
 
@@ -53,9 +62,14 @@ export default function LoginPage() {
         title: "Welcome back!",
         description: `Signed in as ${trimmedEmail}`,
       });
-      router.push(redirectPath || "/dashboard");
+      const callbackUrl = searchParams.get("callbackUrl");
+      const safeCallback =
+        callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : null;
+      router.push(safeCallback || redirectPath || "/account");
     } catch (err: any) {
-      setError(err.message || "Invalid email or password.");
+      setError("Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -154,7 +168,7 @@ export default function LoginPage() {
         <div className="pt-4 text-center text-xs text-foreground-muted border-t border-line">
           <p>
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-sage-deep font-semibold hover:underline">
+            <Link href="/signup" className="text-sage-deep font-semibold hover:underline">
               Create Account
             </Link>
           </p>

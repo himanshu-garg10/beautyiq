@@ -38,3 +38,6 @@ data/*.db
 data/*.db-*
 *.db
 prisma/dev.db
+
+# local scratch folder (do not watch or commit)
+/Untitled/
