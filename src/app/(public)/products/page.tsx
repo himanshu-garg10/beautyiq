@@ -40,20 +40,6 @@ const categoryOptions = [
   { value: "Treatment Products", label: "Treatment Products" },
 ];
 
-const brandOptions = [
-  { value: "", label: "All Brands" },
-  { value: "Minimalist", label: "Minimalist" },
-  { value: "Dot & Key", label: "Dot & Key" },
-  { value: "The Derma Co", label: "The Derma Co" },
-  { value: "Re'equil", label: "Re'equil" },
-  { value: "Cetaphil", label: "Cetaphil" },
-  { value: "Plum", label: "Plum" },
-  { value: "COSRX", label: "COSRX" },
-  { value: "Paula's Choice", label: "Paula's Choice" },
-  { value: "Innisfree", label: "Innisfree" },
-  { value: "Laneige", label: "Laneige" },
-];
-
 const skinTypePills = [
   { id: "Oily", label: "Oily" },
   { id: "Dry", label: "Dry" },
@@ -121,6 +107,13 @@ function ProductsCatalogContent() {
   const [showMobileFilters, setShowMobileFilters] = React.useState(false);
   const [dataResult, setDataResult] = React.useState<PaginatedProductsResult | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const brandOptions = React.useMemo(
+    () => [
+      { value: "", label: "All Brands" },
+      ...(dataResult?.facets?.brands || []).map((brand) => ({ value: brand, label: brand })),
+    ],
+    [dataResult?.facets?.brands]
+  );
 
   const fetchProducts = React.useCallback(() => {
     setLoading(true);

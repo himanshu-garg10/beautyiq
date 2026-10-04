@@ -36,6 +36,10 @@ export interface PaginatedProductsResult {
   page: number;
   pageSize: number;
   totalPages: number;
+  facets?: {
+    brands: string[];
+    categories: string[];
+  };
 }
 
 export interface GroupedSearchSuggestions {

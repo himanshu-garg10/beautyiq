@@ -142,6 +142,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const facets = {
+      brands: [...new Set(rawProducts.map((product) => product.brand))].sort((a, b) => a.localeCompare(b)),
+      categories: [...new Set(rawProducts.map((product) => product.category))].sort((a, b) => a.localeCompare(b)),
+    };
     const total = rawProducts.length;
     const totalPages = Math.ceil(total / pageSize) || 1;
     const paginated = rawProducts.slice((page - 1) * pageSize, page * pageSize);
@@ -157,6 +161,7 @@ export async function GET(request: NextRequest) {
         page,
         pageSize,
         totalPages,
+        facets,
       },
       products: formatted,
       total,
