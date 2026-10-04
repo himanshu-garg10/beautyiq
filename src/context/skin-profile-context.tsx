@@ -58,13 +58,15 @@ export function SkinProfileProvider({ children }: { children: React.ReactNode })
 
   const updateProfile = async (updated: Partial<SkinProfile>) => {
     const newProfile = { ...profile, ...updated };
-    setProfile(newProfile);
     if (isAuthenticated && user) {
-      await fetch("/api/profile", {
+      const response = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(persistProfilePayload(newProfile)),
       });
+      if (!response.ok) {
+        throw new Error("Your profile could not be saved. Please try again.");
+      }
       NotificationService.createNotification(user.id, {
         type: "PROFILE_UPDATED",
         title: "Skin Profile Updated",
@@ -72,6 +74,7 @@ export function SkinProfileProvider({ children }: { children: React.ReactNode })
         link: "/account",
       });
     }
+    setProfile(newProfile);
   };
 
   const resetProfile = () => {

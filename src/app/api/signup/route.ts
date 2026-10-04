@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/auth/validation";
 import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
 import { InputValidator } from "@/lib/security/input-validator";
 
 const BCRYPT_COST = 12;
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "P2002"
+  );
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +31,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password } = parsed.data;
+    const { name, password } = parsed.data;
+    const email = parsed.data.email.trim().toLowerCase();
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
     const user = await prisma.user.create({
@@ -42,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: user }, { status: 201 });
   } catch (error: unknown) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       return NextResponse.json(
         {
           success: false,
