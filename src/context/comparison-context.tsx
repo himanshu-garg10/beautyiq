@@ -5,7 +5,7 @@ import { useToast } from "@/context/toast-context";
 
 const COMPARE_STORAGE_KEY = "beautyiq_compare_selected_ids";
 const MAX_COMPARISON_ITEMS = 5;
-const MIN_COMPARISON_ITEMS = 2;
+const MIN_COMPARISON_ITEMS = 1;
 
 interface ComparisonContextType {
   selectedIds: string[];

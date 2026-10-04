@@ -15,32 +15,22 @@ import { ApiResponse, createSuccessResponse, createErrorResponse, simulateDelay 
 const HISTORY_STORAGE_KEY = "beautyiq_comparison_history";
 
 export class ComparisonService {
-  /**
-   * Compare 2 to 5 products side-by-side with objective and optional personalized metrics
-   */
+  /** Compare 1 to 5 products, adding columns as the visitor chooses them. */
   static async compareProducts(
     productIds: string[],
     userProfile?: SkinProfile | null
   ): Promise<ApiResponse<ProductComparisonItem[]>> {
     await simulateDelay(150);
 
-    // Validate 2 to 5 products limit
-    if (!productIds || productIds.length < 2 || productIds.length > 5) {
+    if (!productIds || productIds.length < 1 || productIds.length > 5) {
       return createErrorResponse(
         "VALIDATION_ERROR",
-        "Comparison requires between 2 and 5 products."
+        "Select between 1 and 5 products."
       );
     }
 
     // Ensure unique product IDs
     const uniqueIds = Array.from(new Set(productIds));
-    if (uniqueIds.length < 2) {
-      return createErrorResponse(
-        "VALIDATION_ERROR",
-        "Select at least two different products to compare."
-      );
-    }
-
     if (typeof window !== "undefined") {
       try {
         const res = await fetch(`/api/compare?ids=${uniqueIds.join(",")}`);
@@ -111,8 +101,8 @@ export class ComparisonService {
       }
     }
 
-    if (items.length < 2) {
-      return createErrorResponse("NOT_FOUND", "Products selected for comparison were not found.");
+    if (items.length < 1) {
+      return createErrorResponse("NOT_FOUND", "The selected product was not found.");
     }
 
     // Identify best overall highlights across the compared items

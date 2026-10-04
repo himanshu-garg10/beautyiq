@@ -83,10 +83,6 @@ export default function CompareMatrixPage() {
   }, []);
 
   const handleRemove = (id: string) => {
-    if (items.length <= 2) {
-      showToast("Comparison requires at least 2 products.", "warning");
-      return;
-    }
     removeFromComparison(id);
     setItems((prev) => prev.filter((item) => item.product.id !== id));
   };
@@ -164,7 +160,7 @@ export default function CompareMatrixPage() {
       ) : items.length === 0 ? (
         <EmptyState
           title="No Products Selected for Comparison"
-          description="Select 2 to 5 skincare products from the catalog, search results, or recommendation engine to compare them side-by-side."
+          description="Add a product to view its details, then add more products whenever you want to compare them side-by-side."
           actionLabel="Browse Products Catalog"
           onAction={() => (window.location.href = "/products")}
         />

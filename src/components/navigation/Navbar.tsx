@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/" },
+  { label: "Discover", href: "/categories" },
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
   { label: "AI Match", href: "/recommendations", isAi: true },
@@ -126,7 +127,7 @@ export function Navbar() {
                         "relative px-3.5 py-1.5 rounded-full text-[0.9rem] transition-all duration-200 flex items-center gap-1.5 tracking-tight",
                         isActive
                           ? "font-semibold text-background bg-foreground border border-foreground shadow-md hover:bg-foreground"
-                          : "font-medium text-foreground-muted hover:bg-foreground hover:text-background hover:shadow-sm"
+                          : "font-medium text-foreground-muted hover:text-foreground"
                       )}
                     >
                       {link.isAi && (
