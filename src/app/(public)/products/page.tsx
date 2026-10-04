@@ -200,10 +200,10 @@ function ProductsCatalogContent() {
   };
 
   return (
-    <Container className="py-10 space-y-8">
+    <Container className="py-8 md:py-12 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
-        <div>
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-champagne-tint via-background-card to-sage-tint/60 px-6 py-8 md:px-9 md:py-10 shadow-subtle">
+        <div className="relative max-w-2xl">
           <Badge variant="sage" className="mb-2">
             Product Intelligence & Discovery
           </Badge>
@@ -211,13 +211,13 @@ function ProductsCatalogContent() {
             Browse Skincare Catalog
           </h1>
           <p className="text-sm text-foreground-muted mt-1">
-            Explore dermatologically verified products filtered by active ingredients, skin concerns, and price per unit.
+            Explore product-label data, ingredients and verified retailer listings in one calm, easy-to-compare catalog.
           </p>
         </div>
 
         <Button
           variant="outline"
-          className="md:hidden self-start"
+          className="mt-5 md:hidden self-start"
           leftIcon={<Filter className="h-4 w-4" />}
           onClick={() => setShowMobileFilters(true)}
         >
@@ -226,9 +226,9 @@ function ProductsCatalogContent() {
       </div>
 
       {/* Main Layout: Sidebar Filters + Products Catalog */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 xl:gap-8 items-start">
         {/* Desktop Sidebar Filters */}
-        <aside className="hidden lg:block space-y-6 rounded border border-line bg-background-card p-5 shadow-subtle sticky top-24">
+        <aside className="hidden lg:block space-y-6 rounded-2xl border border-line bg-background-card p-5 shadow-subtle sticky top-24">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <h3 className="font-display text-base font-semibold text-foreground flex items-center gap-2">
               <SlidersHorizontal className="h-4 w-4 text-sage-deep" /> Filters
@@ -492,7 +492,7 @@ function ProductsCatalogContent() {
           )}
 
           {/* Top Bar: Result Count & Sorting */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded border border-line bg-background-card px-4 py-3 shadow-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-background-card px-5 py-3.5 shadow-subtle">
             <span className="text-sm font-medium text-foreground-muted">
               Showing{" "}
               <strong className="text-foreground">
@@ -515,7 +515,7 @@ function ProductsCatalogContent() {
 
           {/* Grid Content / Loading Skeletons / Empty State */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 xl:gap-6">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="h-88 rounded border border-line bg-background-card animate-pulse p-4 space-y-4">
                   <div className="h-44 bg-background-elevated rounded" />
