@@ -209,24 +209,8 @@ function AISearchContent() {
   };
 
   return (
-    <Container className="py-10 space-y-8 max-w-5xl">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
-        <div>
-          <Badge variant="sage" className="mb-2 flex items-center gap-1.5 w-fit">
-            <Sparkles className="h-3.5 w-3.5" /> BeautyIQ AI Requirement Assistant
-          </Badge>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Skincare Natural Language Requirements
-          </h1>
-          <p className="text-sm text-foreground-muted mt-1">
-            Describe what your skin needs in your own words. BeautyIQ structures your requirements before matching products.
-          </p>
-          <p className="mt-2 text-xs text-foreground-faint">
-            AI helps understand your request; verified catalog and ingredient data determine the final ranking. Do not enter medical records or sensitive personal information.
-          </p>
-        </div>
-
+    <Container className="py-6 md:py-8 space-y-6 max-w-5xl">
+      <div className="flex justify-end border-b border-line pb-4">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"

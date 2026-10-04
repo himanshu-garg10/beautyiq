@@ -105,20 +105,7 @@ export default function SearchPage() {
   };
 
   return (
-    <Container className="py-10 space-y-8 max-w-5xl">
-      {/* Search Header */}
-      <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <Badge variant="sage" className="mx-auto">
-          Frontend Product Search Engine
-        </Badge>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Search BeautyIQ Product Catalog
-        </h1>
-        <p className="text-sm text-foreground-muted leading-relaxed">
-          Search by product name, brand, active ingredients, category, skin type, or active concerns.
-        </p>
-      </div>
-
+    <Container className="py-6 md:py-8 space-y-6 max-w-5xl">
       {/* Main Search Bar with Autocomplete Grouped Dropdown */}
       <div className="max-w-3xl mx-auto rounded border border-line bg-background-card p-4 shadow-md space-y-3">
         <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row gap-2">

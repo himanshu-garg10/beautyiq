@@ -136,28 +136,13 @@ function RecommendationsContent() {
   const currentSessionId = `rec_${Date.now()}`;
 
   return (
-    <Container className="py-8 md:py-12 space-y-8 max-w-6xl">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 rounded-2xl border border-line bg-gradient-to-br from-sage-tint/70 via-background-card to-champagne-tint px-6 py-8 md:px-9 md:py-9 shadow-subtle">
-        <div className="max-w-2xl">
-          <Badge variant="sage" className="mb-2 flex items-center gap-1.5 w-fit">
-            <Sparkles className="h-3.5 w-3.5" /> Deterministic Intelligence Engine
-          </Badge>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Skincare Recommendations &amp; Ranking
-          </h1>
-          <p className="text-sm text-foreground-muted mt-1">
-            Clear product matches based on your concerns, ingredients, preferences and available catalog data.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <Container className="py-6 md:py-8 space-y-6 max-w-6xl">
+      <div className="flex justify-end border-b border-line pb-4">
           <Link href="/ai-search">
             <Button variant="accent" size="sm" leftIcon={<Edit3 className="h-4 w-4" />}>
               Edit Requirements
             </Button>
           </Link>
-        </div>
       </div>
 
       {/* Requirement Summary Header Bar (Requirement #40) */}

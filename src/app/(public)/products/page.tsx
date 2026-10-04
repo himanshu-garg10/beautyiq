@@ -200,24 +200,10 @@ function ProductsCatalogContent() {
   };
 
   return (
-    <Container className="py-8 md:py-12 space-y-8">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-champagne-tint via-background-card to-sage-tint/60 px-6 py-8 md:px-9 md:py-10 shadow-subtle">
-        <div className="relative max-w-2xl">
-          <Badge variant="sage" className="mb-2">
-            Product Intelligence & Discovery
-          </Badge>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Browse Skincare Catalog
-          </h1>
-          <p className="text-sm text-foreground-muted mt-1">
-            Explore product-label data, ingredients and verified retailer listings in one calm, easy-to-compare catalog.
-          </p>
-        </div>
-
+    <Container className="py-6 md:py-8 space-y-6">
+      <div className="flex justify-end lg:hidden">
         <Button
           variant="outline"
-          className="mt-5 md:hidden self-start"
           leftIcon={<Filter className="h-4 w-4" />}
           onClick={() => setShowMobileFilters(true)}
         >

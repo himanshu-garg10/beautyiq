@@ -128,26 +128,9 @@ export default function CompareMatrixPage() {
   );
 
   return (
-    <Container className="py-10 space-y-10 max-w-7xl">
-      {/* Sticky Header & Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-line pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge variant="sage" className="flex items-center gap-1">
-              <Scale className="h-3.5 w-3.5" /> Product Comparison Engine
-            </Badge>
-            <Badge variant="default" className="font-mono text-xs">
-              {items.length} / 5 Selected
-            </Badge>
-          </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-            Side-by-Side Product Comparison
-          </h1>
-          <p className="text-sm text-foreground-muted">
-            Analyze objective specs, normalized unit costs (₹/ml), cross-platform prices, and personalized compatibility.
-          </p>
-        </div>
-
+    <Container className="py-6 md:py-8 space-y-6 max-w-7xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+        <span className="text-xs font-mono text-foreground-faint">{items.length} / 5 selected</span>
         <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"

@@ -38,18 +38,7 @@ export default function IngredientsPage() {
   }, [searchQuery, selectedCategory]);
 
   return (
-    <Container className="py-10 space-y-8">
-      {/* Header */}
-      <div className="max-w-3xl space-y-3">
-        <Badge variant="sage">Ingredient Intelligence Index</Badge>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Skincare Ingredient Explorer
-        </h1>
-        <p className="text-sm text-foreground-muted leading-relaxed">
-          Search scientifically cataloged ingredients, functional categories, safety ratings, comedogenic scores, and skin compatibility.
-        </p>
-      </div>
-
+    <Container className="py-6 md:py-8 space-y-6">
       {/* Non-Medical Disclaimer Alert (Requirement #17) */}
       <div className="rounded border border-line bg-background-card p-4 text-xs text-foreground-muted flex items-start gap-3 shadow-subtle">
         <Info className="h-5 w-5 text-sage-deep shrink-0 mt-0.5" />
