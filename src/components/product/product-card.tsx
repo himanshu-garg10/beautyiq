@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Scale, Star, Heart, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { Product } from "@/types";
+import type { Product, ProductListing } from "@/types";
 import { ProductService } from "@/services/product.service";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
@@ -26,7 +26,10 @@ export function ProductCard({
   const isSaved = user?.wishlistIds?.includes(product.id) || false;
   const isCompared = isInComparison(product.id);
 
-  const bestListing = ProductService.getBestListingForProduct(product.id);
+  const databasePrices = (product as Product & { prices?: ProductListing[] }).prices || [];
+  const bestListing = databasePrices
+    .filter((listing) => listing.price !== null)
+    .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))[0] || ProductService.getBestListingForProduct(product.id);
   const price = bestListing?.price ?? null;
   const originalPrice = bestListing?.originalPrice;
   const discountPercent = bestListing?.discountPercent;
@@ -141,6 +144,12 @@ export function ProductCard({
             )}
           </div>
         </div>
+
+        {product.productStatus === "Incomplete" && (
+          <span className="w-fit rounded-full bg-champagne-tint px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-champagne-deep">
+            Label data · price pending
+          </span>
+        )}
 
         {/* Product Title */}
         <Link href={`/products/${product.id}`} className="block">
