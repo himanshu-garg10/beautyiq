@@ -89,7 +89,7 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 z-40 w-full overflow-hidden transition-all duration-300",
+          "fixed inset-x-2 top-2 z-40 w-auto overflow-hidden rounded-2xl transition-all duration-300",
           scrolled
             ? "border-b border-white/70 bg-gradient-to-b from-background/95 via-background/90 to-background/82 backdrop-blur-3xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.12)] py-2.5"
             : "border-b border-white/60 bg-gradient-to-b from-background/96 via-background/90 to-background/82 backdrop-blur-2xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.08)] py-3.5"

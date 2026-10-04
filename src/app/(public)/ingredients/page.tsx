@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Droplets, Search, ShieldCheck, Sparkles, Sun, Waves } from "lucide-react";
+import { ArrowRight, Droplets, Search, ShieldCheck, Sparkles, Sun, Waves, X } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
 
@@ -34,7 +34,7 @@ export default function IngredientsPage() {
   }, [search]);
 
   return <Container className="py-6 md:py-8 space-y-6">
-    <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search a concern or ingredient — e.g. acne, glow, Vitamin C, dryness" leftIcon={<Search className="h-4 w-4 text-sage-deep" />} />
+    <div className="flex items-start gap-2"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search a concern or ingredient — e.g. acne, glow, Vitamin C, dryness" leftIcon={<Search className="h-4 w-4 text-sage-deep" />} /><button type="button" onClick={() => setSearch("")} disabled={!search} className="flex h-11 shrink-0 items-center gap-1.5 rounded border border-line bg-background-card px-3 text-sm font-semibold text-foreground-muted transition-colors hover:border-champagne hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"><X className="h-4 w-4" />Clear</button></div>
     <div className="grid gap-5 lg:grid-cols-2">
       {visibleGuides.map((guide) => { const Icon = guide.icon; return <Link key={guide.title} href={`/products?q=${encodeURIComponent(guide.query)}`} className="group grid min-h-64 grid-cols-[.88fr_1.12fr] overflow-hidden rounded-3xl border border-line bg-background-card shadow-subtle transition-all hover:-translate-y-1 hover:border-champagne/70 hover:shadow-lg"><div className="relative overflow-hidden bg-background-elevated"><span aria-hidden="true" className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${guide.image})` }} /><span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-foreground/55 via-transparent to-transparent" /><span className="absolute bottom-4 left-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-background-card/90 text-champagne-deep shadow-subtle"><Icon className="h-4 w-4" /></span></div><div className="flex flex-col p-5 sm:p-6"><h2 className="font-display text-xl font-bold text-foreground">{guide.title}</h2><div className="mt-4 border-l-2 border-champagne pl-3"><p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-champagne-deep">Useful ingredients</p><ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-foreground-muted">{guide.ingredients.split(", ").map((ingredient) => <li key={ingredient} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-deep" />{ingredient}</li>)}</ul></div><span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-bold text-champagne-deep">See matching products <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span></div></Link>; })}
     </div>
