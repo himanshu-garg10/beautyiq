@@ -80,7 +80,7 @@ export function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setSearchModalOpen(false);
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
     }
   }
@@ -116,7 +116,8 @@ export function Navbar() {
             {/* Center: Main Navigation */}
             <ul className="hidden lg:flex items-center gap-1 xl:gap-2">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href ||
+                  (link.href === "/recommendations" && pathname === "/ai-search");
                 return (
                   <li key={link.href}>
                     <Link
@@ -354,7 +355,7 @@ export function Navbar() {
                     type="button"
                     onClick={() => {
                       setSearchModalOpen(false);
-                      router.push(`/search?q=${encodeURIComponent(term)}`);
+                      router.push(`/products?q=${encodeURIComponent(term)}`);
                     }}
                     className="rounded-full border border-line bg-background-elevated/70 px-2.5 py-1 text-xs text-foreground hover:border-champagne/60 hover:bg-champagne-tint/40 transition-colors flex items-center gap-1"
                   >
