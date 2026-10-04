@@ -220,7 +220,7 @@ export default function CompareMatrixPage() {
       ) : (
         <div className="space-y-8">
           {/* DESKTOP COMPARISON TABLE (>= 768px) */}
-          <div className="hidden md:block overflow-x-auto rounded border border-line bg-background-card shadow-subtle">
+          <div className="hidden md:block overflow-x-auto rounded-2xl border border-line bg-background-card shadow-subtle">
             <Table>
               <TableHeader>
                 <TableRow className="bg-background-elevated/50">
@@ -448,7 +448,7 @@ export default function CompareMatrixPage() {
           {/* MOBILE RESPONSIVE COMPARISON (< 768px) */}
           <div className="block md:hidden space-y-6">
             {items.map((item) => (
-              <div key={item.product.id} className="rounded-lg border border-line bg-background-card p-5 space-y-4 shadow-subtle relative">
+              <div key={item.product.id} className="rounded-2xl border border-line bg-background-card p-5 space-y-4 shadow-subtle relative">
                 <button
                   onClick={() => handleRemove(item.product.id)}
                   className="absolute top-4 right-4 text-foreground-faint hover:text-status-error p-1"
@@ -456,11 +456,11 @@ export default function CompareMatrixPage() {
                   <X className="h-5 w-5" />
                 </button>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4 pr-7">
                   <div className="relative h-20 w-20 rounded overflow-hidden bg-background-elevated flex-shrink-0 border border-line">
                     <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-xs uppercase font-bold text-foreground-faint block">{item.product.brand}</span>
                     <h3 className="font-display font-semibold text-foreground text-sm line-clamp-2">{item.product.name}</h3>
                     <span className="font-mono font-bold text-sage-deep text-base block mt-1">
