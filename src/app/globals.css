@@ -159,3 +159,6 @@
     scroll-behavior: auto !important;
   }
 }
+/* Native range tracks remain invisible; only their draggable thumbs sit above RangeSlider's custom track. */
+.range-thumb::-webkit-slider-thumb { pointer-events: auto; height: 18px; width: 18px; appearance: none; border-radius: 9999px; border: 2px solid var(--background-card); background: var(--sage-deep); box-shadow: 0 1px 5px rgb(30 26 20 / 0.24); cursor: grab; }
+.range-thumb::-moz-range-thumb { pointer-events: auto; height: 18px; width: 18px; appearance: none; border-radius: 9999px; border: 2px solid var(--background-card); background: var(--sage-deep); box-shadow: 0 1px 5px rgb(30 26 20 / 0.24); cursor: grab; }

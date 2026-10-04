@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const minPriceStr = searchParams.get("minPrice");
     const minPrice = minPriceStr ? parseFloat(minPriceStr) : undefined;
     const skinTypes = (searchParams.get("skinType") || "").split(",").map((item) => item.trim()).filter(Boolean);
-    const brand = searchParams.get("brand");
+    const brands = (searchParams.get("brand") || "").split(",").map((item) => item.trim()).filter(Boolean);
     const query = searchParams.get("q") || searchParams.get("query");
     const minRatingStr = searchParams.get("minRating");
     const minRating = minRatingStr ? parseFloat(minRatingStr) : undefined;
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
       where.category = { in: categories };
     }
 
-    if (brand && brand !== "All" && brand !== "all" && brand !== "") {
-      where.brand = { equals: brand };
+    if (brands.length) {
+      where.brand = { in: brands };
     }
 
     if (crueltyFree) where.crueltyFree = true;

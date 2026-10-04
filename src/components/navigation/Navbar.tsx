@@ -89,10 +89,10 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "fixed inset-x-2 top-2 z-40 w-auto overflow-hidden rounded-2xl transition-all duration-300",
+          "fixed inset-x-0 top-0 z-40 w-full overflow-hidden rounded-b-3xl transition-all duration-300",
           scrolled
-            ? "border-b border-white/70 bg-gradient-to-b from-background/95 via-background/90 to-background/82 backdrop-blur-3xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.12)] py-2.5"
-            : "border-b border-white/60 bg-gradient-to-b from-background/96 via-background/90 to-background/82 backdrop-blur-2xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.08)] py-3.5"
+            ? "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_252_247_/_0.95),rgb(245_239_227_/_0.88),rgb(231_240_229_/_0.82),rgb(255_250_244_/_0.9))] backdrop-blur-3xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.14)] py-2.5"
+            : "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_253_249_/_0.96),rgb(247_240_228_/_0.9),rgb(234_242_231_/_0.84),rgb(255_252_247_/_0.93))] backdrop-blur-2xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.1)] py-3.5"
         )}
       >
         <Container className="max-w-none px-5 sm:px-8 xl:px-12">

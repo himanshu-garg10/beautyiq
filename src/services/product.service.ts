@@ -16,6 +16,7 @@ export interface ProductFilterOptions {
   category?: RoutineStep | string;
   categories?: string[];
   brand?: string;
+  brands?: string[];
   skinType?: SkinType;
   skinTypes?: string[];
   skinConcern?: DetailedSkinConcern | string;
@@ -103,8 +104,9 @@ export class ProductService {
         if (categories.length) {
           params.set("category", categories.join(","));
         }
-        if (filters.brand && filters.brand !== "all" && filters.brand !== "All") {
-          params.set("brand", filters.brand);
+        const brands = filters.brands || (filters.brand ? [filters.brand] : []);
+        if (brands.length) {
+          params.set("brand", brands.join(","));
         }
         const skinTypes = filters.skinTypes || (filters.skinType ? [filters.skinType] : []);
         const skinConcerns = filters.skinConcerns || (filters.skinConcern ? [filters.skinConcern] : []);
@@ -163,9 +165,10 @@ export class ProductService {
       }
 
       // Filter by Brand
-      if (filters.brand && filters.brand !== "all") {
-        const brand = filters.brand.toLowerCase();
-        result = result.filter((p) => p.brand.toLowerCase() === brand);
+      const brands = filters.brands || (filters.brand ? [filters.brand] : []);
+      if (brands.length) {
+        const normalized = brands.map((brand) => brand.toLowerCase());
+        result = result.filter((p) => normalized.includes(p.brand.toLowerCase()));
       }
 
       // Filter by Skin Type

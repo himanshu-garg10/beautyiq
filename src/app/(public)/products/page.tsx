@@ -8,7 +8,7 @@ import { Container } from "@/components/layout/container";
 import { ProductCard } from "@/components/product/product-card";
 import { GroupedSearchInput } from "@/components/product/grouped-search-input";
 import { Select } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import { RangeSlider } from "@/components/ui/range-slider";
 import { Switch } from "@/components/ui/switch";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
@@ -101,7 +101,7 @@ function ProductsCatalogContent() {
 
   const [searchQuery, setSearchQuery] = React.useState(initialQuery);
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialCategory ? initialCategory.split(",").filter(Boolean) : []);
-  const [selectedBrand, setSelectedBrand] = React.useState<string>(initialBrand);
+  const [selectedBrands, setSelectedBrands] = React.useState<string[]>(initialBrand ? initialBrand.split(",").filter(Boolean) : []);
   const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>(initialSkinType ? initialSkinType.split(",").filter(Boolean) : []);
   const [selectedConcerns, setSelectedConcerns] = React.useState<string[]>(initialConcern ? initialConcern.split(",").filter(Boolean) : []);
   const [minPrice, setMinPrice] = React.useState<number>(initialMinPrice);
@@ -118,12 +118,10 @@ function ProductsCatalogContent() {
   const [showMobileFilters, setShowMobileFilters] = React.useState(false);
   const [dataResult, setDataResult] = React.useState<PaginatedProductsResult | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [knownBrands, setKnownBrands] = React.useState<string[]>([]);
   const brandOptions = React.useMemo(
-    () => [
-      { value: "", label: "All Brands" },
-      ...(dataResult?.facets?.brands || []).map((brand) => ({ value: brand, label: brand })),
-    ],
-    [dataResult?.facets?.brands]
+    () => Array.from(new Set([...knownBrands, ...selectedBrands])).sort((a, b) => a.localeCompare(b)).map((brand) => ({ value: brand, label: brand })),
+    [knownBrands, selectedBrands]
   );
 
   const fetchProducts = React.useCallback(() => {
@@ -131,7 +129,7 @@ function ProductsCatalogContent() {
     ProductService.getProducts({
       query: searchQuery,
       categories: selectedCategories,
-      brand: selectedBrand || undefined,
+      brands: selectedBrands,
       skinTypes: selectedSkinTypes,
       skinConcerns: selectedConcerns,
       minPrice: minPrice > 0 ? minPrice : undefined,
@@ -146,13 +144,16 @@ function ProductsCatalogContent() {
       page,
       pageSize: 9,
     }).then((res) => {
-      if (res.data) setDataResult(res.data);
+      if (res.data) {
+        setDataResult(res.data);
+        setKnownBrands((current) => Array.from(new Set([...current, ...(res.data?.facets?.brands || [])])).sort((a, b) => a.localeCompare(b)));
+      }
       setLoading(false);
     });
   }, [
     searchQuery,
     selectedCategories,
-    selectedBrand,
+    selectedBrands,
     selectedSkinTypes,
     selectedConcerns,
     minPrice,
@@ -174,7 +175,7 @@ function ProductsCatalogContent() {
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedCategories([]);
-    setSelectedBrand("");
+    setSelectedBrands([]);
     setSelectedSkinTypes([]);
     setSelectedConcerns([]);
     setMinPrice(0);
@@ -192,7 +193,7 @@ function ProductsCatalogContent() {
   const hasActiveFilters =
     Boolean(searchQuery) ||
     selectedCategories.length > 0 ||
-    Boolean(selectedBrand) ||
+    selectedBrands.length > 0 ||
     selectedSkinTypes.length > 0 ||
     selectedConcerns.length > 0 ||
     minPrice > 0 ||
@@ -219,7 +220,7 @@ function ProductsCatalogContent() {
     const params = new URLSearchParams();
     if (searchQuery) params.set("q", searchQuery);
     if (selectedCategories.length) params.set("category", selectedCategories.join(","));
-    if (selectedBrand) params.set("brand", selectedBrand);
+    if (selectedBrands.length) params.set("brand", selectedBrands.join(","));
     if (selectedSkinTypes.length) params.set("skinType", selectedSkinTypes.join(","));
     if (selectedConcerns.length) params.set("concern", selectedConcerns.join(","));
     if (minPrice) params.set("minPrice", String(minPrice));
@@ -229,14 +230,14 @@ function ProductsCatalogContent() {
     if (page > 1) params.set("page", String(page));
     const query = params.toString();
     return query ? `/products?${query}` : "/products";
-  }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrand, selectedCategories, selectedConcerns, selectedSkinTypes]);
+  }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrands, selectedCategories, selectedConcerns, selectedSkinTypes]);
 
   React.useEffect(() => {
     window.history.replaceState(null, "", catalogReturnTo);
   }, [catalogReturnTo]);
 
   return (
-    <Container className="py-3 md:py-4 space-y-5">
+    <Container className="max-w-[1500px] px-3 sm:px-5 lg:px-6 py-3 md:py-4 space-y-5">
       <div className="flex justify-end lg:hidden">
         <Button
           variant="outline"
@@ -248,7 +249,7 @@ function ProductsCatalogContent() {
       </div>
 
       {/* Main Layout: Sidebar Filters + Products Catalog */}
-      <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-5 xl:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-8 xl:gap-10 items-start">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block space-y-6 rounded-2xl border border-line bg-background-card p-5 shadow-subtle sticky top-24">
           <div className="flex items-center justify-between border-b border-line pb-3">
@@ -295,16 +296,7 @@ function ProductsCatalogContent() {
             }}
           />
 
-          {/* Brand Dropdown */}
-          <Select
-            label="Brand"
-            options={brandOptions}
-            value={selectedBrand}
-            onChange={(e) => {
-              setSelectedBrand(e.target.value);
-              setPage(1);
-            }}
-          />
+          <MultiSelect label="Brands" options={brandOptions} value={selectedBrands} onChange={(value) => { setSelectedBrands(value); setPage(1); }} placeholder="Select brands" />
 
           <MultiSelect
             label="Skin Concerns"
@@ -314,14 +306,7 @@ function ProductsCatalogContent() {
             placeholder="Select concerns"
           />
 
-          <div className="space-y-2 border-t border-line pt-4">
-            <div className="flex items-center justify-between"><span className="text-sm font-bold text-foreground">Price range</span><span className="text-xs text-foreground-muted">₹{minPrice || 0} – {maxPrice >= 3000 ? "Any" : `₹${maxPrice}`}</span></div>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="space-y-1 text-xs font-medium text-foreground-muted">Minimum<input type="number" min="0" max={maxPrice} value={minPrice || ""} placeholder="₹ 0" onChange={(event) => { const value = Math.max(0, Math.min(Number(event.target.value) || 0, maxPrice)); setMinPrice(value); setPage(1); }} className="h-10 w-full rounded-lg border border-line bg-background-card px-3 text-sm text-foreground outline-none focus:border-sage-deep" /></label>
-              <label className="space-y-1 text-xs font-medium text-foreground-muted">Maximum<input type="number" min={minPrice} max="3000" value={maxPrice >= 3000 ? "" : maxPrice} placeholder="Any" onChange={(event) => { const raw = Number(event.target.value); const value = raw ? Math.max(minPrice, Math.min(raw, 3000)) : 3000; setMaxPrice(value); setPage(1); }} className="h-10 w-full rounded-lg border border-line bg-background-card px-3 text-sm text-foreground outline-none focus:border-sage-deep" /></label>
-            </div>
-            <Slider label="Maximum price" min={200} max={3000} step={50} value={maxPrice} onChange={(value) => { setMaxPrice(Math.max(value, minPrice)); setPage(1); }} formatValue={(value) => value >= 3000 ? "Any" : `₹${value}`} />
-          </div>
+          <RangeSlider label="Price range" min={0} max={3000} step={50} value={[minPrice, maxPrice]} onChange={([minimum, maximum]) => { setMinPrice(minimum); setMaxPrice(maximum); setPage(1); }} formatValue={(value) => value >= 3000 ? "Any price" : `₹${value}`} />
 
           {/* Rating & Availability */}
           <div className="grid grid-cols-2 gap-2">
@@ -402,14 +387,9 @@ function ProductsCatalogContent() {
               />
               <MultiSelect label="Skin Type" options={skinTypePills.map(({ id, label }) => ({ value: id, label }))} value={selectedSkinTypes} onChange={setSelectedSkinTypes} />
               <MultiSelect label="Category" options={categoryOptions.filter((option) => option.value)} value={selectedCategories} onChange={setSelectedCategories} />
-              <Select
-                label="Brand"
-                options={brandOptions}
-                value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
-              />
+              <MultiSelect label="Brands" options={brandOptions} value={selectedBrands} onChange={setSelectedBrands} />
               <MultiSelect label="Skin Concerns" options={concernOptions} value={selectedConcerns} onChange={setSelectedConcerns} />
-              <div className="grid grid-cols-2 gap-2"><label className="text-xs font-medium text-foreground-muted">Min price<input type="number" value={minPrice || ""} placeholder="₹ 0" onChange={(event) => setMinPrice(Number(event.target.value) || 0)} className="mt-1 h-10 w-full rounded-lg border border-line px-3" /></label><label className="text-xs font-medium text-foreground-muted">Max price<input type="number" value={maxPrice >= 3000 ? "" : maxPrice} placeholder="Any" onChange={(event) => setMaxPrice(Number(event.target.value) || 3000)} className="mt-1 h-10 w-full rounded-lg border border-line px-3" /></label></div>
+              <RangeSlider label="Price range" min={0} max={3000} step={50} value={[minPrice, maxPrice]} onChange={([minimum, maximum]) => { setMinPrice(minimum); setMaxPrice(maximum); }} formatValue={(value) => value >= 3000 ? "Any" : `₹${value}`} />
 
               <div className="flex gap-3 pt-4 border-t border-line">
                 <Button
@@ -438,12 +418,7 @@ function ProductsCatalogContent() {
             <div className="flex flex-wrap items-center gap-2 rounded border border-line bg-background-elevated/40 px-4 py-2.5 text-xs">
               <span className="font-semibold text-foreground-faint">Active Filters:</span>
               {selectedCategories.map((category) => <Badge key={category} variant="sage" className="gap-1">Category: {category}<X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedCategories((current) => current.filter((item) => item !== category))} /></Badge>)}
-              {selectedBrand && (
-                <Badge variant="sage" className="gap-1">
-                  Brand: {selectedBrand}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedBrand("")} />
-                </Badge>
-              )}
+              {selectedBrands.map((brand) => <Badge key={brand} variant="sage" className="gap-1">Brand: {brand}<X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedBrands((current) => current.filter((item) => item !== brand))} /></Badge>)}
               {selectedSkinTypes.map((st) => (
                 <Badge key={st} variant="clay" className="gap-1">
                   Skin: {st}
