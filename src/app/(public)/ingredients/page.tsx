@@ -8,7 +8,7 @@ import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
-import { Search, FlaskConical, ArrowRight, Info, Sparkles, Droplets, ShieldCheck } from "lucide-react";
+import { Search, FlaskConical, ArrowRight, Info, Sparkles, Droplets, ShieldCheck, Sun } from "lucide-react";
 
 const categoryOptions = [
   { value: "", label: "All Ingredient Categories" },
@@ -31,6 +31,14 @@ const goalGuides = [
   { title: "Acne & clogged pores", ingredients: "Salicylic Acid, Niacinamide, Azelaic Acid", query: "Salicylic Acid", icon: ShieldCheck },
   { title: "Dryness & barrier", ingredients: "Ceramides, Hyaluronic Acid, Glycerin", query: "Hyaluronic Acid", icon: Droplets },
   { title: "Uneven tone & spots", ingredients: "Vitamin C, Alpha Arbutin, Tranexamic Acid", query: "Alpha Arbutin", icon: Sparkles },
+  { title: "Oiliness & shine", ingredients: "Niacinamide, Zinc PCA, Salicylic Acid", query: "Niacinamide", icon: ShieldCheck },
+  { title: "Redness & sensitivity", ingredients: "Centella, Panthenol, Ceramides", query: "Centella", icon: Droplets },
+  { title: "Texture & roughness", ingredients: "Lactic Acid, Glycolic Acid, Urea", query: "Lactic Acid", icon: Sparkles },
+  { title: "Pores & blackheads", ingredients: "Salicylic Acid, Niacinamide, Clay", query: "Salicylic Acid", icon: ShieldCheck },
+  { title: "Fine lines", ingredients: "Retinoids, Peptides, Hyaluronic Acid", query: "Retinol", icon: Sparkles },
+  { title: "Tanning care", ingredients: "Vitamin C, Niacinamide, Alpha Arbutin", query: "Niacinamide", icon: Sun },
+  { title: "Dark circles", ingredients: "Caffeine, Vitamin C, Peptides", query: "Caffeine", icon: Droplets },
+  { title: "Sun protection", ingredients: "Broad-spectrum UV filters, antioxidants", query: "Sunscreen", icon: Sun },
 ];
 
 export default function IngredientsPage() {
@@ -48,7 +56,7 @@ export default function IngredientsPage() {
     <Container className="py-6 md:py-8 space-y-8">
       <section>
         <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[0.18em] text-champagne-deep">Ingredient guide</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Start with your skin goal.</h1><p className="mt-3 text-sm leading-relaxed text-foreground-muted">Learn which cosmetic ingredients are commonly used for a concern, then open matching catalog products to inspect their labels and listings.</p></div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{goalGuides.map((guide) => { const Icon = guide.icon; return <article key={guide.title} className="rounded-2xl border border-line bg-background-card p-5 shadow-subtle"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep"><Icon className="h-4 w-4" /></span><h2 className="mt-4 font-display text-lg font-bold text-foreground">{guide.title}</h2><p className="mt-2 text-sm leading-relaxed text-foreground-muted">{guide.ingredients}</p><Link href={`/products?q=${encodeURIComponent(guide.query)}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-champagne-deep hover:text-foreground">See matching products <ArrowRight className="h-4 w-4" /></Link></article>; })}</div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{goalGuides.map((guide) => { const Icon = guide.icon; return <article key={guide.title} className="flex min-h-60 flex-col rounded-3xl border border-line bg-background-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-champagne/60 hover:shadow-md"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-champagne-tint text-champagne-deep"><Icon className="h-4 w-4" /></span><h2 className="mt-5 font-display text-xl font-bold text-foreground">{guide.title}</h2><p className="mt-3 text-sm leading-relaxed text-foreground-muted">{guide.ingredients}</p><Link href={`/products?q=${encodeURIComponent(guide.query)}`} className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-bold text-champagne-deep hover:text-foreground">See matching products <ArrowRight className="h-4 w-4" /></Link></article>; })}</div>
       </section>
 
       <div className="rounded-xl border border-line bg-background-card px-4 py-3 text-xs text-foreground-muted flex items-start gap-3 shadow-subtle"><Info className="h-4 w-4 text-sage-deep shrink-0 mt-0.5" /><p><strong className="text-foreground font-semibold">Educational cosmetic information:</strong> Ingredient guides help with product discovery, not medical diagnosis. For a skin condition, consult a dermatologist.</p></div>

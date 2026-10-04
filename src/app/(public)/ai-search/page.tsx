@@ -14,7 +14,6 @@ import type {
 import { Container } from "@/components/layout/container";
 import { EditableRequirementCard } from "@/components/ai-requirement/editable-requirement-card";
 import { ManualRequirementForm } from "@/components/ai-requirement/manual-requirement-form";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,39 +21,15 @@ import {
   ArrowRight,
   HelpCircle,
   AlertTriangle,
-  RotateCcw,
-  CheckCircle2,
   Info,
   Sliders,
   ShieldCheck,
-  FlaskConical,
-  TestTube,
 } from "lucide-react";
 
 const examplePrompts = [
   "I have oily skin and acne. I want a lightweight serum under ₹1000 with niacinamide and no fragrance.",
   "I have dry skin and want a hydrating moisturizer under ₹800.",
-  "I have oily skin with acne and want a lightweight serum.",
   "Find a fragrance free sunscreen for sensitive skin under ₹1200.",
-  "I need something for marks.", // Ambiguity test
-  "I want a fragrance free serum with a light fragrance.", // Contradiction test
-];
-
-const testScenarios = [
-  { label: "1. Simple skin type", query: "I have oily skin." },
-  { label: "2. Multiple concerns", query: "I have oily skin with acne and dark spots." },
-  { label: "3. Goal", query: "I want hydrated glowing skin." },
-  { label: "4. Product category", query: "I need a serum." },
-  { label: "5. Budget", query: "Under ₹1000." },
-  { label: "6. Ingredient", query: "I want niacinamide." },
-  { label: "7. Avoid ingredient", query: "I don't want fragrance." },
-  { label: "8. Brand", query: "I prefer Minimalist." },
-  { label: "9. Complex multi-requirement", query: "I have oily skin, acne and dark spots. I want a lightweight serum under ₹1000 with niacinamide and no fragrance." },
-  { label: "10. Ambiguous request", query: "I need something for marks." },
-  { label: "11. Contradictory requirements", query: "I want a fragrance free serum with a light fragrance under ₹500 min price ₹1000." },
-  { label: "12. AI Failure simulation", query: "TRIGGER_FAIL" },
-  { label: "13. Empty request", query: "" },
-  { label: "14. Profile Conflict test", query: "I have dry skin." },
 ];
 
 const loadingSteps = [
@@ -78,7 +53,6 @@ function AISearchContent() {
   const [resolvedAmbiguities, setResolvedAmbiguities] = React.useState<Record<string, boolean>>({});
   const [resolvedContradictions, setResolvedContradictions] = React.useState<Record<string, boolean>>({});
   const [resolvedProfileConflict, setResolvedProfileConflict] = React.useState<boolean>(false);
-  const [showTestSuite, setShowTestSuite] = React.useState(false);
 
   const handleAnalyze = React.useCallback(async (textToParse: string) => {
     if (textToParse === "TRIGGER_FAIL") {
@@ -210,26 +184,10 @@ function AISearchContent() {
 
   return (
     <Container className="py-6 md:py-8 space-y-6 max-w-5xl">
-      <div className="flex justify-end border-b border-line pb-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            leftIcon={<TestTube className="h-4 w-4 text-sage-deep" />}
-            onClick={() => setShowTestSuite(!showTestSuite)}
-          >
-            {showTestSuite ? "Hide Test Suite" : "Run Test Suite (14 Scenarios)"}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<Sliders className="h-4 w-4" />}
-            onClick={() => setMode("manual")}
-          >
-            Manual Form
-          </Button>
-        </div>
-      </div>
+      <section className="rounded-3xl border border-line bg-gradient-to-br from-champagne-tint/55 via-background-card to-sage-tint/30 p-6 shadow-subtle sm:p-8">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-2xl"><div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-champagne-deep"><Sparkles className="h-4 w-4" /> AI Match</div><h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Tell us what your skin needs.</h1><p className="mt-3 text-sm leading-relaxed text-foreground-muted">Write naturally in English, Hindi, or Hinglish. Gemini AI turns your words into filters; BeautyIQ then searches only the catalog products we actually have.</p></div><Button variant="outline" size="sm" leftIcon={<Sliders className="h-4 w-4" />} onClick={() => setMode("manual")}>Manual form</Button></div>
+        <div className="mt-6 grid gap-3 text-sm sm:grid-cols-3"><div className="rounded-2xl border border-line/70 bg-background-card/80 p-3"><b className="text-champagne-deep">1. Describe</b><p className="mt-1 text-foreground-muted">Your skin, concern, product type and budget.</p></div><div className="rounded-2xl border border-line/70 bg-background-card/80 p-3"><b className="text-champagne-deep">2. AI understands</b><p className="mt-1 text-foreground-muted">It extracts filters such as acne, dry skin or serum.</p></div><div className="rounded-2xl border border-line/70 bg-background-card/80 p-3"><b className="text-champagne-deep">3. You choose</b><p className="mt-1 text-foreground-muted">Review filters, then open matching catalog products.</p></div></div>
+      </section>
 
       {/* Non-Medical Disclaimer (Requirement #23) */}
       <div className="rounded border border-line bg-background-card p-3.5 text-xs text-foreground-muted flex items-start gap-2.5 shadow-subtle">
@@ -239,42 +197,12 @@ function AISearchContent() {
         </div>
       </div>
 
-      {/* Interactive Test Suite Panel (Requirement #30) */}
-      {showTestSuite && (
-        <div className="rounded-lg border border-sage-deep/40 bg-sage-tint/30 p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="font-display text-sm font-bold text-sage-deep flex items-center gap-2">
-              <FlaskConical className="h-4 w-4" /> Requirement Extraction Test Suite (Requirement #30)
-            </span>
-            <span className="text-xs font-mono text-foreground-faint">14 Test Cases</span>
-          </div>
-          <p className="text-xs text-foreground-muted">
-            Click any test scenario below to verify natural language parsing, entity extraction, ambiguity resolution, and error handling.
-          </p>
-
-          <div className="flex flex-wrap gap-2 pt-1">
-            {testScenarios.map((ts, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setQueryText(ts.query);
-                  handleAnalyze(ts.query);
-                }}
-                className="px-3 py-1.5 rounded bg-background-card border border-line hover:border-sage-deep hover:text-sage-deep text-xs font-medium text-foreground transition-all shadow-2xs"
-              >
-                {ts.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Main Input State */}
       {mode === "input" && (
         <div className="rounded-lg border border-line bg-background-card p-6 shadow-md space-y-6">
           <div className="space-y-2">
             <label className="block text-sm font-display font-semibold text-foreground">
-              Describe Your Skincare Needs
+              Ask BeautyIQ AI
             </label>
             <Textarea
               rows={4}
@@ -288,7 +216,7 @@ function AISearchContent() {
           {/* Example Prompts (Requirement #2) */}
           <div className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-foreground-faint block">
-              Try Example Skincare Prompts:
+              Try an example:
             </span>
             <div className="flex flex-wrap gap-2">
               {examplePrompts.map((prompt, i) => (
@@ -321,7 +249,7 @@ function AISearchContent() {
               onClick={() => handleAnalyze(queryText)}
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
-              Analyze &amp; Structure Requirements
+              Understand my request
             </Button>
           </div>
         </div>
