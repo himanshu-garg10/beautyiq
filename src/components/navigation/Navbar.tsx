@@ -89,10 +89,10 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-300",
+          "fixed top-0 z-40 w-full transition-all duration-300",
           scrolled
-            ? "border-b border-line/80 bg-background/90 backdrop-blur-md shadow-subtle py-2.5"
-            : "border-b border-line/50 bg-background/95 py-3.5"
+            ? "border-b border-line/80 bg-background/72 backdrop-blur-2xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.08)] py-2.5"
+            : "border-b border-line/60 bg-background/78 backdrop-blur-xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.05)] py-3.5"
         )}
       >
         <Container className="max-w-none px-5 sm:px-8 xl:px-12">

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 
 export default function PublicLayout({
   children,
@@ -10,8 +9,7 @@ export default function PublicLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1">{children}</main>
-      <Footer />
+      <main className="flex-1 pt-[76px]">{children}</main>
     </div>
   );
 }
