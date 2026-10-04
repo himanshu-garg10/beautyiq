@@ -68,7 +68,7 @@ async function importProduct(product: OpenBeautyProduct): Promise<boolean> {
     if (!slug) return null;
     const ingredient = await prisma.ingredient.upsert({
       where: { slug },
-      create: { slug, name, description: "Ingredient name imported from a product label.", function: "Not assessed", category: "Unclassified", concernTags: "[]", safetyRating: "Not assessed", suitableSkinTypes: "[]", status: "imported_unclassified" },
+      create: { slug, legacyId: `obf-ingredient-${slug}`, name, description: "Ingredient name imported from a product label.", function: "Not assessed", category: "Unclassified", concernTags: "[]", safetyRating: "Not assessed", suitableSkinTypes: "[]", status: "imported_unclassified" },
       update: {},
       select: { id: true },
     });
