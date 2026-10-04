@@ -195,9 +195,9 @@ export function MobileNav({ links }: { links: NavLink[] }) {
                         Alerts {unreadNotifs > 0 ? `(${unreadNotifs})` : ""}
                       </Button>
                     </Link>
-                    <Link href="/profile" onClick={() => setOpen(false)}>
+                    <Link href="/account" onClick={() => setOpen(false)}>
                       <Button variant="ghost" size="sm" className="w-full border border-line text-xs">
-                        Profile
+                        My Account
                       </Button>
                     </Link>
                   </div>
@@ -246,4 +246,3 @@ export function MobileNav({ links }: { links: NavLink[] }) {
     </div>
   );
 }
-

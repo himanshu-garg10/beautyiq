@@ -28,11 +28,11 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Discover", href: "/categories" },
+  { label: "Categories", href: "/categories" },
+  { label: "Concerns", href: "/ingredients" },
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
   { label: "AI Match", href: "/recommendations", isAi: true },
-  { label: "Ingredients", href: "/ingredients" },
 ];
 
 export function Navbar() {
@@ -91,8 +91,8 @@ export function Navbar() {
         className={cn(
           "fixed inset-x-0 top-0 z-40 w-full overflow-hidden rounded-b-3xl transition-all duration-300",
           scrolled
-            ? "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_252_247_/_0.95),rgb(245_239_227_/_0.88),rgb(231_240_229_/_0.82),rgb(255_250_244_/_0.9))] backdrop-blur-3xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.14)] py-2.5"
-            : "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_253_249_/_0.96),rgb(247_240_228_/_0.9),rgb(234_242_231_/_0.84),rgb(255_252_247_/_0.93))] backdrop-blur-2xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.1)] py-3.5"
+            ? "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_252_247_/_0.95),rgb(245_239_227_/_0.88),rgb(231_240_229_/_0.82),rgb(255_250_244_/_0.9))] backdrop-blur-3xl saturate-150 shadow-[0_10px_30px_rgb(30_26_20_/_0.14)] py-2.5 dark:border-white/10 dark:bg-[linear-gradient(110deg,rgb(21_25_26_/_0.96),rgb(37_45_42_/_0.9),rgb(51_43_35_/_0.86),rgb(23_22_27_/_0.94))] dark:shadow-[0_10px_34px_rgb(0_0_0_/_0.5)]"
+            : "border-b border-white/80 bg-[linear-gradient(110deg,rgb(255_253_249_/_0.96),rgb(247_240_228_/_0.9),rgb(234_242_231_/_0.84),rgb(255_252_247_/_0.93))] backdrop-blur-2xl saturate-150 shadow-[0_6px_22px_rgb(30_26_20_/_0.1)] py-3.5 dark:border-white/10 dark:bg-[linear-gradient(110deg,rgb(25_29_30_/_0.97),rgb(43_50_45_/_0.91),rgb(57_47_38_/_0.87),rgb(24_23_29_/_0.95))] dark:shadow-[0_7px_26px_rgb(0_0_0_/_0.45)]"
         )}
       >
         <Container className="max-w-none px-5 sm:px-8 xl:px-12">
@@ -187,18 +187,7 @@ export function Navbar() {
               <div className="hidden lg:block"><ThemeToggle /></div>
 
               {/* User Account / Profile Menu */}
-              {role === "admin" ? (
-                <Link href="/admin/dashboard" className="hidden sm:inline-block">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-champagne/40 bg-champagne-tint/40 text-foreground font-semibold text-xs"
-                    leftIcon={<ShieldCheck className="h-3.5 w-3.5 text-champagne-deep" />}
-                  >
-                    {user?.name ? `${user.name} · Admin` : "Admin Portal"}
-                  </Button>
-                </Link>
-              ) : user ? (
+              {user ? (
                 <div className="relative hidden lg:block" ref={accountRef}>
                   <button
                     onClick={() => setAccountMenuOpen(!accountMenuOpen)}
@@ -217,6 +206,16 @@ export function Navbar() {
                         <p className="text-[0.7rem] text-foreground-faint truncate">{user.email}</p>
                       </div>
                       <div className="py-1">
+                        {role === "admin" ? (
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setAccountMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-champagne-tint/60 text-foreground hover:bg-champagne-tint transition-colors"
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5 text-champagne-deep" />
+                            <span>Catalog Control Room</span>
+                          </Link>
+                        ) : null}
                         <Link
                           href="/account"
                           onClick={() => setAccountMenuOpen(false)}
