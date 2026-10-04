@@ -3,14 +3,14 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductService, type PaginatedProductsResult } from "@/services/product.service";
-import type { RoutineStep, SkinType, DetailedSkinConcern, AvailabilityStatus } from "@/types";
+import type { AvailabilityStatus } from "@/types";
 import { Container } from "@/components/layout/container";
 import { ProductCard } from "@/components/product/product-card";
 import { GroupedSearchInput } from "@/components/product/grouped-search-input";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Pills } from "@/components/ui/pills";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,7 +21,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 
 const categoryOptions = [
@@ -48,15 +47,23 @@ const skinTypePills = [
   { id: "Normal", label: "Normal" },
 ];
 
-const concernPills = [
-  { id: "Acne", label: "Acne" },
-  { id: "Dullness", label: "Dullness" },
-  { id: "Hyperpigmentation", label: "Hyperpigmentation" },
-  { id: "Dark spots", label: "Dark Spots" },
-  { id: "Visible pores", label: "Pores" },
-  { id: "Redness", label: "Redness" },
-  { id: "Dehydration", label: "Dehydration" },
-  { id: "Dryness", label: "Dryness" },
+const concernOptions = [
+  { value: "Dullness", label: "Glow & dullness" },
+  { value: "Acne", label: "Acne & active breakouts" },
+  { value: "Whiteheads", label: "Whiteheads & clogged pores" },
+  { value: "Blackheads", label: "Blackheads & open pores" },
+  { value: "Dryness", label: "Dryness & barrier" },
+  { value: "Itching", label: "Itching & sensitivity" },
+  { value: "Hyperpigmentation", label: "Uneven tone & dark spots" },
+  { value: "Oiliness", label: "Oiliness & shine" },
+  { value: "Texture", label: "Texture & roughness" },
+  { value: "Fine lines", label: "Fine lines" },
+  { value: "Tanning", label: "Tanning care" },
+  { value: "Dark circles", label: "Dark circles" },
+  { value: "Sun protection", label: "Sun protection" },
+  { value: "Pigmentation", label: "Pigmentation" },
+  { value: "Redness", label: "Redness & irritation" },
+  { value: "Dehydration", label: "Dehydration" },
 ];
 
 const ratingOptions = [
@@ -87,13 +94,17 @@ function ProductsCatalogContent() {
   const initialBrand = searchParams?.get("brand") || "";
   const initialQuery = searchParams?.get("q") || "";
   const initialSkinType = searchParams?.get("skinType") || "";
+  const initialConcern = searchParams?.get("concern") || "";
+  const initialMinPrice = searchParams?.get("minPrice") ? parseInt(searchParams.get("minPrice")!, 10) : 0;
   const initialMaxPrice = searchParams?.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!, 10) : 3000;
+  const initialPage = searchParams?.get("page") ? Math.max(1, parseInt(searchParams.get("page")!, 10) || 1) : 1;
 
   const [searchQuery, setSearchQuery] = React.useState(initialQuery);
-  const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialCategory ? initialCategory.split(",").filter(Boolean) : []);
   const [selectedBrand, setSelectedBrand] = React.useState<string>(initialBrand);
-  const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>(initialSkinType ? [initialSkinType] : []);
-  const [selectedConcerns, setSelectedConcerns] = React.useState<string[]>([]);
+  const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>(initialSkinType ? initialSkinType.split(",").filter(Boolean) : []);
+  const [selectedConcerns, setSelectedConcerns] = React.useState<string[]>(initialConcern ? initialConcern.split(",").filter(Boolean) : []);
+  const [minPrice, setMinPrice] = React.useState<number>(initialMinPrice);
   const [maxPrice, setMaxPrice] = React.useState<number>(initialMaxPrice);
   const [minRating, setMinRating] = React.useState<string>("");
   const [availability, setAvailability] = React.useState<string>("");
@@ -102,7 +113,7 @@ function ProductsCatalogContent() {
   const [fragranceFreeOnly, setFragranceFreeOnly] = React.useState(false);
   const [parabenFreeOnly, setParabenFreeOnly] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<any>("relevance");
-  const [page, setPage] = React.useState(1);
+  const [page, setPage] = React.useState(initialPage);
 
   const [showMobileFilters, setShowMobileFilters] = React.useState(false);
   const [dataResult, setDataResult] = React.useState<PaginatedProductsResult | null>(null);
@@ -119,10 +130,11 @@ function ProductsCatalogContent() {
     setLoading(true);
     ProductService.getProducts({
       query: searchQuery,
-      category: (selectedCategory as RoutineStep) || undefined,
+      categories: selectedCategories,
       brand: selectedBrand || undefined,
-      skinType: selectedSkinTypes[0] as SkinType | undefined,
-      skinConcern: selectedConcerns[0] as DetailedSkinConcern | undefined,
+      skinTypes: selectedSkinTypes,
+      skinConcerns: selectedConcerns,
+      minPrice: minPrice > 0 ? minPrice : undefined,
       maxPrice: maxPrice < 3000 ? maxPrice : undefined,
       minRating: minRating ? parseFloat(minRating) : undefined,
       availability: (availability as AvailabilityStatus) || undefined,
@@ -139,10 +151,11 @@ function ProductsCatalogContent() {
     });
   }, [
     searchQuery,
-    selectedCategory,
+    selectedCategories,
     selectedBrand,
     selectedSkinTypes,
     selectedConcerns,
+    minPrice,
     maxPrice,
     minRating,
     availability,
@@ -160,10 +173,11 @@ function ProductsCatalogContent() {
 
   const handleResetFilters = () => {
     setSearchQuery("");
-    setSelectedCategory("");
+    setSelectedCategories([]);
     setSelectedBrand("");
     setSelectedSkinTypes([]);
     setSelectedConcerns([]);
+    setMinPrice(0);
     setMaxPrice(3000);
     setMinRating("");
     setAvailability("");
@@ -177,10 +191,11 @@ function ProductsCatalogContent() {
 
   const hasActiveFilters =
     Boolean(searchQuery) ||
-    Boolean(selectedCategory) ||
+    selectedCategories.length > 0 ||
     Boolean(selectedBrand) ||
     selectedSkinTypes.length > 0 ||
     selectedConcerns.length > 0 ||
+    minPrice > 0 ||
     maxPrice < 3000 ||
     Boolean(minRating) ||
     Boolean(availability) ||
@@ -191,13 +206,34 @@ function ProductsCatalogContent() {
 
   const toggleSkinType = (type: string) => {
     setPage(1);
-    setSelectedSkinTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [type]));
+    setSelectedSkinTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
   };
 
   const toggleConcern = (concern: string) => {
     setPage(1);
-    setSelectedConcerns((prev) => (prev.includes(concern) ? prev.filter((c) => c !== concern) : [concern]));
+    setSelectedConcerns((prev) => (prev.includes(concern) ? prev.filter((c) => c !== concern) : [...prev, concern]));
   };
+
+  // Keep the catalog state in the URL: browser Back from a product returns to the same page and filters.
+  const catalogReturnTo = React.useMemo(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("q", searchQuery);
+    if (selectedCategories.length) params.set("category", selectedCategories.join(","));
+    if (selectedBrand) params.set("brand", selectedBrand);
+    if (selectedSkinTypes.length) params.set("skinType", selectedSkinTypes.join(","));
+    if (selectedConcerns.length) params.set("concern", selectedConcerns.join(","));
+    if (minPrice) params.set("minPrice", String(minPrice));
+    if (maxPrice < 3000) params.set("maxPrice", String(maxPrice));
+    if (minRating) params.set("minRating", minRating);
+    if (availability) params.set("availability", availability);
+    if (page > 1) params.set("page", String(page));
+    const query = params.toString();
+    return query ? `/products?${query}` : "/products";
+  }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrand, selectedCategories, selectedConcerns, selectedSkinTypes]);
+
+  React.useEffect(() => {
+    window.history.replaceState(null, "", catalogReturnTo);
+  }, [catalogReturnTo]);
 
   return (
     <Container className="py-3 md:py-4 space-y-5">
@@ -212,7 +248,7 @@ function ProductsCatalogContent() {
       </div>
 
       {/* Main Layout: Sidebar Filters + Products Catalog */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 xl:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-5 xl:gap-6 items-start">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block space-y-6 rounded-2xl border border-line bg-background-card p-5 shadow-subtle sticky top-24">
           <div className="flex items-center justify-between border-b border-line pb-3">
@@ -238,13 +274,23 @@ function ProductsCatalogContent() {
             }}
           />
 
-          {/* Category Dropdown */}
-          <Select
+          {/* Skin type intentionally comes first: users can choose more than one. */}
+          <MultiSelect
+            label="Skin Type"
+            options={skinTypePills.map(({ id, label }) => ({ value: id, label }))}
+            value={selectedSkinTypes}
+            onChange={(value) => {
+              setSelectedSkinTypes(value);
+              setPage(1);
+            }}
+          />
+
+          <MultiSelect
             label="Category"
-            options={categoryOptions}
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
+            options={categoryOptions.filter((option) => option.value)}
+            value={selectedCategories}
+            onChange={(value) => {
+              setSelectedCategories(value);
               setPage(1);
             }}
           />
@@ -260,45 +306,22 @@ function ProductsCatalogContent() {
             }}
           />
 
-          {/* Skin Type Filter Pills */}
-          <div className="space-y-2">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted">
-              Skin Type
-            </span>
-            <Pills
-              options={skinTypePills}
-              selectedIds={selectedSkinTypes}
-              onToggle={toggleSkinType}
-              size="sm"
-            />
-          </div>
-
-          {/* Target Concern Filter Pills */}
-          <div className="space-y-2">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted">
-              Skin Concern
-            </span>
-            <Pills
-              options={concernPills}
-              selectedIds={selectedConcerns}
-              onToggle={toggleConcern}
-              size="sm"
-            />
-          </div>
-
-          {/* Maximum Price Slider */}
-          <Slider
-            label="Max Price Cap"
-            min={200}
-            max={3000}
-            step={50}
-            value={maxPrice}
-            onChange={(val) => {
-              setMaxPrice(val);
-              setPage(1);
-            }}
-            formatValue={(v) => (v >= 3000 ? "Any Price" : `₹${v}`)}
+          <MultiSelect
+            label="Skin Concerns"
+            options={concernOptions}
+            value={selectedConcerns}
+            onChange={(value) => { setSelectedConcerns(value); setPage(1); }}
+            placeholder="Select concerns"
           />
+
+          <div className="space-y-2 border-t border-line pt-4">
+            <div className="flex items-center justify-between"><span className="text-sm font-bold text-foreground">Price range</span><span className="text-xs text-foreground-muted">₹{minPrice || 0} – {maxPrice >= 3000 ? "Any" : `₹${maxPrice}`}</span></div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="space-y-1 text-xs font-medium text-foreground-muted">Minimum<input type="number" min="0" max={maxPrice} value={minPrice || ""} placeholder="₹ 0" onChange={(event) => { const value = Math.max(0, Math.min(Number(event.target.value) || 0, maxPrice)); setMinPrice(value); setPage(1); }} className="h-10 w-full rounded-lg border border-line bg-background-card px-3 text-sm text-foreground outline-none focus:border-sage-deep" /></label>
+              <label className="space-y-1 text-xs font-medium text-foreground-muted">Maximum<input type="number" min={minPrice} max="3000" value={maxPrice >= 3000 ? "" : maxPrice} placeholder="Any" onChange={(event) => { const raw = Number(event.target.value); const value = raw ? Math.max(minPrice, Math.min(raw, 3000)) : 3000; setMaxPrice(value); setPage(1); }} className="h-10 w-full rounded-lg border border-line bg-background-card px-3 text-sm text-foreground outline-none focus:border-sage-deep" /></label>
+            </div>
+            <Slider label="Maximum price" min={200} max={3000} step={50} value={maxPrice} onChange={(value) => { setMaxPrice(Math.max(value, minPrice)); setPage(1); }} formatValue={(value) => value >= 3000 ? "Any" : `₹${value}`} />
+          </div>
 
           {/* Rating & Availability */}
           <div className="grid grid-cols-2 gap-2">
@@ -377,39 +400,16 @@ function ProductsCatalogContent() {
                 value={searchQuery}
                 onChange={(val) => setSearchQuery(val)}
               />
-              <Select
-                label="Category"
-                options={categoryOptions}
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              />
+              <MultiSelect label="Skin Type" options={skinTypePills.map(({ id, label }) => ({ value: id, label }))} value={selectedSkinTypes} onChange={setSelectedSkinTypes} />
+              <MultiSelect label="Category" options={categoryOptions.filter((option) => option.value)} value={selectedCategories} onChange={setSelectedCategories} />
               <Select
                 label="Brand"
                 options={brandOptions}
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
               />
-              <Pills
-                options={skinTypePills}
-                selectedIds={selectedSkinTypes}
-                onToggle={toggleSkinType}
-                size="sm"
-              />
-              <Pills
-                options={concernPills}
-                selectedIds={selectedConcerns}
-                onToggle={toggleConcern}
-                size="sm"
-              />
-              <Slider
-                label="Max Price"
-                min={200}
-                max={3000}
-                step={50}
-                value={maxPrice}
-                onChange={setMaxPrice}
-                formatValue={(v) => (v >= 3000 ? "Any Price" : `₹${v}`)}
-              />
+              <MultiSelect label="Skin Concerns" options={concernOptions} value={selectedConcerns} onChange={setSelectedConcerns} />
+              <div className="grid grid-cols-2 gap-2"><label className="text-xs font-medium text-foreground-muted">Min price<input type="number" value={minPrice || ""} placeholder="₹ 0" onChange={(event) => setMinPrice(Number(event.target.value) || 0)} className="mt-1 h-10 w-full rounded-lg border border-line px-3" /></label><label className="text-xs font-medium text-foreground-muted">Max price<input type="number" value={maxPrice >= 3000 ? "" : maxPrice} placeholder="Any" onChange={(event) => setMaxPrice(Number(event.target.value) || 3000)} className="mt-1 h-10 w-full rounded-lg border border-line px-3" /></label></div>
 
               <div className="flex gap-3 pt-4 border-t border-line">
                 <Button
@@ -437,12 +437,7 @@ function ProductsCatalogContent() {
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 rounded border border-line bg-background-elevated/40 px-4 py-2.5 text-xs">
               <span className="font-semibold text-foreground-faint">Active Filters:</span>
-              {selectedCategory && (
-                <Badge variant="sage" className="gap-1">
-                  Category: {selectedCategory}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedCategory("")} />
-                </Badge>
-              )}
+              {selectedCategories.map((category) => <Badge key={category} variant="sage" className="gap-1">Category: {category}<X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedCategories((current) => current.filter((item) => item !== category))} /></Badge>)}
               {selectedBrand && (
                 <Badge variant="sage" className="gap-1">
                   Brand: {selectedBrand}
@@ -461,6 +456,7 @@ function ProductsCatalogContent() {
                   <X className="h-3 w-3 cursor-pointer" onClick={() => toggleConcern(sc)} />
                 </Badge>
               ))}
+              {minPrice > 0 && <Badge variant="default" className="gap-1">Min: ₹{minPrice}<X className="h-3 w-3 cursor-pointer" onClick={() => setMinPrice(0)} /></Badge>}
               {maxPrice < 3000 && (
                 <Badge variant="default" className="gap-1">
                   Max: ₹{maxPrice}
@@ -520,7 +516,7 @@ function ProductsCatalogContent() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {dataResult.products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} returnTo={catalogReturnTo} />
               ))}
             </div>
           )}

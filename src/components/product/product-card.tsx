@@ -15,9 +15,12 @@ import { cn } from "@/lib/utils";
 export function ProductCard({
   product,
   className,
+  returnTo,
 }: {
   product: Product;
   className?: string;
+  /** Catalog context so the detail page can return to the exact filters/page. */
+  returnTo?: string;
 }) {
   const { user, toggleWishlist } = useAuth();
   const { addToast } = useToast();
@@ -78,7 +81,7 @@ export function ProductCard({
     >
       {/* Top Image Box */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-background-elevated">
-        <Link href={`/products/${product.id}`} className="block h-full w-full">
+        <Link href={`/products/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="block h-full w-full">
           <Image
             src={product.image}
             alt={`${product.brand} ${product.name}`}

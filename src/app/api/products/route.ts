@@ -8,11 +8,13 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const category = searchParams.get("category");
-    const concern = searchParams.get("concern") || searchParams.get("skinConcern");
+    const categories = (searchParams.get("category") || "").split(",").map((item) => item.trim()).filter(Boolean);
+    const concerns = (searchParams.get("concern") || searchParams.get("skinConcern") || "").split(",").map((item) => item.trim()).filter(Boolean);
     const maxPriceStr = searchParams.get("maxPrice");
     const maxPrice = maxPriceStr ? parseFloat(maxPriceStr) : undefined;
-    const skinType = searchParams.get("skinType");
+    const minPriceStr = searchParams.get("minPrice");
+    const minPrice = minPriceStr ? parseFloat(minPriceStr) : undefined;
+    const skinTypes = (searchParams.get("skinType") || "").split(",").map((item) => item.trim()).filter(Boolean);
     const brand = searchParams.get("brand");
     const query = searchParams.get("q") || searchParams.get("query");
     const minRatingStr = searchParams.get("minRating");
@@ -30,6 +32,9 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (minPrice !== undefined && (isNaN(minPrice) || minPrice < 0)) {
+      return NextResponse.json({ success: false, error: "minPrice must be a valid positive number" }, { status: 400 });
+    }
 
     if (minRating !== undefined && (isNaN(minRating) || minRating < 0 || minRating > 5)) {
       return NextResponse.json(
@@ -44,8 +49,8 @@ export async function GET(request: NextRequest) {
     // Build Prisma where filter
     const where: any = {};
 
-    if (category && category !== "All" && category !== "all" && category !== "") {
-      where.category = { equals: category };
+    if (categories.length) {
+      where.category = { in: categories };
     }
 
     if (brand && brand !== "All" && brand !== "all" && brand !== "") {
@@ -90,24 +95,24 @@ export async function GET(request: NextRequest) {
     });
 
     // Post-filter JSON fields (concern, skinType) and maxPrice
-    if (concern) {
-      const normalizedConcern = concern.toLowerCase();
+    if (concerns.length) {
+      const normalizedConcerns = concerns.map((concern) => concern.toLowerCase());
       rawProducts = rawProducts.filter((p: any) => {
         try {
           const concerns: string[] = JSON.parse(p.targetConcerns);
-          return concerns.some((c) => c.toLowerCase().includes(normalizedConcern));
+          return concerns.some((c) => normalizedConcerns.some((concern) => c.toLowerCase().includes(concern)));
         } catch {
           return false;
         }
       });
     }
 
-    if (skinType) {
-      const normalizedSkin = skinType.toLowerCase();
+    if (skinTypes.length) {
+      const normalizedSkins = skinTypes.map((skinType) => skinType.toLowerCase());
       rawProducts = rawProducts.filter((p: any) => {
         try {
           const skinTypes: string[] = JSON.parse(p.skinTypes);
-          return skinTypes.some((s) => s.toLowerCase().includes(normalizedSkin));
+          return skinTypes.some((s) => normalizedSkins.some((skinType) => s.toLowerCase().includes(skinType)));
         } catch {
           return false;
         }
@@ -122,6 +127,13 @@ export async function GET(request: NextRequest) {
         if (availablePrices.length === 0) return true; // keep if no price listed yet
         const minPrice = Math.min(...availablePrices);
         return minPrice <= maxPrice;
+      });
+    }
+    if (minPrice !== undefined && !isNaN(minPrice)) {
+      rawProducts = rawProducts.filter((p: any) => {
+        const availablePrices = p.prices.map((pr: any) => pr.price).filter((val: unknown): val is number => typeof val === "number" && val > 0);
+        if (availablePrices.length === 0) return true;
+        return Math.min(...availablePrices) >= minPrice;
       });
     }
 

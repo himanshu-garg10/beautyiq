@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ProductService } from "@/services/product.service";
 import { RecentlyViewedService } from "@/services/recently-viewed.service";
 import type { Product, ProductListing } from "@/types";
@@ -36,7 +36,10 @@ import { ValueEngineService } from "@/services/value-engine.service";
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const requestedReturnTo = searchParams?.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/products") ? requestedReturnTo : "/products";
 
   const [product, setProduct] = React.useState<Product | null>(null);
   const [listings, setListings] = React.useState<ProductListing[]>([]);
@@ -136,7 +139,7 @@ export default function ProductDetailPage() {
       {/* Breadcrumb & Navigation */}
       <div className="flex items-center justify-between">
         <Link
-          href="/products"
+          href={returnTo}
           className="inline-flex items-center gap-2 text-xs font-semibold text-foreground-muted hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Products Catalog

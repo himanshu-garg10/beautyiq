@@ -14,10 +14,14 @@ import { ApiResponse, createSuccessResponse, createErrorResponse, simulateDelay 
 export interface ProductFilterOptions {
   query?: string;
   category?: RoutineStep | string;
+  categories?: string[];
   brand?: string;
   skinType?: SkinType;
+  skinTypes?: string[];
   skinConcern?: DetailedSkinConcern | string;
+  skinConcerns?: string[];
   ingredient?: string;
+  minPrice?: number;
   maxPrice?: number;
   minRating?: number;
   availability?: AvailabilityStatus;
@@ -95,16 +99,20 @@ export class ProductService {
     if (typeof window !== "undefined") {
       try {
         const params = new URLSearchParams();
-        if (filters.category && filters.category !== "all" && filters.category !== "All") {
-          params.set("category", filters.category);
+        const categories = filters.categories || (filters.category ? [filters.category] : []);
+        if (categories.length) {
+          params.set("category", categories.join(","));
         }
         if (filters.brand && filters.brand !== "all" && filters.brand !== "All") {
           params.set("brand", filters.brand);
         }
-        if (filters.skinType) params.set("skinType", filters.skinType);
-        if (filters.skinConcern && filters.skinConcern !== "all") {
-          params.set("concern", filters.skinConcern);
+        const skinTypes = filters.skinTypes || (filters.skinType ? [filters.skinType] : []);
+        const skinConcerns = filters.skinConcerns || (filters.skinConcern ? [filters.skinConcern] : []);
+        if (skinTypes.length) params.set("skinType", skinTypes.join(","));
+        if (skinConcerns.length) {
+          params.set("concern", skinConcerns.join(","));
         }
+        if (filters.minPrice !== undefined) params.set("minPrice", filters.minPrice.toString());
         if (filters.maxPrice !== undefined) params.set("maxPrice", filters.maxPrice.toString());
         if (filters.minRating !== undefined) params.set("minRating", filters.minRating.toString());
         if (filters.query) params.set("q", filters.query);
@@ -148,9 +156,10 @@ export class ProductService {
       result = searchRes.products;
     } else {
       // Filter by Category
-      if (filters.category && filters.category !== "all") {
-        const cat = filters.category.toLowerCase();
-        result = result.filter((p) => p.category.toLowerCase() === cat);
+      const categories = filters.categories || (filters.category ? [filters.category] : []);
+      if (categories.length) {
+        const normalized = categories.map((category) => category.toLowerCase());
+        result = result.filter((p) => normalized.includes(p.category.toLowerCase()));
       }
 
       // Filter by Brand
@@ -160,18 +169,18 @@ export class ProductService {
       }
 
       // Filter by Skin Type
-      if (filters.skinType) {
+      const skinTypes = filters.skinTypes || (filters.skinType ? [filters.skinType] : []);
+      if (skinTypes.length) {
         result = result.filter(
-          (p) => p.skinTypes.includes(filters.skinType!) || p.skinTypes.includes("All Skin Types" as any)
+          (p) => skinTypes.some((skinType) => p.skinTypes.includes(skinType as SkinType)) || p.skinTypes.includes("All Skin Types" as any)
         );
       }
 
       // Filter by Skin Concern
-      if (filters.skinConcern && filters.skinConcern !== "all") {
-        const c = filters.skinConcern.toLowerCase();
-        result = result.filter((p) =>
-          p.targetConcerns.some((concern) => concern.toLowerCase() === c)
-        );
+      const skinConcerns = filters.skinConcerns || (filters.skinConcern ? [filters.skinConcern] : []);
+      if (skinConcerns.length) {
+        const normalized = skinConcerns.map((concern) => concern.toLowerCase());
+        result = result.filter((p) => p.targetConcerns.some((concern) => normalized.some((item) => concern.toLowerCase().includes(item))));
       }
 
       // Filter by Max Price
@@ -195,6 +204,14 @@ export class ProductService {
     }
 
     // Filter by Max Price
+    if (filters.minPrice !== undefined) {
+      result = result.filter((p) => {
+        const best = this.getBestListingForProduct(p.id);
+        if (!best || best.price === null) return true;
+        return best.price >= filters.minPrice!;
+      });
+    }
+
     if (filters.maxPrice !== undefined) {
       result = result.filter((p) => {
         const best = this.getBestListingForProduct(p.id);
