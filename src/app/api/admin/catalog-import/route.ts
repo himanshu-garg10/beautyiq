@@ -3,6 +3,8 @@ import { getSessionUser } from "@/lib/auth/session";
 import { importOpenBeautyFacts } from "@/server/open-beauty-facts-importer";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 function isCatalogAdmin(email: string) {
   const administrators = (process.env.ADMIN_EMAILS || "")
     .split(",")

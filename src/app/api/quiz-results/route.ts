@@ -4,6 +4,8 @@ import { requireSessionUser } from "@/lib/auth/session";
 import { quizResultSchema } from "@/lib/auth/validation";
 import { InputValidator } from "@/lib/security/input-validator";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const { user, response } = await requireSessionUser();

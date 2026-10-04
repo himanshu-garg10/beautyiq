@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSessionUser } from "@/lib/auth/session";
+
+export const dynamic = "force-dynamic";
 import { InputValidator } from "@/lib/security/input-validator";
 
 export async function DELETE() {

@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
             Refresh
           </Button>
 
-          <Link href="/admin/products">
+          <Link href="/admin/catalog">
             <Button variant="clay" size="sm" leftIcon={<Plus className="h-4 w-4" />}>
               Add Product
             </Button>

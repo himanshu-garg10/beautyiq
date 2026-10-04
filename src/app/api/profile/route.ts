@@ -5,6 +5,9 @@ import { profileUpdateSchema } from "@/lib/auth/validation";
 import { toPublicProfile } from "@/lib/auth/profile-map";
 import { InputValidator } from "@/lib/security/input-validator";
 
+// Session lookup reads request headers/cookies; this must never be prerendered.
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const { user, response } = await requireSessionUser();

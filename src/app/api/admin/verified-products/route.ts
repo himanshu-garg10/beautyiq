@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+
 const categories = new Set([
   "Face Wash", "Cleanser", "Serum", "Moisturizer", "Sunscreen", "Toner",
   "Exfoliator", "Acne Focused Products", "Face Masks", "Lip Care", "Eye Care", "Treatment Products",

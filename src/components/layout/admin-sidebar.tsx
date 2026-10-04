@@ -58,6 +58,7 @@ export function AdminSidebar({ className }: { className?: string }) {
       group: "Catalog",
       items: [
         { label: "Products", href: "/admin/products", icon: Package },
+        { label: "Catalog Control", href: "/admin/catalog", icon: Database },
         { label: "Brands", href: "/admin/brands", icon: Award },
         { label: "Categories", href: "/admin/categories", icon: FolderTree },
         { label: "Ingredients", href: "/admin/ingredients", icon: FlaskConical },
