@@ -33,14 +33,14 @@ interface AuthContextType {
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
 function mapSessionUser(
-  sessionUser: { id: string; name?: string | null; email?: string | null },
+  sessionUser: { id: string; name?: string | null; email?: string | null; role?: "customer" | "admin" },
   extras?: { wishlistIds?: string[]; skinProfile?: SkinProfile }
 ): User {
   return {
     id: sessionUser.id,
     name: sessionUser.name || "BeautyIQ Member",
     email: sessionUser.email || "",
-    role: "customer",
+    role: sessionUser.role || "customer",
     wishlistIds: extras?.wishlistIds || [],
     searchHistory: [],
     createdAt: new Date().toISOString(),
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthModalMode("login");
         setIsAuthModalOpen(true);
       }
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [user, status]);

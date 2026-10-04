@@ -89,19 +89,15 @@ export function ProductCard({
         </Link>
 
         {/* Wishlist Button (Top Left) */}
-        <button
+        {user && <button
           onClick={handleWishlist}
           aria-label={isSaved ? "Remove from wishlist" : "Save to wishlist"}
           title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
           className={cn(
             "absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line/80 bg-background-card/90 backdrop-blur-xs transition-all hover:scale-110 shadow-xs",
-            isSaved
-              ? "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200"
-              : "text-foreground-muted hover:text-rose-500"
+            isSaved ? "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200" : "text-foreground-muted hover:text-rose-500"
           )}
-        >
-          <Heart className={cn("h-4 w-4", isSaved && "fill-current")} />
-        </button>
+        ><Heart className={cn("h-4 w-4", isSaved && "fill-current")} /></button>}
 
         {/* Compatibility Match Pill (Top Right) */}
         {product.compatibilityScore ? (

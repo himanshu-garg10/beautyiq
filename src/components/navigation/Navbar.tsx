@@ -177,17 +177,7 @@ export function Navbar() {
                     </span>
                   )}
                 </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openAuthModal("login")}
-                  className="relative hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
-                  title="Saved Wishlist (Sign in)"
-                  aria-label="Wishlist"
-                >
-                  <Heart className="h-4 w-4" />
-                </button>
-              )}
+              ) : null}
 
               {/* User Notifications (logged-in) */}
               {user && <div className="hidden lg:block"><NotificationDropdown /></div>}

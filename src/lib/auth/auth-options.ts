@@ -8,6 +8,14 @@ const sessionMaxAge = Number(process.env.SESSION_EXPIRY_SECONDS) || 86400;
 
 const TIMING_SAFE_HASH = bcrypt.hashSync("beautyiq-invalid-password-placeholder", 12);
 
+function isAdminEmail(email: string) {
+  return (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email.trim().toLowerCase());
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -41,6 +49,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          role: isAdminEmail(user.email) ? "admin" : "customer",
         };
       },
     }),
@@ -74,12 +83,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = user.role || "customer";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = (token.id as string) || (token.sub as string);
+        session.user.role = token.role === "admin" ? "admin" : "customer";
       }
       return session;
     },
