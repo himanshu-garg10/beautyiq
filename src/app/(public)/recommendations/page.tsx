@@ -136,10 +136,10 @@ function RecommendationsContent() {
   const currentSessionId = `rec_${Date.now()}`;
 
   return (
-    <Container className="py-10 space-y-8 max-w-6xl">
+    <Container className="py-8 md:py-12 space-y-8 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 rounded-2xl border border-line bg-gradient-to-br from-sage-tint/70 via-background-card to-champagne-tint px-6 py-8 md:px-9 md:py-9 shadow-subtle">
+        <div className="max-w-2xl">
           <Badge variant="sage" className="mb-2 flex items-center gap-1.5 w-fit">
             <Sparkles className="h-3.5 w-3.5" /> Deterministic Intelligence Engine
           </Badge>
@@ -147,7 +147,7 @@ function RecommendationsContent() {
             Skincare Recommendations &amp; Ranking
           </h1>
           <p className="text-sm text-foreground-muted mt-1">
-            Products evaluated and ranked by hard constraint filters, ingredient matching, and weighted compatibility math.
+            Clear product matches based on your concerns, ingredients, preferences and available catalog data.
           </p>
         </div>
 
@@ -162,7 +162,7 @@ function RecommendationsContent() {
 
       {/* Requirement Summary Header Bar (Requirement #40) */}
       {requirement && (
-        <div className="rounded-lg border border-line bg-background-card p-4 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="rounded-2xl border border-line bg-background-card p-5 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1 text-xs">
             <span className="font-semibold text-foreground-faint uppercase tracking-wider block">
               Active Structured Requirements:
@@ -277,10 +277,10 @@ function RecommendationsContent() {
       {!loading && result && result.status === "EXACT_MATCH_FOUND" && (
         <div className="space-y-10">
           {/* Featured Top Recommendations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6">
             {/* 1. Best Overall Category */}
             {result.bestOverall && (
-              <div className="rounded-lg border-2 border-sage-deep bg-background-card p-5 space-y-4 shadow-lg relative flex flex-col justify-between">
+              <div className="rounded-2xl border-2 border-sage-deep bg-background-card p-5 space-y-4 shadow-lg relative flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge variant="sage" className="gap-1 font-bold">
