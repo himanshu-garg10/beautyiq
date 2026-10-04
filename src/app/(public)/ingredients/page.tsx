@@ -20,6 +20,9 @@ const concernGuides = [
   { title: "Tanning care", ingredients: "Vitamin C, Niacinamide, Alpha Arbutin", query: "Niacinamide", icon: Sun, image: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=format&fit=crop&w=900&q=80" },
   { title: "Dark circles", ingredients: "Caffeine, Vitamin C, Peptides", query: "Caffeine", icon: Droplets, image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" },
   { title: "Sun protection", ingredients: "Broad-spectrum UV filters, antioxidants", query: "Sunscreen", icon: Sun, image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=900&q=80" },
+  { title: "Pigmentation", ingredients: "Vitamin C, Alpha Arbutin, Tranexamic Acid", query: "Alpha Arbutin", icon: Sparkles, image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=900&q=80" },
+  { title: "Redness & irritation", ingredients: "Panthenol, Centella, Ceramides", query: "Panthenol", icon: Droplets, image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80" },
+  { title: "Dehydration", ingredients: "Hyaluronic Acid, Glycerin, Betaine", query: "Hyaluronic Acid", icon: Droplets, image: "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=900&q=80" },
 ];
 
 export default function IngredientsPage() {

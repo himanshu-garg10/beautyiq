@@ -200,7 +200,7 @@ function ProductsCatalogContent() {
   };
 
   return (
-    <Container className="py-6 md:py-8 space-y-6">
+    <Container className="py-3 md:py-4 space-y-5">
       <div className="flex justify-end lg:hidden">
         <Button
           variant="outline"

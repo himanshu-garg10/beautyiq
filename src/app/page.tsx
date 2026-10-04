@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pt-[76px]">
+      <main className="min-h-screen pt-[64px]">
         {/* 1. Hero Section */}
         <Hero />
 
