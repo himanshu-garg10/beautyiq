@@ -6,8 +6,7 @@ import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import { ComparisonService } from "@/services/comparison.service";
 import { ProductService } from "@/services/product.service";
-import { ValueEngineService } from "@/services/value-engine.service";
-import type { Product, ProductComparisonItem, ComparisonSession } from "@/types";
+import type { Product, ProductComparisonItem, ComparisonSession, ProductListing } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -15,19 +14,13 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   Scale,
-  CheckCircle2,
   X,
   Star,
   Plus,
   Trash2,
-  RotateCcw,
   ExternalLink,
-  Shield,
   Clock,
   ArrowRight,
-  TestTube,
-  BarChart2,
-  SlidersHorizontal,
   Heart,
 } from "lucide-react";
 import { useComparison } from "@/context/comparison-context";
@@ -35,10 +28,31 @@ import { useSkinProfile } from "@/context/skin-profile-context";
 import { useToast } from "@/context/toast-context";
 import { useAuth } from "@/context/auth-context";
 
+function RetailerPriceLinks({ listings }: { listings: ProductListing[] }) {
+  const visibleListings = [...listings]
+    .filter((listing) => listing.price !== null)
+    .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+
+  if (!visibleListings.length) {
+    return <span className="text-xs text-foreground-faint">No verified seller price yet</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {visibleListings.map((listing) => {
+        const content = <><span className="font-semibold">{listing.platform}</span><span className="rounded bg-background-card/70 px-1.5 py-0.5 font-mono font-bold">₹{listing.price?.toLocaleString("en-IN")}</span><ExternalLink className="h-3 w-3 opacity-70" /></>;
+        return listing.productUrl ? (
+          <a key={listing.id} href={listing.productUrl} target="_blank" rel="noreferrer" title={`Open ${listing.platform} listing`} className="inline-flex items-center gap-1 rounded-lg border border-line bg-sage-tint/55 px-2 py-1.5 text-xs text-sage-deep transition-colors hover:border-sage-deep hover:bg-sage-tint">{content}</a>
+        ) : <span key={listing.id} className="inline-flex items-center gap-1 rounded-lg border border-line bg-background-elevated px-2 py-1.5 text-xs text-foreground-muted">{content}</span>;
+      })}
+    </div>
+  );
+}
+
 export default function CompareMatrixPage() {
   const { user, toggleWishlist } = useAuth();
   const userId = user?.id || "u1";
-  const { selectedIds, removeFromComparison, clearComparison, addToComparison } = useComparison();
+  const { selectedIds, removeFromComparison, addToComparison } = useComparison();
   const { profile } = useSkinProfile();
   const { showToast } = useToast();
 
@@ -140,17 +154,6 @@ export default function CompareMatrixPage() {
             Add Product ({items.length}/5)
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<RotateCcw className="h-4 w-4" />}
-            onClick={() => {
-              clearComparison();
-              setItems([]);
-            }}
-          >
-            Clear Matrix
-          </Button>
         </div>
       </div>
 
@@ -253,34 +256,6 @@ export default function CompareMatrixPage() {
                   ))}
                 </TableRow>
 
-                {/* Best Price & Unit Cost Row */}
-                <TableRow>
-                  <TableCell className="font-semibold text-foreground-muted">Price &amp; Unit Cost</TableCell>
-                  {items.map((item) => {
-                    const price = item.bestPriceListing?.price ?? null;
-                    return (
-                      <TableCell key={item.product.id} className="font-mono">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <strong className="text-foreground text-base">
-                              {price !== null ? `₹${price}` : "Unavailable"}
-                            </strong>
-                            {item.isBestPriceOverall && (
-                              <Badge variant="sage" className="text-[0.6rem]">Best Price</Badge>
-                            )}
-                          </div>
-                          <span className="text-xs text-foreground-faint block">
-                            {item.product.quantity} {item.product.unit} ({item.unitPriceLabel})
-                          </span>
-                          {item.isBestValueOverall && (
-                            <Badge variant="clay" className="text-[0.6rem] mt-1">Best Value (₹/ml)</Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-
                 {/* Customer Rating Row */}
                 <TableRow>
                   <TableCell className="font-semibold text-foreground-muted">Rating &amp; Reviews</TableCell>
@@ -348,6 +323,16 @@ export default function CompareMatrixPage() {
                   ))}
                 </TableRow>
 
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Size &amp; Routine</TableCell>
+                  {items.map((item) => <TableCell key={item.product.id} className="text-xs"><p className="font-semibold text-foreground">{item.product.quantity} {item.product.unit}</p><p className="mt-1 text-foreground-muted">Use: {item.product.usageTime}</p><p className="mt-1 text-foreground-faint">{item.product.pHLevel ? `pH ${item.product.pHLevel}` : "pH not listed"}</p></TableCell>)}
+                </TableRow>
+
+                <TableRow>
+                  <TableCell className="font-semibold text-foreground-muted">Formula Preferences</TableCell>
+                  {items.map((item) => <TableCell key={item.product.id} className="text-xs leading-6 text-foreground-muted"><span className={item.product.parabenFree ? "text-sage-deep" : undefined}>Paraben-free: {item.product.parabenFree ? "Yes" : "No"}</span><br />Silicone-free: {item.product.siliconeFree ? "Yes" : "No"}</TableCell>)}
+                </TableRow>
+
                 {/* Grounded Comparison Highlights */}
                 <TableRow className="bg-background-elevated/40">
                   <TableCell className="font-semibold text-foreground-muted">Key Highlights</TableCell>
@@ -368,25 +353,10 @@ export default function CompareMatrixPage() {
                   ))}
                 </TableRow>
 
-                {/* Store Action Row */}
+                {/* Prices deliberately appear last: each verified retailer chip opens its source listing. */}
                 <TableRow>
-                  <TableCell className="font-semibold text-foreground-muted">Store Listings</TableCell>
-                  {items.map((item) => (
-                    <TableCell key={item.product.id}>
-                      {item.bestPriceListing?.productUrl ? (
-                        <a
-                          href={item.bestPriceListing.productUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded bg-sage-deep text-white text-xs font-semibold hover:bg-sage-deep/90 transition-colors"
-                        >
-                          Visit Seller ({item.bestPriceListing.platform}) <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
-                      ) : (
-                        <span className="text-xs text-foreground-faint">No external store</span>
-                      )}
-                    </TableCell>
-                  ))}
+                  <TableCell className="font-semibold text-foreground-muted">Retailer Prices</TableCell>
+                  {items.map((item) => <TableCell key={item.product.id} className="space-y-2"><div className="flex items-center gap-2 text-xs"><span className="font-mono font-bold text-foreground">{item.unitPriceLabel}</span>{item.isBestPriceOverall ? <Badge variant="sage" className="text-[0.6rem]">Best unit price</Badge> : null}{item.isBestValueOverall ? <Badge variant="clay" className="text-[0.6rem]">Best value</Badge> : null}</div><RetailerPriceLinks listings={item.listings} /></TableCell>)}
                 </TableRow>
               </TableBody>
             </Table>
@@ -442,6 +412,11 @@ export default function CompareMatrixPage() {
                       <Badge key={i} variant="default" className="text-[0.65rem]">{i}</Badge>
                     ))}
                   </div>
+                </div>
+
+                <div className="border-t border-line pt-3 text-xs space-y-2">
+                  <div className="flex items-center justify-between"><span className="font-semibold text-foreground">Retailer prices</span><span className="font-mono text-foreground-faint">{item.unitPriceLabel}</span></div>
+                  <RetailerPriceLinks listings={item.listings} />
                 </div>
               </div>
             ))}
