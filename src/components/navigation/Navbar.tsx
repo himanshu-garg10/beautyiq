@@ -207,29 +207,14 @@ export function Navbar() {
                   </Button>
                 </Link>
               ) : user ? (
-                <div className="relative flex items-center gap-2" ref={accountRef}>
-                  <Link href="/account" className="hidden sm:inline-block">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="font-semibold text-xs"
-                    >
-                      Account
-                    </Button>
-                  </Link>
+                <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                    className="flex items-center gap-1.5 h-9 px-2.5 rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground text-xs font-semibold transition-all shadow-subtle"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card text-foreground-muted transition-all shadow-subtle hover:border-line-strong hover:bg-background-elevated hover:text-foreground"
                     aria-label="User Account Menu"
                     aria-expanded={accountMenuOpen}
                   >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-champagne-tint text-champagne-deep font-bold text-[0.68rem] border border-champagne/30">
-                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
-                    </span>
-                    <span className="hidden md:inline-block max-w-[90px] truncate font-medium">
-                      {user.name ? user.name.split(" ")[0] : "Account"}
-                    </span>
-                    <ChevronDown className="h-3 w-3 text-foreground-faint" />
+                    <User className="h-4 w-4" />
                   </button>
 
                   {/* Account Dropdown Menu */}
@@ -303,18 +288,6 @@ export function Navbar() {
                   </Link>
                 </div>
               )}
-
-              {/* Subtle CTA: "Find My Products" */}
-              <Link href="/recommendations" className="hidden sm:inline-block">
-                <Button
-                  size="sm"
-                  variant="accent"
-                  className="font-semibold text-xs tracking-tight shadow-sm hover:shadow px-3.5 rounded-full bg-foreground text-background hover:bg-foreground/90 dark:bg-champagne-deep dark:text-white"
-                >
-                  <Sparkles className="h-3 w-3 mr-1 text-champagne" />
-                  <span>Find My Products</span>
-                </Button>
-              </Link>
 
               {/* Mobile Drawer Trigger */}
               <MobileNav links={navLinks} />
