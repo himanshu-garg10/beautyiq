@@ -21,9 +21,7 @@ import {
   Plus,
   Trash2,
   RotateCcw,
-  Sparkles,
   ExternalLink,
-  Info,
   Shield,
   Clock,
   ArrowRight,
@@ -67,9 +65,13 @@ export default function CompareMatrixPage() {
   );
 
   React.useEffect(() => {
-    // If no items selected in context, default to demo product IDs ("p1", "p3", "p5")
-    const ids = selectedIds.length >= 2 ? selectedIds : ["p1", "p3", "p5"];
-    loadComparison(ids);
+    // A comparison starts empty. Only products deliberately added by the visitor appear here.
+    if (selectedIds.length === 0) {
+      setItems([]);
+      setLoading(false);
+    } else {
+      loadComparison(selectedIds);
+    }
     setHistory(ComparisonService.getComparisonHistory(userId));
   }, [selectedIds, loadComparison, userId]);
 
@@ -155,40 +157,6 @@ export default function CompareMatrixPage() {
           </Button>
         </div>
       </div>
-
-      {/* Profile Suitability Alert Banner */}
-      {!hasCompletedProfile ? (
-        <div className="rounded border border-amber-300/40 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-foreground font-semibold block text-sm mb-0.5">
-                Personalized Compatibility Unavailable
-              </strong>
-              <p className="text-foreground-muted">
-                You are viewing objective product specifications. Complete your skin profile to calculate personalized compatibility scores, concern matches, and active ingredient suitability.
-              </p>
-            </div>
-          </div>
-          <Link href="/onboarding" className="flex-shrink-0">
-            <Button variant="accent" size="sm">
-              Complete Profile
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="rounded border border-sage-deep/30 bg-sage-tint/30 p-4 flex items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-2 text-sage-deep">
-            <Sparkles className="h-4 w-4" />
-            <span>
-              Personalized for <strong>{profile.skinType} Skin</strong> ({profile.concerns.join(", ") || "General Care"})
-            </span>
-          </div>
-          <Link href="/profile" className="text-xs text-sage-deep font-semibold hover:underline">
-            Edit Skin Profile
-          </Link>
-        </div>
-      )}
 
       {/* Main Comparison Matrix Display */}
       {loading ? (

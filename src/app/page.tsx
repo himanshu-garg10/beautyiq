@@ -4,6 +4,7 @@ import { HeroSection as Hero } from "@/components/hero/HeroSection";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { PersonalizedDiscovery } from "@/components/recommendations/PersonalizedDiscovery";
 import { FinalCta } from "@/components/home/final-cta";
+import { HomeQuickStart } from "@/components/home/home-quick-start";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
         <Hero />
 
         <TrustStrip />
+        <HomeQuickStart />
         <PersonalizedDiscovery />
         <FinalCta />
       </main>

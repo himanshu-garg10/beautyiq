@@ -100,14 +100,15 @@ export function Navbar() {
             aria-label="Primary navigation"
           >
             {/* Left: BeautyIQ Wordmark */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-5">
               <Link href="/" className="group flex items-center gap-2">
                 <span className="font-display text-2xl md:text-[1.65rem] font-bold tracking-tight text-foreground group-hover:text-champagne-deep transition-colors">
                   Beauty<span className="italic font-normal text-champagne-deep ml-0.5">IQ</span>
                 </span>
                 <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-champagne-deep/70" />
-                <span className="hidden xl:inline-block text-[0.68rem] tracking-widest uppercase font-mono text-foreground-faint">
-                  AI Skincare Intelligence
+                <span className="hidden xl:flex flex-col text-[0.63rem] leading-[1.1] tracking-[0.16em] uppercase font-mono text-foreground-faint">
+                  <span>AI Skincare</span>
+                  <span>Intelligence</span>
                 </span>
               </Link>
             </div>
@@ -118,7 +119,7 @@ export function Navbar() {
                 const isActive = pathname === link.href ||
                   (link.href === "/recommendations" && pathname === "/ai-search");
                 return (
-                  <li key={link.href}>
+                  <li key={link.href} className={link.href === "/" ? "mr-2" : undefined}>
                     <Link
                       href={link.href}
                       className={cn(
