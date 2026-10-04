@@ -178,6 +178,9 @@ export class AIRequirementService {
     if (/\b(dehydration|dehydrated)\b/i.test(lower)) addConcern("Dehydration");
     if (/\b(excess oil|oily shine|greasiness|sebum)\b/i.test(lower)) addConcern("Excess oil");
     if (/\b(dullness|dull skin|lack of glow)\b/i.test(lower)) addConcern("Dullness");
+    // "Glow" is a cosmetic goal, but it also needs a searchable concern signal so
+    // the catalog can rank products with brightening / tone-evening ingredients.
+    if (/\b(glow|glowing|radiance|radiant)\b/i.test(lower)) addConcern("Dullness");
     if (/\b(redness|inflamed skin|rosacea)\b/i.test(lower)) addConcern("Redness");
     if (/\b(rough texture|bumpy skin)\b/i.test(lower)) addConcern("Rough texture");
     if (/\b(visible pores|enlarged pores|large pores|open pores)\b/i.test(lower)) addConcern("Visible pores");

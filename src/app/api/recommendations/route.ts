@@ -311,22 +311,19 @@ export async function POST(request: NextRequest) {
       }
 
       // --- OVERALL WEIGHTED CALCULATION ---
-      // Weights:
-      // ingredientMatch: 40%
-      // skinTypeFit: 25%
-      // budgetFit: 15%
-      // rating: 10%
-      // freeFromPreferences: 10%
+      // Concern fit is deliberately part of the final score. Earlier versions
+      // displayed concern results but did not let that score affect ranking.
       const overallScore = Math.min(
         100,
         Math.max(
           10,
           Math.round(
-            ingredientScore * 0.40 +
+            ingredientScore * 0.30 +
             skinTypeScore * 0.25 +
+            concernScore * 0.20 +
             budgetFitScore * 0.15 +
-            ratingScore * 0.10 +
-            preferenceScore * 0.10
+            ratingScore * 0.05 +
+            preferenceScore * 0.05
           )
         )
       );
@@ -345,11 +342,12 @@ export async function POST(request: NextRequest) {
         ratingScore,
         overallScore,
         weights: {
-          ingredientMatch: "40%",
+          ingredientMatch: "30%",
           skinTypeFit: "25%",
+          concernFit: "20%",
           budgetFit: "15%",
-          customerRating: "10%",
-          freeFromPreferences: "10%",
+          customerRating: "5%",
+          freeFromPreferences: "5%",
         },
       };
 
@@ -424,11 +422,12 @@ export async function POST(request: NextRequest) {
       recommendations: scoredProducts,
       breakdownExplanation: {
         weights: {
-          ingredientMatch: "40%",
+          ingredientMatch: "30%",
           skinTypeFit: "25%",
+          concernFit: "20%",
           budgetFit: "15%",
-          customerRating: "10%",
-          freeFromPreferences: "10%",
+          customerRating: "5%",
+          freeFromPreferences: "5%",
         },
         criteriaApplied: {
           skinType: requestedSkinType,
