@@ -27,11 +27,9 @@ import { useComparison } from "@/context/comparison-context";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Discover", href: "/categories" },
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
-  { label: "AI Recommendations", href: "/recommendations", isAi: true },
+  { label: "AI Match", href: "/recommendations", isAi: true },
   { label: "Ingredients", href: "/ingredients" },
 ];
 
@@ -95,7 +93,7 @@ export function Navbar() {
             : "border-b border-line/50 bg-background/95 py-3.5"
         )}
       >
-        <Container>
+        <Container className="max-w-none px-5 sm:px-8 xl:px-12">
           <nav
             className="flex items-center justify-between gap-4"
             aria-label="Primary navigation"
@@ -114,7 +112,7 @@ export function Navbar() {
             </div>
 
             {/* Center: Main Navigation */}
-            <ul className="hidden lg:flex items-center gap-1 xl:gap-2">
+            <ul className="hidden lg:flex items-center gap-2 xl:gap-4">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href ||
                   (link.href === "/recommendations" && pathname === "/ai-search");
@@ -123,7 +121,7 @@ export function Navbar() {
                     <Link
                       href={link.href}
                       className={cn(
-                        "relative px-3.5 py-1.5 rounded-full text-[0.88rem] transition-all duration-200 flex items-center gap-1.5 tracking-tight",
+                        "relative px-3.5 py-1.5 rounded-full text-[0.9rem] transition-all duration-200 flex items-center gap-1.5 tracking-tight",
                         isActive
                           ? "font-semibold text-foreground bg-champagne-tint border border-champagne/40 dark:bg-champagne-tint/30"
                           : "font-medium text-foreground-muted hover:text-foreground hover:bg-background-elevated/70"
@@ -194,7 +192,7 @@ export function Navbar() {
                     className="border-champagne/40 bg-champagne-tint/40 text-foreground font-semibold text-xs"
                     leftIcon={<ShieldCheck className="h-3.5 w-3.5 text-champagne-deep" />}
                   >
-                    Admin Portal
+                    {user?.name ? `${user.name} · Admin` : "Admin Portal"}
                   </Button>
                 </Link>
               ) : user ? (
