@@ -291,7 +291,7 @@ function RecommendationsContent() {
                     </span>
                   </div>
 
-                  <ProductCard product={result.bestOverall.product} />
+                  <ProductCard product={result.bestOverall.product} className="h-auto" />
 
                   {/* Explainable Reasons */}
                   <div className="space-y-1 text-xs pt-2 border-t border-line">
@@ -349,7 +349,7 @@ function RecommendationsContent() {
                     </span>
                   </div>
 
-                  <ProductCard product={result.bestForMainConcern.product} />
+                  <ProductCard product={result.bestForMainConcern.product} className="h-auto" />
 
                   <div className="space-y-1 text-xs pt-2 border-t border-line">
                     {result.bestForMainConcern.reasons.map((r, i) => (
@@ -392,7 +392,7 @@ function RecommendationsContent() {
                     </span>
                   </div>
 
-                  <ProductCard product={result.bestIngredientMatch.product} />
+                  <ProductCard product={result.bestIngredientMatch.product} className="h-auto" />
 
                   <div className="space-y-1 text-xs pt-2 border-t border-line">
                     {result.bestIngredientMatch.reasons.map((r, i) => (

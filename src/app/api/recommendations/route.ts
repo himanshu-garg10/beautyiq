@@ -381,27 +381,32 @@ export async function POST(request: NextRequest) {
     // Sort descending by overallScore
     scoredProducts.sort((a, b) => b.scoreBreakdown.overallScore - a.scoreBreakdown.overallScore);
 
-    // Pick categorized champions
-    const bestOverall = scoredProducts[0] || null;
+    // A product may win several score dimensions. Show it once only: repeated
+    // cards confuse users and make a small catalog look like fake data.
+    const usedProductIds = new Set<string>();
+    const takeUnique = (candidates: ScoredProduct[]) => {
+      const next = candidates.find((candidate) => !usedProductIds.has(candidate.product.id)) || null;
+      if (next) usedProductIds.add(next.product.id);
+      return next;
+    };
 
-    const bestForMainConcern =
-      [...scoredProducts].sort((a, b) => b.scoreBreakdown.concernScore - a.scoreBreakdown.concernScore)[0] || null;
-
-    const bestIngredientMatch =
-      [...scoredProducts].sort((a, b) => b.scoreBreakdown.ingredientScore - a.scoreBreakdown.ingredientScore)[0] || null;
-
-    const bestBudgetOption =
+    const bestOverall = takeUnique(scoredProducts);
+    const bestForMainConcern = takeUnique(
+      [...scoredProducts].sort((a, b) => b.scoreBreakdown.concernScore - a.scoreBreakdown.concernScore)
+    );
+    const bestIngredientMatch = takeUnique(
+      [...scoredProducts].sort((a, b) => b.scoreBreakdown.ingredientScore - a.scoreBreakdown.ingredientScore)
+    );
+    const bestBudgetOption = takeUnique(
       [...scoredProducts]
         .filter((sp) => sp.bestListing?.price !== null && (sp.bestListing?.price ?? 0) > 0)
-        .sort((a, b) => (a.bestListing?.price ?? Infinity) - (b.bestListing?.price ?? Infinity))[0] || null;
-
-    const bestRated =
-      [...scoredProducts].sort((a, b) => (b.product.rating ?? 0) - (a.product.rating ?? 0))[0] || null;
-
-    const bestValue =
-      [...scoredProducts].sort((a, b) => b.valueScore - a.valueScore)[0] || null;
-
-    const alternatives = scoredProducts.slice(1, 7);
+        .sort((a, b) => (a.bestListing?.price ?? Infinity) - (b.bestListing?.price ?? Infinity))
+    );
+    const bestRated = takeUnique(
+      [...scoredProducts].sort((a, b) => (b.product.rating ?? 0) - (a.product.rating ?? 0))
+    );
+    const bestValue = takeUnique([...scoredProducts].sort((a, b) => b.valueScore - a.valueScore));
+    const alternatives = scoredProducts.filter((candidate) => !usedProductIds.has(candidate.product.id)).slice(0, 6);
 
     const resultSet: RecommendationResultSet = {
       status: "EXACT_MATCH_FOUND",
