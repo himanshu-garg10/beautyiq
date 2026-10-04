@@ -222,6 +222,9 @@ function AISearchContent() {
           <p className="text-sm text-foreground-muted mt-1">
             Describe what your skin needs in your own words. BeautyIQ structures your requirements before matching products.
           </p>
+          <p className="mt-2 text-xs text-foreground-faint">
+            AI helps understand your request; verified catalog and ingredient data determine the final ranking. Do not enter medical records or sensitive personal information.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">

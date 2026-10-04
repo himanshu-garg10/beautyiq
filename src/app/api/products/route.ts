@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     // Post-filter JSON fields (concern, skinType) and maxPrice
     if (concern) {
       const normalizedConcern = concern.toLowerCase();
-      rawProducts = rawProducts.filter((p) => {
+      rawProducts = rawProducts.filter((p: any) => {
         try {
           const concerns: string[] = JSON.parse(p.targetConcerns);
           return concerns.some((c) => c.toLowerCase().includes(normalizedConcern));
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     if (skinType) {
       const normalizedSkin = skinType.toLowerCase();
-      rawProducts = rawProducts.filter((p) => {
+      rawProducts = rawProducts.filter((p: any) => {
         try {
           const skinTypes: string[] = JSON.parse(p.skinTypes);
           return skinTypes.some((s) => s.toLowerCase().includes(normalizedSkin));
@@ -115,10 +115,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (maxPrice !== undefined && !isNaN(maxPrice)) {
-      rawProducts = rawProducts.filter((p) => {
+      rawProducts = rawProducts.filter((p: any) => {
         const availablePrices = p.prices
-          .map((pr) => pr.price)
-          .filter((val): val is number => val !== null && val > 0);
+          .map((pr: any) => pr.price)
+          .filter((val: unknown): val is number => typeof val === "number" && val > 0);
         if (availablePrices.length === 0) return true; // keep if no price listed yet
         const minPrice = Math.min(...availablePrices);
         return minPrice <= maxPrice;
@@ -127,24 +127,24 @@ export async function GET(request: NextRequest) {
 
     // Sort products
     if (sortBy === "rating") {
-      rawProducts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      rawProducts.sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0));
     } else if (sortBy === "price-asc") {
-      rawProducts.sort((a, b) => {
-        const aMin = Math.min(...(a.prices.map((p) => p.price ?? 99999)));
-        const bMin = Math.min(...(b.prices.map((p) => p.price ?? 99999)));
+      rawProducts.sort((a: any, b: any) => {
+        const aMin = Math.min(...(a.prices.map((p: any) => p.price ?? 99999)));
+        const bMin = Math.min(...(b.prices.map((p: any) => p.price ?? 99999)));
         return aMin - bMin;
       });
     } else if (sortBy === "price-desc") {
-      rawProducts.sort((a, b) => {
-        const aMin = Math.max(...(a.prices.map((p) => p.price ?? 0)));
-        const bMin = Math.max(...(b.prices.map((p) => p.price ?? 0)));
+      rawProducts.sort((a: any, b: any) => {
+        const aMin = Math.max(...(a.prices.map((p: any) => p.price ?? 0)));
+        const bMin = Math.max(...(b.prices.map((p: any) => p.price ?? 0)));
         return bMin - aMin;
       });
     }
 
     const facets = {
-      brands: [...new Set(rawProducts.map((product) => product.brand))].sort((a, b) => a.localeCompare(b)),
-      categories: [...new Set(rawProducts.map((product) => product.category))].sort((a, b) => a.localeCompare(b)),
+      brands: Array.from(new Set<string>(rawProducts.map((product: any) => String(product.brand)))).sort((a, b) => a.localeCompare(b)),
+      categories: Array.from(new Set<string>(rawProducts.map((product: any) => String(product.category)))).sort((a, b) => a.localeCompare(b)),
     };
     const total = rawProducts.length;
     const totalPages = Math.ceil(total / pageSize) || 1;

@@ -107,6 +107,33 @@ export class AIRequirementService {
       confidenceScores: extracted.confidenceScores,
     };
 
+    // Gemini improves Hinglish/free-text understanding only. Product matching,
+    // medical safety checks and final ranking remain deterministic and local.
+    try {
+      const aiResponse = await fetch("/api/ai/parse-requirement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: rawText }),
+      });
+      const aiPayload = await aiResponse.json().catch(() => null);
+      if (aiResponse.ok && aiPayload?.success && aiPayload.data) {
+        const ai = aiPayload.data;
+        if (ai.skinType) reqObject.skinType = ai.skinType;
+        if (ai.concerns?.length) reqObject.concerns = ai.concerns;
+        if (ai.goals?.length) reqObject.goals = ai.goals;
+        if (ai.category) reqObject.category = ai.category;
+        if (ai.minPrice !== null && ai.minPrice !== undefined) reqObject.minPrice = ai.minPrice;
+        if (ai.maxPrice !== null && ai.maxPrice !== undefined) reqObject.maxPrice = ai.maxPrice;
+        if (ai.preferredIngredients?.length) reqObject.preferredIngredients = ai.preferredIngredients;
+        if (ai.avoidIngredients?.length) reqObject.avoidIngredients = ai.avoidIngredients;
+        stepLogs.push("Step 8: Gemini AI structured your natural-language request.");
+      } else {
+        stepLogs.push("AI parser unavailable — used the built-in requirement parser.");
+      }
+    } catch {
+      stepLogs.push("AI parser unavailable — used the built-in requirement parser.");
+    }
+
     return {
       requirements: reqObject,
       ambiguities,

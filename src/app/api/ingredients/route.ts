@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       orderBy: { name: "asc" },
     });
 
-    const formatted = rawIngredients.map((ing) => {
+    const formatted = rawIngredients.map((ing: any) => {
       let commonNames: string[] = [];
       let synonyms: string[] = [];
       let concernTags: string[] = [];

@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     // Preserve the order of requested IDs using map by id/slug/legacyId
     const productMap = new Map<string, any>();
-    rawProducts.forEach((p) => {
+    rawProducts.forEach((p: any) => {
       productMap.set(p.id, p);
       if (p.slug) productMap.set(p.slug, p);
       if (p.legacyId) productMap.set(p.legacyId, p);

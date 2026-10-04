@@ -14,9 +14,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    const productIds = saved.map((item) => item.productId);
+    const productIds = saved.map((item: any) => item.productId);
     const objectIdPattern = new RegExp("^[a-f\\d]{24}$", "i");
-    const mongoIds = productIds.filter((id) => objectIdPattern.test(id));
+    const mongoIds = productIds.filter((id: string) => objectIdPattern.test(id));
 
     const products =
       productIds.length === 0
@@ -49,7 +49,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: saved.map((item) => ({
+      data: saved.map((item: any) => ({
         id: item.id,
         productId: item.productId,
         createdAt: item.createdAt,

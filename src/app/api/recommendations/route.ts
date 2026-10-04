@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     // 3. Budget fit: 15%
     // 4. Rating: 10%
     // 5. Free-from preferences: 10%
-    const scoredProducts: ScoredProduct[] = rawProducts.map((raw) => {
+    const scoredProducts: ScoredProduct[] = rawProducts.map((raw: any) => {
       const formatted = formatProduct(raw);
       const productIngredientsLower = formatted.allIngredients.map((i) => i.toLowerCase());
       const keyIngredientsLower = formatted.keyIngredients.map((i) => i.toLowerCase());
