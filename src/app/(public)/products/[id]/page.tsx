@@ -101,11 +101,15 @@ export default function ProductDetailPage() {
   }
 
   const isSaved = user?.wishlistIds.includes(product.id) || false;
-  const bestListing = ProductService.getBestListingForProduct(product.id);
+  const bestListing = listings
+    .filter((listing) => listing.price !== null)
+    .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))[0];
   const bestPrice = bestListing?.price ?? null;
   const originalPrice = bestListing?.originalPrice;
   const discountPercent = bestListing?.discountPercent;
-  const unitPriceCalc = ProductService.getUnitPrice(product);
+  const unitPriceCalc = bestPrice !== null && product.quantity > 0
+    ? { unitPrice: Math.round((bestPrice / product.quantity) * 10) / 10, unitLabel: `₹${Math.round((bestPrice / product.quantity) * 10) / 10}/${product.unit}` }
+    : { unitPrice: null, unitLabel: `₹ / ${product.unit}` };
 
   const handleWishlist = () => {
     toggleWishlist(product.id);
@@ -490,7 +494,10 @@ export default function ProductDetailPage() {
             </div>
 
             {listings.length === 0 ? (
-              <p className="text-sm text-foreground-muted">No external platform listings currently available for this product entity.</p>
+              <div className="rounded-2xl border border-dashed border-line-strong bg-background-elevated/40 p-6 text-sm text-foreground-muted">
+                <p className="font-semibold text-foreground">Retailer offers are not connected for this product yet.</p>
+                <p className="mt-1">Amazon, Flipkart, Nykaa and official-brand offers will appear here as separate, time-stamped listings after their authorised data feeds are connected.</p>
+              </div>
             ) : (
               <Table>
                 <TableHeader>
