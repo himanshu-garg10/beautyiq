@@ -222,7 +222,7 @@ export function PersonalizedDiscovery() {
               variant="outline"
               className="rounded-full px-6 py-3.5 font-medium text-sm border-line hover:border-champagne/60 bg-background-card hover:bg-background-elevated"
             >
-              <span>View Sample Recommendations ({totalSelected} matches)</span>
+              <span>View Recommendations ({totalSelected} preferences)</span>
             </Button>
           </Link>
         </div>

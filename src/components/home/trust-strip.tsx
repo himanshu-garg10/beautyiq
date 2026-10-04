@@ -7,23 +7,23 @@ import { Container } from "@/components/layout/container";
 const valueProps = [
   {
     icon: Sparkles,
-    title: "AI Personalized Recommendations",
-    description: "Matched to your exact skin type, barrier resilience, and concerns.",
+    title: "AI-guided discovery",
+    description: "Turn your skin goals and product needs into clear catalog filters.",
   },
   {
     icon: Dna,
-    title: "Ingredient Intelligence",
-    description: "Evidence-backed active concentrations analyzed without marketing hype.",
+    title: "Ingredient details",
+    description: "Explore listed ingredients and cosmetic reference information.",
   },
   {
     icon: Scale,
-    title: "Cross Platform Price Comparison",
-    description: "Live real-time index tracking across Nykaa, Amazon, Tira & brand stores.",
+    title: "Verified offer comparison",
+    description: "Compare store offers when a verified source is available in the catalog.",
   },
   {
     icon: Compass,
-    title: "Smart Product Discovery",
-    description: "Natural language search that understands skincare chemistry.",
+    title: "Catalog search",
+    description: "Search products, brands, product types, and ingredients in one place.",
   },
 ];
 

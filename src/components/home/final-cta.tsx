@@ -55,9 +55,9 @@ export function FinalCta() {
           </div>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-foreground-faint font-medium border-t border-line/60">
-            <span>✓ 100% Free to Use</span>
-            <span>✓ No Sponsored Rankings</span>
-            <span>✓ 350+ Clinical Actives Verified</span>
+            <span>✓ Guest browsing available</span>
+            <span>✓ Ingredient-first product discovery</span>
+            <span>✓ Source-linked offers when available</span>
           </div>
         </div>
       </Container>
