@@ -160,7 +160,7 @@ export function Navbar() {
               {user ? (
                 <Link
                   href="/wishlist"
-                  className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
+                  className="relative hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
                   title="Saved Wishlist"
                   aria-label={`Wishlist with ${wishlistCount} items`}
                 >
@@ -180,7 +180,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => openAuthModal("login")}
-                  className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
+                  className="relative hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground transition-all shadow-subtle hover:border-line-strong"
                   title="Saved Wishlist (Sign in)"
                   aria-label="Wishlist"
                 >
@@ -189,10 +189,10 @@ export function Navbar() {
               )}
 
               {/* User Notifications (logged-in) */}
-              {user && <NotificationDropdown />}
+              {user && <div className="hidden lg:block"><NotificationDropdown /></div>}
 
               {/* Theme Toggle */}
-              <ThemeToggle />
+              <div className="hidden lg:block"><ThemeToggle /></div>
 
               {/* User Account / Profile Menu */}
               {role === "admin" ? (
@@ -207,7 +207,7 @@ export function Navbar() {
                   </Button>
                 </Link>
               ) : user ? (
-                <div className="relative" ref={accountRef}>
+                <div className="relative hidden lg:block" ref={accountRef}>
                   <button
                     onClick={() => setAccountMenuOpen(!accountMenuOpen)}
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-background-card text-foreground-muted transition-all shadow-subtle hover:border-line-strong hover:bg-background-elevated hover:text-foreground"
