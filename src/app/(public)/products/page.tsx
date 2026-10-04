@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProductService, type PaginatedProductsResult } from "@/services/product.service";
 import type { AvailabilityStatus } from "@/types";
 import { Container } from "@/components/layout/container";
@@ -90,6 +90,7 @@ const sortOptions = [
 
 function ProductsCatalogContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialCategory = searchParams?.get("category") || "";
   const initialBrand = searchParams?.get("brand") || "";
   const initialQuery = searchParams?.get("q") || "";
@@ -118,6 +119,7 @@ function ProductsCatalogContent() {
   const [showMobileFilters, setShowMobileFilters] = React.useState(false);
   const [dataResult, setDataResult] = React.useState<PaginatedProductsResult | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [catalogError, setCatalogError] = React.useState<string | null>(null);
   const [knownBrands, setKnownBrands] = React.useState<string[]>([]);
   const brandOptions = React.useMemo(
     () => Array.from(new Set([...knownBrands, ...selectedBrands])).sort((a, b) => a.localeCompare(b)).map((brand) => ({ value: brand, label: brand })),
@@ -126,6 +128,7 @@ function ProductsCatalogContent() {
 
   const fetchProducts = React.useCallback(() => {
     setLoading(true);
+    setCatalogError(null);
     ProductService.getProducts({
       query: searchQuery,
       categories: selectedCategories,
@@ -147,9 +150,12 @@ function ProductsCatalogContent() {
       if (res.data) {
         setDataResult(res.data);
         setKnownBrands((current) => Array.from(new Set([...current, ...(res.data?.facets?.brands || [])])).sort((a, b) => a.localeCompare(b)));
+      } else {
+        setCatalogError("The catalog could not be loaded right now. Please retry in a moment.");
       }
-      setLoading(false);
-    });
+    }).catch(() => {
+      setCatalogError("The catalog could not be loaded right now. Please retry in a moment.");
+    }).finally(() => setLoading(false));
   }, [
     searchQuery,
     selectedCategories,
@@ -233,8 +239,10 @@ function ProductsCatalogContent() {
   }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrands, selectedCategories, selectedConcerns, selectedSkinTypes]);
 
   React.useEffect(() => {
-    window.history.replaceState(null, "", catalogReturnTo);
-  }, [catalogReturnTo]);
+    // Do not call window.history.replaceState directly: Next stores its router tree there.
+    // router.replace preserves that tree, so browser navigation remains stable after filtering.
+    router.replace(catalogReturnTo, { scroll: false });
+  }, [catalogReturnTo, router]);
 
   return (
     <Container className="max-w-[1500px] px-3 sm:px-5 lg:px-6 py-3 md:py-4 space-y-5">
@@ -413,6 +421,12 @@ function ProductsCatalogContent() {
 
         {/* Products Results Area */}
         <div className="space-y-6">
+          {catalogError ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-status-error/30 bg-status-error-bg/20 px-4 py-3 text-sm text-status-error">
+              <span>{catalogError}</span>
+              <Button size="sm" variant="outline" onClick={fetchProducts}>Try again</Button>
+            </div>
+          ) : null}
           {/* Active Filters Bar */}
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 rounded border border-line bg-background-elevated/40 px-4 py-2.5 text-xs">
