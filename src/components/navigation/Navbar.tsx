@@ -7,12 +7,9 @@ import {
   Sparkles,
   User,
   Heart,
-  Scale,
   Search,
   ChevronDown,
   LogOut,
-  Sliders,
-  LayoutDashboard,
   ShieldCheck,
   X,
   ArrowRight,
@@ -223,30 +220,6 @@ export function Navbar() {
                         >
                           <User className="h-3.5 w-3.5 text-champagne-deep" />
                           <span>My Account</span>
-                        </Link>
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setAccountMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-background-elevated transition-colors"
-                        >
-                          <LayoutDashboard className="h-3.5 w-3.5 text-champagne-deep" />
-                          <span>Skin Profile &amp; Dashboard</span>
-                        </Link>
-                        <Link
-                          href="/compare"
-                          onClick={() => setAccountMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-background-elevated transition-colors"
-                        >
-                          <Scale className="h-3.5 w-3.5 text-champagne-deep" />
-                          <span>Comparison Matrix ({compareCount})</span>
-                        </Link>
-                        <Link
-                          href="/settings"
-                          onClick={() => setAccountMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-background-elevated transition-colors"
-                        >
-                          <Sliders className="h-3.5 w-3.5 text-champagne-deep" />
-                          <span>Account Preferences</span>
                         </Link>
                       </div>
                       <div className="pt-1 border-t border-line/60">

@@ -52,6 +52,7 @@ const concernOptions = [
   { value: "Acne", label: "Acne & active breakouts" },
   { value: "Whiteheads", label: "Whiteheads & clogged pores" },
   { value: "Blackheads", label: "Blackheads & open pores" },
+  { value: "Visible pores", label: "Visible pores" },
   { value: "Dryness", label: "Dryness & barrier" },
   { value: "Itching", label: "Itching & sensitivity" },
   { value: "Hyperpigmentation", label: "Uneven tone & dark spots" },
