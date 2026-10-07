@@ -7,7 +7,7 @@ import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
 
 const concernGuides = [
-  { title: "Glow & dullness", ingredients: "Vitamin C, Niacinamide, Alpha Arbutin", concerns: "Dullness", icon: Sparkles, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=80" },
+  { title: "Glow & dullness", ingredients: "Vitamin C, Niacinamide, Alpha Arbutin", concerns: "Dullness", icon: Sparkles, image: "/images/concerns/glow-and-dullness.png" },
   { title: "Acne & active breakouts", ingredients: "Salicylic Acid, Niacinamide, Azelaic Acid", concerns: "Acne", icon: ShieldCheck, image: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=900&q=80" },
   { title: "Whiteheads & clogged pores", ingredients: "Salicylic Acid, Niacinamide, Clay", concerns: "Acne,Visible pores", icon: ShieldCheck, image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=900&q=80" },
   { title: "Blackheads & open pores", ingredients: "Salicylic Acid, Niacinamide, Retinoids", concerns: "Visible pores,Acne", icon: ShieldCheck, image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=900&q=80" },
