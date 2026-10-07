@@ -1,8 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/auth/validation";
+import { findUserByEmail } from "@/lib/auth/user-store";
 
 const sessionMaxAge = Number(process.env.SESSION_EXPIRY_SECONDS) || 86400;
 
@@ -31,9 +31,8 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.trim().toLowerCase() },
-        });
+        const cleanEmail = parsed.data.email.trim().toLowerCase();
+        const user = await findUserByEmail(cleanEmail);
 
         if (!user) {
           await bcrypt.compare(parsed.data.password, TIMING_SAFE_HASH);

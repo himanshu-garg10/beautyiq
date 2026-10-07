@@ -2,36 +2,272 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Droplets, Search, ShieldCheck, Sparkles, Sun, Waves, X } from "lucide-react";
+import {
+  ArrowRight,
+  Droplets,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Waves,
+  X,
+  Layers,
+  Heart,
+  Eye,
+  Smile,
+} from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
 
 const categories = [
-  { name: "Face Wash", category: "Face Wash", icon: Waves, points: ["Daily cleansing", "Oil and sweat removal", "Morning or evening use"], image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=900&q=80" },
-  { name: "Cleanser", category: "Cleanser", icon: Waves, points: ["Gentle cleansing", "Makeup removal", "Barrier-friendly options"], image: "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=900&q=80" },
-  { name: "Serum", category: "Serum", icon: Sparkles, points: ["Targeted active ingredients", "Glow, spots and acne", "Layer before moisturizer"], image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=900&q=80" },
-  { name: "Moisturizer", category: "Moisturizer", icon: Droplets, points: ["Hydration support", "Cream, gel or lotion", "Barrier comfort"], image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=80" },
-  { name: "Sunscreen", category: "Sunscreen", icon: Sun, points: ["Daily UV protection", "AM routine step", "Cream, gel and fluid types"], image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=900&q=80" },
-  { name: "Toner", category: "Toner", icon: Droplets, points: ["Post-cleanse prep", "Light hydration", "Essence-style formulas"], image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=900&q=80" },
-  { name: "Exfoliator", category: "Exfoliator", icon: Sparkles, points: ["AHA, BHA and PHA options", "Texture-focused care", "Use as directed"], image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=900&q=80" },
-  { name: "Acne Focused Products", category: "Acne Focused Products", icon: ShieldCheck, points: ["Acne and pimple care", "Pore-focused formulas", "Targeted routine steps"], image: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=900&q=80" },
-  { name: "Face Masks", category: "Face Masks", icon: Waves, points: ["Occasional care", "Hydration or cleansing", "Wash-off and leave-on"], image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80" },
-  { name: "Lip Care", category: "Lip Care", icon: Droplets, points: ["Lip balm and repair", "Dryness comfort", "Day or night use"], image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80" },
-  { name: "Eye Care", category: "Eye Care", icon: Sparkles, points: ["Eye-area hydration", "Caffeine and peptide options", "Gentle application"], image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" },
-  { name: "Treatment Products", category: "Treatment Products", icon: Sparkles, points: ["Specific routine needs", "Targeted actives", "Use with product guidance"], image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=900&q=80" },
+  {
+    name: "Face Wash",
+    category: "Face Wash",
+    icon: Waves,
+    points: [
+      "Daily gentle cleansing",
+      "Removes excess oil and sweat",
+      "Morning and evening routine base",
+    ],
+    image: "/images/categories/face-wash.jpg",
+  },
+  {
+    name: "Cleanser",
+    category: "Cleanser",
+    icon: Waves,
+    points: [
+      "Gentle impurity cleansing",
+      "Dissolves makeup and pollution",
+      "Supports healthy skin barrier",
+    ],
+    image: "/images/categories/cleanser.jpg",
+  },
+  {
+    name: "Serum",
+    category: "Serum",
+    icon: Sparkles,
+    points: [
+      "Concentrated active ingredients",
+      "Targets dark spots, fine lines and acne",
+      "Apply before moisturizer",
+    ],
+    image: "/images/categories/serum.jpg",
+  },
+  {
+    name: "Moisturizer",
+    category: "Moisturizer",
+    icon: Droplets,
+    points: [
+      "Locks in deep hydration",
+      "Gel, cream and lotion textures",
+      "Calms and softens skin surface",
+    ],
+    image: "/images/categories/moisturizer.jpg",
+  },
+  {
+    name: "Sunscreen",
+    category: "Sunscreen",
+    icon: Sun,
+    points: [
+      "Broad-spectrum UVA/UVB defense",
+      "Non-greasy fluid & matte options",
+      "Essential daily morning step",
+    ],
+    image: "/images/categories/sunscreen.jpg",
+  },
+  {
+    name: "Toner",
+    category: "Toner",
+    icon: Droplets,
+    points: [
+      "Balances skin pH after cleansing",
+      "Prep layer for serums & creams",
+      "Provides lightweight hydration",
+    ],
+    image: "/images/categories/toner.jpg",
+  },
+  {
+    name: "Exfoliator",
+    category: "Exfoliator",
+    icon: Layers,
+    points: [
+      "Gentle AHA, BHA & PHA formulas",
+      "Smoothes rough skin texture",
+      "Unclogs congested pores",
+    ],
+    image: "/images/categories/exfoliator.jpg",
+  },
+  {
+    name: "Acne Focused Products",
+    category: "Acne Focused Products",
+    icon: ShieldCheck,
+    points: [
+      "Targets breakouts and redness",
+      "Salicylic acid & benzoyl peroxide",
+      "Prevents post-acne blemishes",
+    ],
+    image: "/images/categories/acne-focused.jpg",
+  },
+  {
+    name: "Face Masks",
+    category: "Face Masks",
+    icon: Heart,
+    points: [
+      "Intensive weekly skin treatment",
+      "Hydrating clay & sheet options",
+      "Restores natural radiance",
+    ],
+    image: "/images/categories/face-masks.jpg",
+  },
+  {
+    name: "Lip Care",
+    category: "Lip Care",
+    icon: Smile,
+    points: [
+      "Hydrating balms and overnight butter",
+      "Soothes dry, chapped lips",
+      "SPF protection for everyday wear",
+    ],
+    image: "/images/categories/lip-care.jpg",
+  },
+  {
+    name: "Eye Care",
+    category: "Eye Care",
+    icon: Eye,
+    points: [
+      "Hydrates delicate under-eye area",
+      "Caffeine & peptide depuffing",
+      "Diminishes dark circles",
+    ],
+    image: "/images/categories/eye-care.jpg",
+  },
+  {
+    name: "Treatment Products",
+    category: "Treatment Products",
+    icon: Sparkles,
+    points: [
+      "Targeted intensive skincare formulas",
+      "Potent retinoids and spot treatments",
+      "Improves elasticity & tone",
+    ],
+    image: "/images/categories/treatment-products.jpg",
+  },
 ];
 
 export function CategoriesBrowser() {
   const [search, setSearch] = React.useState("");
+
   const visibleCategories = React.useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return categories;
-    return categories.filter((item) => `${item.name} ${item.points.join(" ")}`.toLowerCase().includes(query));
+    return categories.filter((item) =>
+      `${item.name} ${item.points.join(" ")}`.toLowerCase().includes(query)
+    );
   }, [search]);
 
-  return <Container className="py-3 md:py-4 space-y-4">
-    <div className="flex items-start gap-2"><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search product categories — e.g. serum, sunscreen, acne" leftIcon={<Search className="h-4 w-4 text-sage-deep" />} /><button type="button" onClick={() => setSearch("")} disabled={!search} className="flex h-11 shrink-0 items-center gap-1.5 rounded border border-line bg-background-card px-3 text-sm font-semibold text-foreground-muted transition-colors hover:border-champagne hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"><X className="h-4 w-4" />Clear</button></div>
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{visibleCategories.map((item) => { const Icon = item.icon; return <Link key={item.name} href={`/products?category=${encodeURIComponent(item.category)}`} className="group relative flex min-h-72 flex-col overflow-hidden rounded-3xl border border-line bg-background-card p-5 shadow-subtle transition-all duration-300 hover:-translate-y-1 hover:border-champagne/70 hover:shadow-lg"><span aria-hidden="true" className="absolute inset-0 bg-cover bg-center opacity-20 transition-opacity duration-300 group-hover:opacity-30" style={{ backgroundImage: `url(${item.image})` }} /><span aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-background-card/90 via-background-card/85 to-background-card/95" /><span className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-champagne-tint text-champagne-deep"><Icon className="h-4 w-4" /></span><h2 className="relative mt-5 font-display text-xl font-bold text-foreground">{item.name}</h2><ul className="relative mt-3 space-y-1.5 text-sm leading-relaxed text-foreground-muted">{item.points.map((point) => <li key={point} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-deep" />{point}</li>)}</ul><span className="relative mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-bold text-champagne-deep">Open products <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span></Link>; })}</div>
-    {visibleCategories.length === 0 ? <p className="rounded-2xl border border-line bg-background-card p-6 text-center text-sm text-foreground-muted">No category matches that search. Try “serum”, “cleanser”, “acne”, or “sunscreen”.</p> : null}
-  </Container>;
+  return (
+    <Container className="py-6 md:py-8 space-y-6">
+      {/* Sleek Search Bar */}
+      <div className="flex items-start gap-2 max-w-2xl mx-auto">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search product categories — e.g. serum, sunscreen, face wash, acne"
+          leftIcon={<Search className="h-4 w-4 text-sage-deep" />}
+          className="bg-background-card"
+        />
+        <button
+          type="button"
+          onClick={() => setSearch("")}
+          disabled={!search}
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl border border-line bg-background-card px-3 text-sm font-semibold text-foreground-muted transition-colors hover:border-champagne hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <X className="h-4 w-4" />
+          <span>Clear</span>
+        </button>
+      </div>
+
+      {/* Grid of Uniform Sized Cards Matching Sketch (4 columns in row) */}
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {visibleCategories.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.name}
+              href={`/products?category=${encodeURIComponent(item.category)}`}
+              className="group flex flex-col h-full rounded-3xl border border-line bg-background-card overflow-hidden shadow-subtle hover:shadow-xl hover:border-sage-deep/50 hover:-translate-y-1.5 transition-all duration-300"
+            >
+              {/* UPPER SECTION: Image + Top-Left Circular Badge + Category Title (as per sketch) */}
+              <div className="relative h-56 w-full overflow-hidden bg-background-elevated shrink-0">
+                {/* Real Category Photo */}
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+
+                {/* Subtle gradient overlay to make category title pop */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/15" />
+
+                {/* Top-Left Circular Icon Badge (drawn as circle with icon in sketch) */}
+                <div className="absolute top-3.5 left-3.5 h-10 w-10 rounded-full bg-background-card/90 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-md flex items-center justify-center text-sage-deep transition-transform duration-300 group-hover:scale-110">
+                  <Icon className="h-5 w-5" />
+                </div>
+
+                {/* Category Title at the bottom of the upper section (drawn as 'Face Wash' in sketch) */}
+                <div className="absolute bottom-3.5 left-4 right-4">
+                  <h2 className="font-display text-xl font-bold text-white drop-shadow-md tracking-tight group-hover:text-champagne transition-colors">
+                    {item.name}
+                  </h2>
+                </div>
+              </div>
+
+              {/* LOWER SECTION: Separated by divider, contains bullet points (as per sketch) */}
+              <div className="flex-1 flex flex-col justify-between p-5 bg-background-card border-t border-line/70">
+                {/* Bullet Points list */}
+                <ul className="space-y-2.5">
+                  {item.points.map((point) => (
+                    <li
+                      key={point}
+                      className="flex items-start gap-2.5 text-xs text-foreground-muted leading-relaxed"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sage-deep group-hover:bg-champagne-deep transition-colors" />
+                      <span className="font-medium text-foreground/85">
+                        {point}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Bottom Card Action */}
+                <div className="pt-4 mt-4 border-t border-line/40 flex items-center justify-between text-xs font-bold text-sage-deep group-hover:text-foreground transition-colors">
+                  <span>View Products</span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5 text-champagne-deep" />
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {visibleCategories.length === 0 && (
+        <div className="rounded-3xl border border-line bg-background-card p-12 text-center space-y-3">
+          <p className="font-display text-lg font-bold text-foreground">
+            No categories found
+          </p>
+          <p className="text-xs text-foreground-muted">
+            Try searching for &ldquo;serum&rdquo;, &ldquo;cleanser&rdquo;, &ldquo;sunscreen&rdquo;, or clear your search query.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-sage-deep text-white shadow-subtle hover:bg-foreground transition-colors"
+          >
+            Show All Categories
+          </button>
+        </div>
+      )}
+    </Container>
+  );
 }

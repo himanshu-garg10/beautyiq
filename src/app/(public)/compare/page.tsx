@@ -141,7 +141,7 @@ export default function CompareMatrixPage() {
 
   return (
     <Container className="py-6 md:py-8 space-y-6 max-w-7xl">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs font-mono text-foreground-faint">{items.length} / 5 selected</span>
         <div className="flex flex-wrap items-center gap-3">
           <Button

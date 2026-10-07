@@ -16,7 +16,10 @@ export function getClientIp(req: { headers: { get(name: string): string | null }
   return req.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
-export function enforceAuthRateLimit(req: NextRequest, action: "login" | "signup"): NextResponse | null {
+export function enforceAuthRateLimit(
+  req: NextRequest,
+  action: "login" | "signup" | "send-otp" | "verify-otp"
+): NextResponse | null {
   if (process.env.RATE_LIMIT_ENABLED === "false") {
     return null;
   }

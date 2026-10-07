@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/auth/validation";
 import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
 import { InputValidator } from "@/lib/security/input-validator";
+import { createUser } from "@/lib/auth/user-store";
 
-const BCRYPT_COST = 12;
+const BCRYPT_COST = 10;
 
 function isUniqueConstraintError(error: unknown): boolean {
   return (
@@ -33,23 +33,28 @@ export async function POST(req: NextRequest) {
 
     const { name, password } = parsed.data;
     const email = parsed.data.email.trim().toLowerCase();
+
+
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
-    const user = await prisma.user.create({
-      data: {
-        name: InputValidator.sanitizeString(name),
-        email,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
-      },
+    const user = await createUser({
+      name: InputValidator.sanitizeString(name),
+      email,
+      passwordHash,
     });
 
-    return NextResponse.json({ success: true, data: user }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     if (isUniqueConstraintError(error)) {
       return NextResponse.json(

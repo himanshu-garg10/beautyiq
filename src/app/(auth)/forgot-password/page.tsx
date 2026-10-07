@@ -27,12 +27,18 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const res = await AuthService.forgotPassword(email);
-      if (res.data) {
-        setSuccessMessage(res.data.message);
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "email", target: email.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to dispatch email.");
       }
+      setSuccessMessage(data.message || `If an account exists with ${email}, a verification code has been dispatched to your email.`);
     } catch (err: any) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(err.message || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
