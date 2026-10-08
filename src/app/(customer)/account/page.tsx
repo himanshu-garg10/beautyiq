@@ -5,255 +5,121 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useSkinProfile } from "@/context/skin-profile-context";
-import { useToast } from "@/context/toast-context";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Alert } from "@/components/ui/alert";
-import type { SkinType } from "@/types";
-import { Heart, Trash2, Save } from "lucide-react";
-
-const skinTypes = ["Oily", "Dry", "Combination", "Normal", "Sensitive"];
+import {
+  ArrowRight,
+  Heart,
+  LogOut,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 
 type SavedProductRow = {
   id: string;
   productId: string;
-  createdAt: string;
   product: {
     id: string;
     name: string;
     brand: string;
-    image: string;
     category: string;
   } | null;
 };
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, deleteAccount, logout, sessionStatus } = useAuth();
-  const { profile, updateProfile } = useSkinProfile();
-  const { addToast } = useToast();
-
-  const [skinType, setSkinType] = React.useState<SkinType>(profile.skinType || "Combination");
-  const [concerns, setConcerns] = React.useState((profile.concerns || []).join(", "));
-  const [allergies, setAllergies] = React.useState((profile.knownAllergies || []).join(", "));
-  const [budgetMin, setBudgetMin] = React.useState(String(profile.budget?.min ?? 0));
-  const [budgetMax, setBudgetMax] = React.useState(String(profile.budget?.max ?? 2000));
-  const [preferences, setPreferences] = React.useState(
-    [profile.texturePreference, profile.finishPreference, profile.fragrancePreference]
-      .filter(Boolean)
-      .join(", ")
-  );
+  const { user, logout, sessionStatus } = useAuth();
+  const { profile } = useSkinProfile();
   const [savedProducts, setSavedProducts] = React.useState<SavedProductRow[]>([]);
-  const [saving, setSaving] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
-  const [confirmDelete, setConfirmDelete] = React.useState("");
-
-  React.useEffect(() => {
-    setSkinType((profile.skinType as SkinType) || "Combination");
-    setConcerns((profile.concerns || []).join(", "));
-    setAllergies((profile.knownAllergies || []).join(", "));
-    setBudgetMin(String(profile.budget?.min ?? 0));
-    setBudgetMax(String(profile.budget?.max ?? 2000));
-  }, [profile]);
 
   React.useEffect(() => {
     if (sessionStatus !== "authenticated") return;
     fetch("/api/saved-products")
-      .then((res) => (res.ok ? res.json() : { data: [] }))
-      .then((payload) => setSavedProducts(payload.data || []))
+      .then((response) => (response.ok ? response.json() : { data: [] }))
+      .then((payload) => setSavedProducts(Array.isArray(payload.data) ? payload.data : []))
       .catch(() => setSavedProducts([]));
   }, [sessionStatus, user?.wishlistIds]);
 
-  const handleSaveProfile = async () => {
-    setSaving(true);
-    try {
-      const concernList = concerns.split(",").map((item) => item.trim()).filter(Boolean);
-      const allergyList = allergies.split(",").map((item) => item.trim()).filter(Boolean);
-      await updateProfile({
-        skinType: skinType as SkinType,
-        concerns: concernList as SkinType[] as never,
-        knownAllergies: allergyList as never,
-        budget: {
-          min: Number(budgetMin) || 0,
-          max: Number(budgetMax) || 2000,
-          label: "Mid-Range",
-        },
-      });
-      await fetch("/api/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          skinType,
-          concerns: concernList,
-          allergies: allergyList,
-          budgetMin: Number(budgetMin) || 0,
-          budgetMax: Number(budgetMax) || 2000,
-          preferences,
-        }),
-      });
-      addToast({
-        type: "success",
-        title: "Skin profile saved",
-        description: "Your account skin profile has been updated.",
-      });
-    } catch {
-      addToast({
-        type: "error",
-        title: "Could not save profile",
-        description: "Please try again.",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRemoveProduct = async (productId: string) => {
-    const response = await fetch(`/api/saved-products?productId=${encodeURIComponent(productId)}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) return;
-    setSavedProducts((current) => current.filter((item) => item.productId !== productId));
-  };
-
-  const handleDeleteAccount = async () => {
-    if (confirmDelete.trim() !== "DELETE") {
-      addToast({
-        type: "error",
-        title: "Confirmation required",
-        description: "Type DELETE to permanently remove your account.",
-      });
-      return;
-    }
-    setDeleting(true);
-    try {
-      await deleteAccount();
-      addToast({
-        type: "info",
-        title: "Account deleted",
-        description: "Your BeautyIQ account and saved data have been removed.",
-      });
-      router.push("/");
-    } catch (error) {
-      addToast({
-        type: "error",
-        title: "Could not delete account",
-        description: error instanceof Error ? error.message : "Please try again.",
-      });
-    } finally {
-      setDeleting(false);
-    }
-  };
+  const initials = (user?.name || "BeautyIQ Member")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+  const concerns = profile.concerns?.slice(0, 3) || [];
 
   return (
-    <div className="space-y-8 max-w-3xl">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-foreground">My Account</h1>
-        <p className="text-sm text-foreground-muted mt-1">
-          Signed in as {user?.email}. Your skin profile and saved products stay on this account.
-        </p>
-      </div>
-
-      <section className="rounded-2xl border border-line bg-background-card p-6 space-y-4">
-        <h2 className="font-semibold text-foreground">Skin profile</h2>
-        <Select
-          label="Skin type"
-          options={skinTypes.map((type) => ({ value: type, label: type }))}
-          value={skinType}
-          onChange={(e) => setSkinType(e.target.value as SkinType)}
-        />
-        <Input
-          label="Concerns (comma separated)"
-          value={concerns}
-          onChange={(e) => setConcerns(e.target.value)}
-          placeholder="Acne, Dryness, Dark spots"
-        />
-        <Input
-          label="Allergies (comma separated)"
-          value={allergies}
-          onChange={(e) => setAllergies(e.target.value)}
-          placeholder="Fragrance, Specific ingredients"
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Input
-            label="Budget min (₹)"
-            type="number"
-            value={budgetMin}
-            onChange={(e) => setBudgetMin(e.target.value)}
-          />
-          <Input
-            label="Budget max (₹)"
-            type="number"
-            value={budgetMax}
-            onChange={(e) => setBudgetMax(e.target.value)}
-          />
+    <div className="mx-auto max-w-5xl space-y-6 pb-10">
+      <section className="overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(circle_at_85%_5%,rgba(215,188,141,0.28),transparent_30%),linear-gradient(135deg,rgba(250,244,234,0.96),rgba(255,255,255,0.96),rgba(230,240,229,0.72))] p-6 shadow-subtle dark:bg-[radial-gradient(circle_at_85%_5%,rgba(161,124,68,0.22),transparent_30%),linear-gradient(135deg,rgba(32,35,34,0.98),rgba(29,31,30,0.98),rgba(38,48,41,0.92))] sm:p-8">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-foreground font-display text-xl font-semibold text-background shadow-md">
+              {initials || "BI"}
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-champagne-deep">BeautyIQ member</p>
+              <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-foreground">{user?.name || "My Account"}</h1>
+              <p className="mt-1 text-sm text-foreground-muted">{user?.email}</p>
+            </div>
+          </div>
+          <Link href="/settings" className="inline-flex">
+            <Button variant="outline" size="sm" leftIcon={<SlidersHorizontal className="h-4 w-4" />}>
+              Account settings
+            </Button>
+          </Link>
         </div>
-        <Input
-          label="Preferences"
-          value={preferences}
-          onChange={(e) => setPreferences(e.target.value)}
-          placeholder="Gel texture, fragrance free"
-        />
-        <Button onClick={handleSaveProfile} isLoading={saving} leftIcon={<Save className="h-4 w-4" />}>
-          Save skin profile
-        </Button>
       </section>
 
-      <section className="rounded-2xl border border-line bg-background-card p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <Heart className="h-4 w-4 text-rose-500" />
-          <h2 className="font-semibold text-foreground">Saved products</h2>
+      <section className="grid gap-4 md:grid-cols-3">
+        <Link href="/profile" className="group rounded-2xl border border-line bg-background-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-sage-deep/30 hover:shadow-md">
+          <div className="flex items-center justify-between"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage-tint text-sage-deep"><UserRound className="h-5 w-5" /></div><ArrowRight className="h-4 w-4 text-foreground-faint transition-transform group-hover:translate-x-0.5 group-hover:text-sage-deep" /></div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.13em] text-foreground-faint">Skin profile</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">{profile.skinType || "Complete your profile"} skin</h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground-muted">{concerns.length ? concerns.join(" · ") : "Add your skin type and concerns for better matches."}</p>
+        </Link>
+
+        <Link href="/wishlist" className="group rounded-2xl border border-line bg-background-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-rose-400/35 hover:shadow-md">
+          <div className="flex items-center justify-between"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-500 dark:bg-rose-950/30"><Heart className="h-5 w-5" /></div><ArrowRight className="h-4 w-4 text-foreground-faint transition-transform group-hover:translate-x-0.5 group-hover:text-rose-500" /></div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.13em] text-foreground-faint">Saved products</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">{savedProducts.length} saved</h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Keep products you want to revisit in one personal wishlist.</p>
+        </Link>
+
+        <Link href="/ai-search" className="group rounded-2xl border border-line bg-background-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-champagne-deep/35 hover:shadow-md">
+          <div className="flex items-center justify-between"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep"><Sparkles className="h-5 w-5" /></div><ArrowRight className="h-4 w-4 text-foreground-faint transition-transform group-hover:translate-x-0.5 group-hover:text-champagne-deep" /></div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.13em] text-foreground-faint">Need a suggestion?</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">Ask AI Match</h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Describe your concern naturally and get cosmetic guidance with products.</p>
+        </Link>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-background-card p-5 shadow-subtle sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line/70 pb-4">
+          <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">Your wishlist</p><h2 className="mt-1 font-display text-2xl font-semibold text-foreground">Recently saved products</h2></div>
+          <Link href="/wishlist" className="text-sm font-semibold text-sage-deep hover:underline">View all</Link>
         </div>
-        {savedProducts.length === 0 ? (
-          <p className="text-sm text-foreground-muted">
-            No saved products yet.{" "}
-            <Link href="/products" className="text-sage-deep font-semibold hover:underline">
-              Browse the catalog
-            </Link>
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {savedProducts.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    {item.product?.name || item.productId}
-                  </p>
-                  <p className="text-xs text-foreground-muted">{item.product?.brand}</p>
-                </div>
-                <Button size="sm" variant="ghost" onClick={() => handleRemoveProduct(item.productId)}>
-                  Remove
-                </Button>
+        {savedProducts.length ? (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {savedProducts.slice(0, 3).map((item) => (
+              <li key={item.id} className="rounded-xl border border-line bg-background-elevated/35 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-champagne-deep">{item.product?.brand || "BeautyIQ catalog"}</p>
+                <p className="mt-1 line-clamp-2 text-sm font-semibold text-foreground">{item.product?.name || "Saved product"}</p>
+                <p className="mt-2 text-xs text-foreground-muted">{item.product?.category || "Product"}</p>
               </li>
             ))}
           </ul>
+        ) : (
+          <div className="mt-5 rounded-xl bg-background-elevated/45 px-4 py-5 text-sm text-foreground-muted">
+            Nothing saved yet. <Link href="/products" className="font-semibold text-sage-deep hover:underline">Browse products</Link> and use the heart icon to build your wishlist.
+          </div>
         )}
       </section>
 
-      <section className="rounded-2xl border border-status-error/30 bg-status-error-bg/20 p-6 space-y-4">
-        <h2 className="font-semibold text-status-error flex items-center gap-2">
-          <Trash2 className="h-4 w-4" />
-          Delete my account
-        </h2>
-        <Alert variant="error">
-          This permanently removes your login, skin profile, saved products, and quiz results. This cannot be undone.
-        </Alert>
-        <Input
-          label='Type DELETE to confirm'
-          value={confirmDelete}
-          onChange={(e) => setConfirmDelete(e.target.value)}
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button variant="danger" isLoading={deleting} onClick={handleDeleteAccount}>
-            Delete my account
-          </Button>
-          <Button variant="outline" onClick={() => logout().then(() => router.push("/"))}>
-            Log out
-          </Button>
-        </div>
+      <section className="flex flex-col gap-4 rounded-2xl border border-line bg-background-card p-5 shadow-subtle sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex items-start gap-3"><div className="mt-0.5 rounded-xl bg-sage-tint p-2 text-sage-deep"><ShieldCheck className="h-4 w-4" /></div><div><h2 className="font-semibold text-foreground">Your data stays with your account</h2><p className="mt-1 text-sm text-foreground-muted">Your saved products, profile and activity are kept separate from other BeautyIQ accounts.</p></div></div>
+        <Button variant="outline" size="sm" leftIcon={<LogOut className="h-4 w-4" />} onClick={() => logout().then(() => router.push("/"))}>Log out</Button>
       </section>
     </div>
   );

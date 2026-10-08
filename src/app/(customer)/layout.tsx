@@ -12,9 +12,9 @@ export default function CustomerLayout({
     <ProtectedRoute allowedRoles={["customer", "admin"]}>
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="flex flex-1 container mx-auto">
+        <div className="container mx-auto flex flex-1 pt-[72px]">
           <CustomerSidebar className="hidden md:flex" />
-          <main className="flex-1 p-6 md:p-8 overflow-y-auto">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto p-5 md:p-8">{children}</main>
         </div>
       </div>
     </ProtectedRoute>
