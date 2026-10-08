@@ -1,182 +1,174 @@
 # BeautyIQ
 
-AI-powered personalized skincare product discovery, recommendation, comparison and product intelligence platform.
+> A skincare discovery platform that helps people explore products, understand common cosmetic ingredients, compare available retailer listings, and get AI-assisted product directions.
+
+[Live demo](https://beautyiq-s3hf.onrender.com) · [Report an issue](https://github.com/himanshu-garg10/beautyiq/issues) · [Explore the source](https://github.com/himanshu-garg10/beautyiq)
 
 ---
 
-## 🚀 Getting Started
+## Why BeautyIQ?
+
+Finding skincare online can feel noisy: the same product is described differently on every store, ingredient labels are hard to read, and it is difficult to know where to begin. BeautyIQ brings those early research steps together in one place.
+
+It is designed as a product-discovery and comparison experience—not a diagnostic or medical service. The AI Match feature gives cosmetic-care guidance and uses the project catalog to surface relevant products; it does not replace advice from a dermatologist.
+
+## What the platform includes
+
+- **AI Match** — write a normal question in English, Hindi, or Hinglish. Gemini extracts useful product filters and returns short, tailored cosmetic-care suggestions.
+- **Product discovery** — browse the catalog by category, concern, skin type, brand, ingredient, or price range.
+- **Concern guides** — practical starting points for concerns such as dullness, acne, dryness, oiliness, texture, pigmentation, dark circles, and more.
+- **Ingredient intelligence** — explore ingredient names and the cosmetic concerns they are commonly associated with.
+- **Comparison workspace** — add only the products you choose, then inspect product information and available retailer listings side by side.
+- **Personal accounts** — each account keeps its own wishlist, comparison selections, profile, activity, and notifications.
+- **Admin control room** — protected tools for catalog import, data quality checks, products, brands, listings, customer records, and support requests.
+- **Responsive interface** — works across desktop and mobile, with light and dark themes.
+
+## Product principles
+
+| Principle | What it means in BeautyIQ |
+| --- | --- |
+| Transparent catalog | Product and retailer information is shown only when it exists in the stored catalog. |
+| Separate user data | Wishlists, comparisons, history, and notifications belong to the signed-in account only. |
+| Cosmetic guidance | AI suggestions are phrased as product-discovery guidance, not medical diagnosis or treatment. |
+| Useful comparison | Retailer buttons open the recorded listing directly when a product URL is available. |
+
+## Technology
+
+- **Framework:** Next.js 14 (App Router) and React 18
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS, Framer Motion, Lucide icons
+- **Database:** MongoDB Atlas through Prisma
+- **Authentication:** NextAuth with credential-based accounts
+- **AI:** Google Gemini for natural-language requirement extraction and question-specific cosmetic guidance
+- **Email:** Resend (optional; used for email flows when configured)
+- **Deployment:** Render
+
+## Getting started
 
 ### Prerequisites
-- Node.js 18.17+ or 20+
-- npm 9+
 
-### Commands to Run Locally
+- Node.js 18.17+ (Node.js 20 LTS is recommended)
+- npm 9+
+- A MongoDB Atlas database for persistent local data
+- A Gemini API key if you want AI Match to use Gemini
+
+### 1. Clone and install
 
 ```bash
-# 1. Install dependencies
+git clone https://github.com/himanshu-garg10/beautyiq.git
+cd beautyiq
 npm install
+```
 
-# 2. Start the development server
+### 2. Add environment variables
+
+Copy the template and fill in your own values:
+
+```bash
+cp .env.example .env.local
+```
+
+At minimum, configure `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `ADMIN_EMAILS`. Add `GEMINI_API_KEY` to enable Gemini-powered AI Match guidance.
+
+### 3. Prepare the database
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+### 4. Start the development server
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-### Build for Production
+### Production check
 
 ```bash
-# 1. Build optimized production bundle
 npm run build
-
-# 2. Run production server
 npm run start
 ```
 
----
+## Environment variables
 
-## 🏛️ Project Architecture Overview
+Never commit a real `.env.local` file or share secrets in screenshots, issues, or commits.
 
-The project is structured into clean, decoupled layers where the purpose of every file is immediately evident:
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | Yes | MongoDB Atlas connection string used by Prisma. |
+| `NEXTAUTH_SECRET` | Yes | Encrypts/signs authentication session data. |
+| `NEXTAUTH_URL` | Yes in production | Public application URL, such as the Render service URL. |
+| `ADMIN_EMAILS` | Yes for admin tools | Comma-separated list of email addresses allowed to access admin routes. |
+| `GEMINI_API_KEY` | Recommended | Enables Gemini parsing and tailored AI Match guidance. |
+| `GEMINI_MODEL` | Optional | Gemini model name; defaults to the app configuration. |
+| `RESEND_API_KEY` | Optional | Enables configured email flows. |
+| `EMAIL_FROM` | Optional | Sender address used with Resend. A verified domain is needed to mail external recipients. |
+| `SUPPORT_FROM_EMAIL` / `SUPPORT_TO_EMAIL` | Optional | Contact and support email configuration. |
+| `RATE_LIMIT_*` | Optional | Controls API request throttling. |
 
-```
-beautyiq/
-├── public/                     # 10. Static Assets
-│   ├── images/                 # Static illustrations & photography
-│   ├── icons/                  # SVG icons & badges
-│   ├── products/               # Product thumbnails & packshots
-│   └── brands/                 # Brand logos
-│
-├── data/                       # Local SQLite storage (beautyiq.db)
-│
-├── src/
-│   ├── app/                    # 1. Pages & Routes (Next.js App Router)
-│   │   ├── page.tsx            # Homepage
-│   │   ├── layout.tsx          # Root layout with context providers
-│   │   ├── (auth)/             # Auth routes (/login, /register, /forgot-password)
-│   │   ├── (customer)/         # Customer routes (/profile, /wishlist, /dashboard)
-│   │   ├── (public)/           # Public routes (/products, /compare, /recommendations, /ingredients)
-│   │   ├── admin/              # Admin routes (/admin/dashboard, /admin/products, etc.)
-│   │   └── api/                # 2. Backend / REST API Route Handlers
-│   │       ├── products/       # /api/products/[id]/prices, /api/products/[id]/value
-│   │       ├── comparison/     # /api/comparison, /api/comparison/history
-│   │       ├── wishlist/       # /api/wishlist, /api/wishlist/[productId]
-│   │       ├── notifications/  # /api/notifications
-│   │       ├── user/           # /api/user/settings, /api/user/export
-│   │       └── admin/          # /api/admin/* (metrics, quality, listings, pipeline)
-│   │
-│   ├── components/             # 4. Reusable UI Components
-│   │   ├── navigation/         # Navbar, MobileNav, NotificationDropdown
-│   │   ├── hero/               # HeroSection banner & value highlights
-│   │   ├── product/            # ProductCard, ProductDiscovery, TrendingProducts, CategoryGrid
-│   │   ├── recommendations/    # AiRecommendationShowcase, PersonalizedDiscovery, ScoreBreakdown
-│   │   ├── comparison/         # ComparisonShowcase, PriceComparison
-│   │   ├── ingredients/        # IngredientIntelligence, IngredientsSection
-│   │   ├── layout/             # Container, Section, Footer, CustomerSidebar, AdminSidebar
-│   │   ├── home/               # Homepage sections (TrustStrip, WhyBeautyIq, ReviewsSection, FinalCta)
-│   │   ├── auth/               # AuthModal, ProtectedRoute
-│   │   ├── admin/              # AdminTable, AdminStatCard, AdminConfirmModal
-│   │   ├── ai-requirement/     # ManualRequirementForm, EditableRequirementCard
-│   │   ├── theme/              # ThemeToggle
-│   │   └── ui/                 # Design system primitives (Button, Input, Modal, Badge, Toast, etc.)
-│   │
-│   ├── server/                 # 2 & 6. Backend Logic, Services & Repositories
-│   │   ├── database/           # 3. Database Connection & Schema (better-sqlite3)
-│   │   │   ├── connection.ts   # SQLite connection singleton with WAL mode
-│   │   │   ├── schema.ts       # Table DDL & auto-migrations
-│   │   │   └── crypto.ts       # Secure scrypt password hashing
-│   │   ├── repositories/       # 3. Database Access Repositories
-│   │   │   ├── userRepository.ts
-│   │   │   ├── wishlistRepository.ts
-│   │   │   ├── recommendationRepository.ts
-│   │   │   └── index.ts        # DbService unified data access facade
-│   │   ├── services/           # 6. Business Logic Services
-│   │   │   ├── auth.service.ts
-│   │   │   ├── product.service.ts
-│   │   │   ├── recommendation-engine.service.ts
-│   │   │   ├── comparison.service.ts
-│   │   │   ├── ingredient.service.ts
-│   │   │   ├── wishlist.service.ts
-│   │   │   ├── notification.service.ts
-│   │   │   ├── product-search.service.ts
-│   │   │   ├── ai-requirement.service.ts
-│   │   │   ├── admin-data.service.ts
-│   │   │   └── data-pipeline/  # 7-stage automated data ingestion
-│   │   └── security/           # Route guards, rate limiters, medical safety, AI guardrails
-│   │
-│   ├── data/                   # Initial Datasets & Catalog
-│   │   ├── categories.ts       # Routine categories
-│   │   ├── brands.ts           # Partner brands
-│   │   ├── ingredients.ts      # Scientific ingredient database
-│   │   ├── products.ts         # Product catalog & listings
-│   │   ├── users.ts            # Mock accounts, profiles, notifications
-│   │   ├── platforms.ts        # E-commerce platforms & sellers
-│   │   ├── admin.ts            # Audit logs, quality issues, reports
-│   │   └── index.ts            # Unified dataset export
-│   │
-│   ├── hooks/                  # Custom React Hooks
-│   │   ├── useAuth.ts          # Authentication session state
-│   │   ├── useComparison.ts    # Comparison tray hook
-│   │   ├── useWishlist.ts      # Wishlist toggle & state hook
-│   │   ├── useSkinProfile.ts   # Skin profile quiz hook
-│   │   ├── useTheme.ts         # Dark/Light mode theme hook
-│   │   ├── useToast.ts         # Global notification alert hook
-│   │   └── index.ts
-│   │
-│   ├── lib/                    # 7. Utilities & Helpers
-│   │   ├── utils/              # Classname merge cn() helper
-│   │   ├── api/                # API client response wrapper
-│   │   ├── validation/         # Input, file, and URL validators
-│   │   └── constants/          # Application constants & pagination defaults
-│   │
-│   ├── types/                  # 8. TypeScript Domain Interfaces
-│   │   ├── user.ts             # User, SkinProfile, roles, notifications
-│   │   ├── product.ts          # Product, ProductListing, Category, Brand
-│   │   ├── ingredient.ts       # Ingredient, safety ratings, categories
-│   │   ├── recommendation.ts   # AI requirements, scored products, match results
-│   │   ├── comparison.ts       # ComparisonItem, PriceHistory, value metrics
-│   │   ├── admin.ts            # Admin metrics, support requests, quality issues
-│   │   ├── pipeline.ts         # Data sources, raw records, validation
-│   │   └── index.ts            # Barrel export
-│   │
-│   └── config/                 # 9. Application Configuration
-│       ├── site.ts             # Site metadata, routes, navigation menus
-│       └── index.ts
-│
-├── .env.example                # Safe environment variables template
-├── .env.local                  # Local development secrets (ignored by git)
-├── next.config.js              # Next.js bundler & image security rules
-├── tailwind.config.ts          # Tailwind design tokens & themes
-└── tsconfig.json               # TypeScript compiler config & path aliases
+For a full key template, see [`.env.example`](.env.example).
+
+## Useful commands
+
+```bash
+npm run dev              # start local development
+npm run build            # create a production build
+npm run start            # run the production build
+npm run db:push          # sync Prisma schema with MongoDB
+npm run db:seed          # seed initial project data
+npm run catalog:import   # run the catalog import script
 ```
 
+## Project structure
+
+```text
+src/
+├── app/                  # Pages, layouts, API routes, admin area
+├── components/           # Reusable UI grouped by feature
+├── context/              # Auth, skin profile, theme, toast, comparison state
+├── services/             # Client-facing product, search, AI and comparison services
+├── server/               # Server business logic, repositories and security utilities
+├── lib/                  # Prisma, auth, validation, email and shared helpers
+├── data/                 # Seed/catalog data and content definitions
+└── types/                # Shared TypeScript domain types
+
+prisma/                   # MongoDB Prisma schema and seed script
+public/images/            # Concern and category imagery
+scripts/                  # Import utilities
+```
+
+## Main routes
+
+| Area | Route |
+| --- | --- |
+| Home | `/` |
+| Products | `/products` |
+| Categories | `/categories` |
+| Concerns | `/ingredients` |
+| AI Match | `/ai-search` |
+| Compare | `/compare` |
+| Account | `/account` |
+| Admin dashboard | `/admin/dashboard` |
+
+## Current scope and honest limitations
+
+- Product availability, prices, images, and retailer links depend on the data currently imported into the BeautyIQ catalog.
+- Retailer APIs may require partner approval; the project does not invent listings or prices when a verified source is not available.
+- AI Match is intended for cosmetic product exploration. Persistent, severe, painful, infected, or otherwise concerning skin symptoms should be discussed with a qualified dermatologist.
+- The free Render service can take time to wake after inactivity.
+
+## Contributing
+
+This is an academic major-project repository. Suggestions and improvements are welcome:
+
+1. Create a branch from `main`.
+2. Keep changes focused and do not add API keys or personal credentials.
+3. Run `npm run build` before opening a pull request.
+4. Explain the user-facing impact of your change.
+
 ---
 
-## 🧭 File Categorization Guide
-
-| Category | Location | Description |
-|---|---|---|
-| **1. Frontend / UI** | `src/components/`, `src/app/` | React views, layout structures, visual widgets, and styles. |
-| **2. Backend / API** | `src/app/api/`, `src/server/` | Next.js REST route handlers and server runtime logic. |
-| **3. Database Access** | `src/server/database/`, `src/server/repositories/` | SQLite database connection, table schemas, and typed data queries. |
-| **4. Reusable Components** | `src/components/` | Domain-grouped UI elements (`hero`, `navigation`, `product`, `ui`, etc.). |
-| **5. Pages / Routes** | `src/app/` | Individual route folders (`products/`, `compare/`, `recommendations/`, etc.). |
-| **6. Business Logic** | `src/server/services/` | Scored recommendation engine, price comparison algorithms, pipelines. |
-| **7. Utilities / Helpers** | `src/lib/` | `cn()` Tailwind utility, API client helpers, input sanitization. |
-| **8. Types / Interfaces** | `src/types/` | Modular domain TypeScript definitions. |
-| **9. Configuration** | `src/config/`, root configs | Navigation menus, site metadata, Tailwind & Next configs. |
-| **10. Static Assets** | `public/` | Images, icons, logos, and public static files. |
-
----
-
-## 🔒 Environment Variables
-
-- `.env.local`: Used exclusively for local developer secrets (NEVER committed to git).
-- `.env.example`: Safe template containing required environment variable keys with empty or placeholder values.
-
----
-
-## 🛡️ Verification & Health
-
-- **Type Check**: `npx tsc --noEmit` passes with 0 errors.
-- **Production Build**: `npm run build` compiles 65 static & dynamic routes.
-- **Live Dev Server**: Running on [http://localhost:3000](http://localhost:3000).
+Built for clearer skincare discovery, not louder product claims.
