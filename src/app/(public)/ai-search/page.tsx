@@ -24,9 +24,6 @@ import {
   Info,
   Sliders,
   ShieldCheck,
-  LockKeyhole,
-  Database,
-  ListChecks,
 } from "lucide-react";
 
 const examplePrompts = [
@@ -189,19 +186,7 @@ function AISearchContent() {
     <Container className="py-6 md:py-8 space-y-6 max-w-5xl">
       <section className="overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(circle_at_top_right,rgba(215,188,141,0.28),transparent_32%),linear-gradient(135deg,rgba(250,244,234,0.96),rgba(255,255,255,0.96),rgba(230,240,229,0.72))] p-6 shadow-subtle dark:bg-[radial-gradient(circle_at_top_right,rgba(161,124,68,0.2),transparent_35%),linear-gradient(135deg,rgba(32,35,34,0.98),rgba(29,31,30,0.98),rgba(38,48,41,0.92))] sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-2xl"><div className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/20 bg-background-card/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-champagne-deep shadow-sm"><Sparkles className="h-4 w-4" /> AI Match</div><h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl">Tell us what your skin needs.</h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground-muted sm:text-base">Ask a real question in English, Hindi, or Hinglish. Describe your skin, concern, budget or product type—and BeautyIQ will turn it into a clear product search.</p></div><Button variant="outline" size="sm" leftIcon={<Sliders className="h-4 w-4" />} onClick={() => setMode("manual")}>Manual form</Button></div>
-        <div className="mt-7 grid gap-3 text-sm sm:grid-cols-3"><div className="rounded-2xl border border-line/70 bg-background-card/80 p-4 shadow-sm"><div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep"><Sparkles className="h-4 w-4" /></div><b className="text-foreground">1. Describe</b><p className="mt-1 leading-relaxed text-foreground-muted">Your skin, concern, product type, ingredient preferences and budget.</p></div><div className="rounded-2xl border border-line/70 bg-background-card/80 p-4 shadow-sm"><div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl bg-sage-tint text-sage-deep"><ListChecks className="h-4 w-4" /></div><b className="text-foreground">2. Review filters</b><p className="mt-1 leading-relaxed text-foreground-muted">Gemini structures your request into editable skincare filters.</p></div><div className="rounded-2xl border border-line/70 bg-background-card/80 p-4 shadow-sm"><div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep"><Database className="h-4 w-4" /></div><b className="text-foreground">3. Explore products</b><p className="mt-1 leading-relaxed text-foreground-muted">BeautyIQ ranks matching products from the live catalog and shows why.</p></div></div>
-      </section>
-
-      <section className="grid gap-4 rounded-2xl border border-line bg-background-card p-5 shadow-subtle md:grid-cols-[1.2fr_0.8fr] md:p-6">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-champagne-deep">How AI Match works</p>
-          <h2 className="mt-2 font-display text-2xl font-bold text-foreground">AI understands the request. BeautyIQ explains the match.</h2>
-          <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Gemini reads your natural-language request and extracts only useful fields such as skin type, concern, product category, budget, preferred ingredients and ingredients to avoid. Then BeautyIQ applies those filters to the products in its catalog and ranks the results with visible reasons—not hidden medical claims.</p>
-        </div>
-        <div className="rounded-xl border border-sage-deep/15 bg-sage-tint/45 p-4 text-sm text-foreground-muted dark:bg-sage-deep/15">
-          <div className="flex items-center gap-2 font-semibold text-foreground"><LockKeyhole className="h-4 w-4 text-sage-deep" /> Your Gemini key stays private</div>
-          <p className="mt-2 leading-relaxed">The key is stored only in Render as <code className="rounded bg-background-card px-1 py-0.5 text-xs">GEMINI_API_KEY</code>. The browser sends your question to BeautyIQ&apos;s server; it never receives or displays the key.</p>
-        </div>
+        <div className="mt-6 flex flex-wrap gap-2"><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">Ask naturally</span><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">English · Hindi · Hinglish</span><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">Catalog-based matches</span></div>
       </section>
 
       {/* Non-Medical Disclaimer (Requirement #23) */}
@@ -214,10 +199,14 @@ function AISearchContent() {
 
       {/* Main Input State */}
       {mode === "input" && (
-        <div className="rounded-lg border border-line bg-background-card p-6 shadow-md space-y-6">
+        <div className="rounded-3xl border border-line bg-background-card p-4 shadow-lg sm:p-6 space-y-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm"><Sparkles className="h-4 w-4 text-champagne" /></div>
+            <div className="max-w-2xl rounded-2xl rounded-tl-sm bg-background-elevated px-4 py-3 text-sm leading-relaxed text-foreground-muted">Hi, I&apos;m BeautyIQ. Tell me what you want help with—your concern, skin type, budget or the type of product you need.</div>
+          </div>
           <div className="space-y-2">
             <label className="block text-sm font-display font-semibold text-foreground">
-              Ask BeautyIQ AI
+              Your message
             </label>
             <Textarea
               rows={4}
@@ -228,10 +217,10 @@ function AISearchContent() {
             />
           </div>
 
-          {/* Example Prompts (Requirement #2) */}
+          {/* Suggested prompts */}
           <div className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-foreground-faint block">
-              Try an example:
+              Suggested questions
             </span>
             <div className="flex flex-wrap gap-2">
               {examplePrompts.map((prompt, i) => (
