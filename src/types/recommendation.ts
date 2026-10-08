@@ -79,6 +79,8 @@ export interface AIRequirementParseResult {
   profileConflict: ProfileConflictInfo | null;
   processingTimeMs: number;
   stepLogs: string[];
+  /** Short, question-specific cosmetic guidance returned by the configured AI provider. */
+  aiGuidance?: string[];
   medicalSafety?: {
     hasClinicalConditions: boolean;
     safetyDisclaimer: string;

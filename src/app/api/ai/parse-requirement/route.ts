@@ -35,6 +35,16 @@ function cleanStringList(value: unknown, allowed?: string[]) {
     .slice(0, 8);
 }
 
+function cleanGuidance(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.replace(/\s+/g, " ").trim())
+    .filter((item) => item.length >= 12 && item.length <= 300)
+    .filter((item, index, list) => list.indexOf(item) === index)
+    .slice(0, 3);
+}
+
 function asAllowed(value: unknown, allowed: string[]) {
   return typeof value === "string" && allowed.includes(value) ? value : null;
 }
@@ -56,6 +66,7 @@ function parseModelJson(text: string) {
     maxPrice: asPrice(parsed.maxPrice),
     preferredIngredients: cleanStringList(parsed.preferredIngredients),
     avoidIngredients: cleanStringList(parsed.avoidIngredients),
+    guidance: cleanGuidance(parsed.guidance),
   };
 }
 
@@ -83,14 +94,16 @@ export async function POST(request: NextRequest) {
   }
 
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
-  const prompt = `You extract cosmetic product-search filters from a user request. The request may be in Hindi, Hinglish, or English. Return ONLY valid JSON, with these exact keys:
-{"skinType":null,"concerns":[],"goals":[],"category":null,"minPrice":null,"maxPrice":null,"preferredIngredients":[],"avoidIngredients":[]}
+  const prompt = `You are BeautyIQ, a cosmetic skincare shopping assistant. The request may be in Hindi, Hinglish, or English. Return ONLY valid JSON, with these exact keys:
+{"skinType":null,"concerns":[],"goals":[],"category":null,"minPrice":null,"maxPrice":null,"preferredIngredients":[],"avoidIngredients":[],"guidance":[]}
 
 Allowed skinType values: ${skinTypes.join(", ")}.
 Allowed concern values: ${concerns.join(", ")}.
 Allowed goal values: ${goals.join(", ")}.
 Allowed category values: ${categories.join(", ")}.
 Use null or [] if information is absent. Extract only what the user explicitly asks for; do not diagnose, prescribe treatment, invent product facts, or add medical advice. Convert Indian rupee budgets to whole numbers.
+
+For guidance, return 2 or 3 concise, genuinely tailored cosmetic-care suggestions for this exact request. Mention appropriate routine steps, product textures, or cosmetic ingredients only when relevant. Each item must be understandable on its own and use cautious wording such as "consider" or "look for". Never claim results, mention prescription medicine, or call yourself a doctor. If the request suggests severe, painful, infected, or persistent symptoms, include one short suggestion to consult a dermatologist.
 
 User request: ${JSON.stringify(query)}`;
 
@@ -102,7 +115,7 @@ User request: ${JSON.stringify(query)}`;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 350, responseMimeType: "application/json" },
+          generationConfig: { temperature: 0.2, maxOutputTokens: 500, responseMimeType: "application/json" },
         }),
       }
     );

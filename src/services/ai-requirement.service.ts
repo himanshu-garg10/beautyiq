@@ -106,6 +106,7 @@ export class AIRequirementService {
       isConfirmed: false,
       confidenceScores: extracted.confidenceScores,
     };
+    let aiGuidance: string[] = [];
 
     // Gemini improves Hinglish/free-text understanding only. Product matching,
     // medical safety checks and final ranking remain deterministic and local.
@@ -126,6 +127,13 @@ export class AIRequirementService {
         if (ai.maxPrice !== null && ai.maxPrice !== undefined) reqObject.maxPrice = ai.maxPrice;
         if (ai.preferredIngredients?.length) reqObject.preferredIngredients = ai.preferredIngredients;
         if (ai.avoidIngredients?.length) reqObject.avoidIngredients = ai.avoidIngredients;
+        if (Array.isArray(ai.guidance)) {
+          aiGuidance = ai.guidance
+            .filter((item: unknown): item is string => typeof item === "string")
+            .map((item: string) => item.trim())
+            .filter((item: string) => item.length > 0 && item.length <= 300)
+            .slice(0, 3);
+        }
         stepLogs.push("Step 8: Gemini AI structured your natural-language request.");
       } else {
         stepLogs.push("AI parser unavailable — used the built-in requirement parser.");
@@ -141,6 +149,7 @@ export class AIRequirementService {
       profileConflict,
       processingTimeMs,
       stepLogs,
+      aiGuidance: aiGuidance.length ? aiGuidance : undefined,
       medicalSafety: {
         hasClinicalConditions: medicalSafety.hasClinicalConditions,
         safetyDisclaimer: medicalSafety.safetyDisclaimer,

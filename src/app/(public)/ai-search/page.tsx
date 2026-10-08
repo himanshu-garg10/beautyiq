@@ -380,16 +380,19 @@ function AISearchContent() {
         <div className="space-y-6">
           {(() => {
             const reply = getAssistantReply(requirement);
+            const guidance = parseResult?.aiGuidance?.length
+              ? parseResult.aiGuidance
+              : [reply.summary + reply.concernNote, ...reply.ingredients];
             return (
               <section className="rounded-3xl border border-line bg-background-card p-5 shadow-subtle sm:p-6">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background"><Sparkles className="h-4 w-4 text-champagne" /></div>
                   <div className="space-y-3">
-                    <p className="text-sm leading-relaxed text-foreground"><strong>Here&apos;s a sensible cosmetic routine direction.</strong> {reply.summary}{reply.concernNote}</p>
+                    <p className="text-sm leading-relaxed text-foreground"><strong>Based on what you asked, here&apos;s a tailored cosmetic-care direction.</strong></p>
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">What to look for</p>
-                      <ul className="mt-2 grid gap-2 text-sm text-foreground-muted sm:grid-cols-3">
-                        {reply.ingredients.slice(0, 3).map((ingredient) => <li key={ingredient} className="rounded-xl bg-background-elevated px-3 py-2">• {ingredient}</li>)}
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">BeautyIQ&apos;s suggestions</p>
+                      <ul className="mt-2 grid gap-2 text-sm leading-relaxed text-foreground-muted sm:grid-cols-3">
+                        {guidance.slice(0, 3).map((item) => <li key={item} className="rounded-xl bg-background-elevated px-3 py-2.5">{item}</li>)}
                       </ul>
                     </div>
                     <p className="text-xs text-foreground-faint">This is cosmetic product guidance, not a diagnosis. For persistent, painful, or severe skin symptoms, consult a dermatologist.</p>
