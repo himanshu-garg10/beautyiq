@@ -99,15 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user || status === "loading" || status === "authenticated") return;
     if (typeof window === "undefined") return;
 
-    const isDismissed = sessionStorage.getItem("beautyiq_auth_popup_dismissed");
-    if (isDismissed === "true") return;
-
     const timer = setTimeout(() => {
-      const dismissedNow = sessionStorage.getItem("beautyiq_auth_popup_dismissed");
-      if (!dismissedNow) {
-        setAuthModalMode("login");
-        setIsAuthModalOpen(true);
-      }
+      setAuthModalMode("login");
+      setIsAuthModalOpen(true);
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -119,9 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const closeAuthModal = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("beautyiq_auth_popup_dismissed", "true");
-    }
     setIsAuthModalOpen(false);
   };
 
@@ -135,9 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (!result?.ok) {
       throw new Error("Invalid email or password");
-    }
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("beautyiq_auth_popup_dismissed", "true");
     }
     setIsAuthModalOpen(false);
     return "/account";
@@ -170,9 +158,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (!result?.ok) {
       throw new Error("Account created. Please log in.");
-    }
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("beautyiq_auth_popup_dismissed", "true");
     }
     setIsAuthModalOpen(false);
   };
