@@ -29,7 +29,7 @@ const navLinks = [
   { label: "Concerns", href: "/ingredients" },
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
-  { label: "AI Match", href: "/recommendations", isAi: true },
+  { label: "AI Match", href: "/ai-search", isAi: true },
 ];
 
 export function Navbar() {
@@ -115,7 +115,7 @@ export function Navbar() {
             <ul className="hidden lg:flex items-center gap-2 xl:gap-4">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href ||
-                  (link.href === "/recommendations" && pathname === "/ai-search");
+                  (link.href === "/ai-search" && pathname === "/recommendations");
                 return (
                   <li key={link.href} className={link.href === "/" ? "mr-2" : undefined}>
                     <Link
