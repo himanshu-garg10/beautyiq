@@ -14,6 +14,13 @@ const steps = [
   { icon: Scale, title: "Compare verified offers", text: "See store offers only when a source has been added to the catalog." },
 ];
 
+const popularSearches = [
+  { label: "Glow", query: "glow" },
+  { label: "Acne care", query: "acne" },
+  { label: "Dry skin", query: "dryness" },
+  { label: "Sunscreen", query: "sunscreen" },
+];
+
 export function HeroSection() {
   const router = useRouter();
   const [query, setQuery] = React.useState("");
@@ -38,6 +45,7 @@ export function HeroSection() {
               <input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-foreground outline-none placeholder:text-foreground-faint sm:text-base" placeholder="Search products, brands, or ingredients" aria-label="Search BeautyIQ catalog" />
               <Button type="submit" variant="accent" className="shrink-0 rounded-xl px-4 sm:px-5" rightIcon={<ArrowRight className="h-4 w-4" />}>Search</Button>
             </form>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-foreground-faint"><span>Popular:</span>{popularSearches.map((item) => <Link key={item.query} href={`/products?q=${encodeURIComponent(item.query)}`} className="rounded-full border border-line bg-background-card/70 px-2.5 py-1 font-medium text-foreground-muted transition-colors hover:border-champagne/70 hover:bg-champagne-tint hover:text-foreground">{item.label}</Link>)}</div>
             <div className="mt-5 flex flex-wrap gap-3"><Link href="/ai-search"><Button variant="outline" className="rounded-full">Ask AI about your skin</Button></Link><Link href="/products" className="inline-flex items-center gap-1.5 px-3 text-sm font-semibold text-foreground-muted transition-colors hover:text-foreground">Browse catalog <ArrowRight className="h-4 w-4" /></Link></div>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-line/60 pt-5 text-xs text-foreground-muted"><span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-sage-deep" />No invented prices</span><span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-sage-deep" />Source-linked catalog entries</span></div>
           </motion.div>

@@ -5,6 +5,7 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { PersonalizedDiscovery } from "@/components/recommendations/PersonalizedDiscovery";
 import { FinalCta } from "@/components/home/final-cta";
 import { HomeQuickStart } from "@/components/home/home-quick-start";
+import { ConcernSpotlight } from "@/components/home/concern-spotlight";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
 
         <TrustStrip />
         <HomeQuickStart />
+        <ConcernSpotlight />
         <PersonalizedDiscovery />
         <FinalCta />
       </main>
