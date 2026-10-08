@@ -18,7 +18,8 @@ export class ComparisonService {
   /** Compare 1 to 5 products, adding columns as the visitor chooses them. */
   static async compareProducts(
     productIds: string[],
-    userProfile?: SkinProfile | null
+    userProfile?: SkinProfile | null,
+    userId?: string
   ): Promise<ApiResponse<ProductComparisonItem[]>> {
     await simulateDelay(150);
 
@@ -142,7 +143,7 @@ export class ComparisonService {
     });
 
     // Save comparison session to history
-    this.saveComparisonSession(uniqueIds);
+    if (userId) this.saveComparisonSession(uniqueIds, userId);
 
     return createSuccessResponse(items);
   }

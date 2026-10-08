@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/context/toast-context";
+import { useAuth } from "@/context/auth-context";
 
 const COMPARE_STORAGE_KEY = "beautyiq_compare_selected_ids";
 const MAX_COMPARISON_ITEMS = 5;
@@ -22,12 +23,16 @@ const ComparisonContext = createContext<ComparisonContextType | undefined>(undef
 
 export const ComparisonProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const storageKey = `${COMPARE_STORAGE_KEY}_${user?.id || "guest"}`;
 
   useEffect(() => {
+    setLoadedFor(null);
+    setSelectedIds([]);
     try {
-      const stored = localStorage.getItem(COMPARE_STORAGE_KEY);
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -37,17 +42,17 @@ export const ComparisonProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (e) {
       console.error("Failed to read comparison state:", e);
     }
-    setIsLoaded(true);
-  }, []);
+    setLoadedFor(storageKey);
+  }, [storageKey]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (loadedFor !== storageKey) return;
     try {
-      localStorage.setItem(COMPARE_STORAGE_KEY, JSON.stringify(selectedIds));
+      localStorage.setItem(storageKey, JSON.stringify(selectedIds));
     } catch (e) {
       console.error("Failed to save comparison state:", e);
     }
-  }, [selectedIds, isLoaded]);
+  }, [selectedIds, loadedFor, storageKey]);
 
   const addToComparison = (productId: string): boolean => {
     if (selectedIds.includes(productId)) {

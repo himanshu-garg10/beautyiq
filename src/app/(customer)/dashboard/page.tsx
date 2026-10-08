@@ -125,7 +125,7 @@ export default function CustomerDashboardPage() {
       WishlistService.getWishlist(user.id).then((res) => {
         if (res.data) setWishlistProducts(res.data);
       });
-      setRecentlyViewed(RecentlyViewedService.getRecentlyViewedDetails().slice(0, 4));
+      setRecentlyViewed(RecentlyViewedService.getRecentlyViewedDetails(user.id).slice(0, 4));
       setRecentSearches(SearchHistoryService.getSearchHistory(user.id).slice(0, 5));
       setRecentRecs(RecommendationHistoryService.getRecommendationHistory(user.id).slice(0, 4));
       setRecentComparisons(ComparisonService.getComparisonHistory(user.id).slice(0, 4));

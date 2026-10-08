@@ -56,8 +56,8 @@ export default function CustomerHistoryPage() {
     if (!user) return;
     setSearches(SearchHistoryService.getSearchHistory(user.id));
     setRecommendations(RecommendationHistoryService.getRecommendationHistory(user.id));
-    setComparisons(ComparisonService.getComparisonHistory());
-    setViewedProducts(RecentlyViewedService.getRecentlyViewedDetails());
+    setComparisons(ComparisonService.getComparisonHistory(user.id));
+    setViewedProducts(RecentlyViewedService.getRecentlyViewedDetails(user.id));
   }, [user]);
 
   React.useEffect(() => {
@@ -124,13 +124,15 @@ export default function CustomerHistoryPage() {
   // Comparison History actions
   const handleDeleteComp = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updated = ComparisonService.deleteComparisonSession(id);
+    if (!user) return;
+    const updated = ComparisonService.deleteComparisonSession(id, user.id);
     setComparisons(updated);
     addToast({ type: "info", title: "Comparison Removed", description: "Comparison matrix removed from history." });
   };
 
   const handleClearComps = () => {
-    ComparisonService.clearComparisonHistory();
+    if (!user) return;
+    ComparisonService.clearComparisonHistory(user.id);
     setComparisons([]);
     addToast({ type: "info", title: "Comparisons Cleared", description: "Comparison history has been cleared." });
   };
@@ -145,13 +147,15 @@ export default function CustomerHistoryPage() {
   // Recently Viewed actions
   const handleDeleteViewed = (productId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    RecentlyViewedService.removeViewedItem(productId);
-    setViewedProducts(RecentlyViewedService.getRecentlyViewedDetails());
+    if (!user) return;
+    RecentlyViewedService.removeViewedItem(productId, user.id);
+    setViewedProducts(RecentlyViewedService.getRecentlyViewedDetails(user.id));
     addToast({ type: "info", title: "Item Removed", description: "Product removed from recently viewed history." });
   };
 
   const handleClearViewed = () => {
-    RecentlyViewedService.clearHistory();
+    if (!user) return;
+    RecentlyViewedService.clearHistory(user.id);
     setViewedProducts([]);
     addToast({ type: "info", title: "History Cleared", description: "Recently viewed history cleared." });
   };

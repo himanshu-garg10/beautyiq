@@ -57,7 +57,7 @@ export default function ProductDetailPage() {
     if (id) {
       setLoading(true);
       // Track recently viewed history
-      RecentlyViewedService.trackView(id);
+      RecentlyViewedService.trackView(id, user?.id);
 
       Promise.all([
         ProductService.getProductById(id),
@@ -74,13 +74,13 @@ export default function ProductDetailPage() {
         }
 
         // Fetch recently viewed items from localStorage
-        const recent = RecentlyViewedService.getRecentlyViewedProducts().filter((p) => p.id !== id);
+        const recent = RecentlyViewedService.getRecentlyViewedProducts(user?.id).filter((p) => p.id !== id);
         setRecentlyViewed(recent.slice(0, 3));
 
         setLoading(false);
       });
     }
-  }, [id]);
+  }, [id, user?.id]);
 
   if (loading) {
     return (

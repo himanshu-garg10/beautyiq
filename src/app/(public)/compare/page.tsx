@@ -51,7 +51,7 @@ function RetailerPriceLinks({ listings }: { listings: ProductListing[] }) {
 
 export default function CompareMatrixPage() {
   const { user, toggleWishlist } = useAuth();
-  const userId = user?.id || "u1";
+  const userId = user?.id || "guest";
   const { selectedIds, removeFromComparison, addToComparison } = useComparison();
   const { profile } = useSkinProfile();
   const { showToast } = useToast();
@@ -69,13 +69,13 @@ export default function CompareMatrixPage() {
   const loadComparison = React.useCallback(
     async (idsToCompare: string[]) => {
       setLoading(true);
-      const res = await ComparisonService.compareProducts(idsToCompare, hasCompletedProfile ? profile : null);
+      const res = await ComparisonService.compareProducts(idsToCompare, hasCompletedProfile ? profile : null, userId);
       if (res.data) {
         setItems(res.data);
       }
       setLoading(false);
     },
-    [hasCompletedProfile, profile]
+    [hasCompletedProfile, profile, userId]
   );
 
   React.useEffect(() => {
