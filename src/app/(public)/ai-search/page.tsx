@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AIRequirementService } from "@/services/ai-requirement.service";
+import { ProductService } from "@/services/product.service";
 import { useSkinProfile } from "@/context/skin-profile-context";
 import type {
   StructuredSkincareRequirement,
@@ -10,10 +11,12 @@ import type {
   AmbiguityClarification,
   ContradictionConflict,
   SkinType,
+  Product,
 } from "@/types";
 import { Container } from "@/components/layout/container";
 import { EditableRequirementCard } from "@/components/ai-requirement/editable-requirement-card";
 import { ManualRequirementForm } from "@/components/ai-requirement/manual-requirement-form";
+import { ProductCard } from "@/components/product/product-card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -39,6 +42,39 @@ const loadingSteps = [
   "Preparing your requirement confirmation...",
 ];
 
+const skinTypeGuidance: Record<SkinType, { routine: string; ingredients: string[] }> = {
+  Oily: {
+    routine: "Start with a gentle cleanser, a lightweight non-comedogenic moisturizer, and sunscreen every morning. Avoid over-cleansing or using too many strong actives at once.",
+    ingredients: ["Niacinamide for oil balance", "Salicylic acid for clogged pores", "Lightweight gel moisturizers"],
+  },
+  Dry: {
+    routine: "Focus on a gentle cleanser, a barrier-supporting moisturizer, and sunscreen every morning. Keep exfoliation gentle and infrequent if your skin feels tight or flaky.",
+    ingredients: ["Ceramides for barrier support", "Hyaluronic acid for hydration", "Glycerin for moisture"],
+  },
+  Combination: {
+    routine: "Use gentle, balanced products. You can use lightweight hydration overall and target oilier areas only where needed instead of drying the whole face.",
+    ingredients: ["Niacinamide for balance", "Hyaluronic acid for hydration", "Gentle non-stripping cleansers"],
+  },
+  Sensitive: {
+    routine: "Keep the routine simple: gentle cleanser, fragrance-free moisturizer, and sunscreen. Introduce only one new product at a time and patch-test it first.",
+    ingredients: ["Ceramides for barrier support", "Glycerin for hydration", "Fragrance-free formulas"],
+  },
+  Normal: {
+    routine: "Maintain a simple routine: gentle cleanser, moisturizer, and sunscreen. Add targeted products only for a specific cosmetic concern.",
+    ingredients: ["Antioxidants such as vitamin C", "Niacinamide", "Daily broad-spectrum sunscreen"],
+  },
+};
+
+function getAssistantReply(requirement: StructuredSkincareRequirement) {
+  const guide = requirement.skinType ? skinTypeGuidance[requirement.skinType] : null;
+  const concerns = requirement.concerns.length ? ` For ${requirement.concerns.join(", ").toLowerCase()}, choose one targeted product and introduce it gradually.` : "";
+  return {
+    summary: guide?.routine || "A simple starting routine is a gentle cleanser, a moisturizer that suits your skin, and sunscreen every morning. Add one targeted product only after the basics feel comfortable.",
+    ingredients: requirement.preferredIngredients.length ? requirement.preferredIngredients : guide?.ingredients || ["Choose products suited to your skin type", "Use daily sunscreen", "Patch-test new products"],
+    concernNote: concerns,
+  };
+}
+
 function AISearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,6 +89,7 @@ function AISearchContent() {
   const [resolvedAmbiguities, setResolvedAmbiguities] = React.useState<Record<string, boolean>>({});
   const [resolvedContradictions, setResolvedContradictions] = React.useState<Record<string, boolean>>({});
   const [resolvedProfileConflict, setResolvedProfileConflict] = React.useState<boolean>(false);
+  const [matchedProducts, setMatchedProducts] = React.useState<Product[]>([]);
 
   const handleAnalyze = React.useCallback(async (textToParse: string) => {
     if (textToParse === "TRIGGER_FAIL") {
@@ -76,6 +113,21 @@ function AISearchContent() {
     const res = await AIRequirementService.parseNaturalLanguageRequest(textToParse, profile);
     setParseResult(res);
     setRequirement(res.requirements);
+    const filters = {
+      ...(res.requirements.skinType ? { skinTypes: [res.requirements.skinType] } : {}),
+      ...(res.requirements.concerns.length ? { skinConcerns: res.requirements.concerns } : {}),
+      ...(res.requirements.category ? { category: res.requirements.category } : {}),
+      ...(res.requirements.maxPrice !== null ? { maxPrice: res.requirements.maxPrice } : {}),
+      pageSize: 6,
+      sortBy: "compatibility" as const,
+    };
+    let productResponse = await ProductService.getProducts(filters);
+    // A broad skin-type search is more helpful than an empty result when the
+    // catalog does not yet contain every specific concern/category combination.
+    if (!productResponse.data?.products.length && res.requirements.skinType) {
+      productResponse = await ProductService.getProducts({ skinTypes: [res.requirements.skinType], pageSize: 6, sortBy: "compatibility" });
+    }
+    setMatchedProducts(productResponse.data?.products || []);
     setResolvedAmbiguities({});
     setResolvedContradictions({});
     setResolvedProfileConflict(false);
@@ -179,6 +231,7 @@ function AISearchContent() {
     setQueryText("");
     setParseResult(null);
     setRequirement(null);
+    setMatchedProducts([]);
     setMode("input");
   };
 
@@ -325,6 +378,32 @@ function AISearchContent() {
       {/* Structured Result & Customer Confirmation Interface (Requirement #13, #15, #16, #24) */}
       {mode === "result" && requirement && (
         <div className="space-y-6">
+          {(() => {
+            const reply = getAssistantReply(requirement);
+            return (
+              <section className="rounded-3xl border border-line bg-background-card p-5 shadow-subtle sm:p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background"><Sparkles className="h-4 w-4 text-champagne" /></div>
+                  <div className="space-y-3">
+                    <p className="text-sm leading-relaxed text-foreground"><strong>Here&apos;s a sensible cosmetic routine direction.</strong> {reply.summary}{reply.concernNote}</p>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">What to look for</p>
+                      <ul className="mt-2 grid gap-2 text-sm text-foreground-muted sm:grid-cols-3">
+                        {reply.ingredients.slice(0, 3).map((ingredient) => <li key={ingredient} className="rounded-xl bg-background-elevated px-3 py-2">• {ingredient}</li>)}
+                      </ul>
+                    </div>
+                    <p className="text-xs text-foreground-faint">This is cosmetic product guidance, not a diagnosis. For persistent, painful, or severe skin symptoms, consult a dermatologist.</p>
+                  </div>
+                </div>
+              </section>
+            );
+          })()}
+
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">Matching products</p><h2 className="mt-1 font-display text-2xl font-bold text-foreground">Products from the BeautyIQ catalog</h2></div><span className="text-xs text-foreground-muted">Retailer buttons open the available listing directly.</span></div>
+            {matchedProducts.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{matchedProducts.map((product) => <ProductCard key={product.id} product={product} returnTo="/ai-search" />)}</div> : <div className="rounded-2xl border border-line bg-background-card p-5 text-sm text-foreground-muted">No catalog product matches every filter yet. Try removing a budget, category, or ingredient condition.</div>}
+          </section>
+
           {/* Medical Safety Notice (when clinical conditions like eczema/cystic acne detected) */}
           {parseResult?.medicalSafety?.hasClinicalConditions && (
             <div className="rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-4 space-y-2 shadow-subtle">
