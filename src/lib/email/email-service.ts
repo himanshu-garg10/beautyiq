@@ -14,10 +14,9 @@ export async function sendOtpEmail(toEmail: string, otpCode: string): Promise<{ 
   const resend = getResendClient();
 
   if (!resend) {
-    console.log(`[EMAIL NOTICE - RESEND_API_KEY missing] Simulated sending OTP ${otpCode} to ${toEmail}`);
     return {
-      success: true,
-      error: "RESEND_API_KEY not configured. OTP logged to server console for testing.",
+      success: false,
+      error: "Email verification is temporarily unavailable. Please try again later.",
     };
   }
 

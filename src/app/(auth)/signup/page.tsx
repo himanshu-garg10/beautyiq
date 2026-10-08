@@ -38,6 +38,10 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [verificationCode, setVerificationCode] = React.useState("");
+  const [codeSent, setCodeSent] = React.useState(false);
+  const [emailVerified, setEmailVerified] = React.useState(false);
+  const [verificationLoading, setVerificationLoading] = React.useState(false);
 
   // Status & Validation
   const [error, setError] = React.useState<string | null>(null);
@@ -53,6 +57,54 @@ export default function SignupPage() {
   const trimmedEmail = email.trim();
   const isGmailFormat = trimmedEmail.toLowerCase().endsWith("@gmail.com");
   const isGeneralEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+
+  const handleSendCode = async () => {
+    if (!isGeneralEmail) {
+      setError("Enter a valid email address before requesting a verification code.");
+      return;
+    }
+    setError(null);
+    setVerificationLoading(true);
+    try {
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: trimmedEmail.toLowerCase() }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || "Could not send the verification code.");
+      setCodeSent(true);
+      addToast({ type: "success", title: "Code sent", description: "Check your email for the 6-digit code." });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the verification code.");
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!/^\d{6}$/.test(verificationCode)) {
+      setError("Enter the 6-digit verification code from your email.");
+      return;
+    }
+    setError(null);
+    setVerificationLoading(true);
+    try {
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: trimmedEmail.toLowerCase(), code: verificationCode }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || "The verification code is incorrect.");
+      setEmailVerified(true);
+      addToast({ type: "success", title: "Email verified", description: "You can now create your account." });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not verify the code.");
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
 
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +135,15 @@ export default function SignupPage() {
         isOpen: true,
         title: "Invalid Email Address",
         message: "Please provide a valid email address (e.g. yourname@gmail.com).",
+      });
+      return;
+    }
+
+    if (!emailVerified) {
+      setValidationAlert({
+        isOpen: true,
+        title: "Verify Your Email",
+        message: "Send and verify the 6-digit code before creating your account.",
       });
       return;
     }
@@ -197,11 +258,47 @@ export default function SignupPage() {
               type="email"
               placeholder="name@gmail.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setCodeSent(false);
+                setEmailVerified(false);
+                setVerificationCode("");
+              }}
               leftIcon={<Mail className="h-4 w-4" />}
               autoComplete="email"
               required
             />
+
+            <div className="rounded-xl border border-line bg-background-elevated/40 p-3 space-y-2">
+              {emailVerified ? (
+                <p className="text-xs font-semibold text-status-success">✓ Email verified — ready to create your account.</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs text-foreground-muted">Verify this email before creating an account.</p>
+                    <Button type="button" size="sm" variant="outline" onClick={handleSendCode} isLoading={verificationLoading} disabled={verificationLoading}>
+                      {codeSent ? "Resend code" : "Send code"}
+                    </Button>
+                  </div>
+                  {codeSent && (
+                    <div className="flex gap-2">
+                      <Input
+                        id="page-signup-verification-code"
+                        aria-label="6-digit verification code"
+                        placeholder="6-digit code"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                      />
+                      <Button type="button" size="sm" variant="accent" onClick={handleVerifyCode} isLoading={verificationLoading} disabled={verificationLoading}>
+                        Verify
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
 
             <Input
               id="page-signup-password"
@@ -254,10 +351,10 @@ export default function SignupPage() {
               size="lg"
               className="w-full font-semibold shadow-subtle mt-2"
               isLoading={loading}
-              disabled={loading}
+              disabled={loading || !emailVerified}
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
-              Create Account with Gmail
+              {emailVerified ? "Create Account" : "Verify email to continue"}
             </Button>
           </form>
 

@@ -4,6 +4,7 @@ interface OtpEntry {
   code: string;
   expiresAt: number;
   attempts: number;
+  verifiedAt?: number;
 }
 
 // Shared global OTP storage for Next.js API routes
@@ -40,11 +41,6 @@ export function verifyOTP(identifier: string, enteredCode: string): { valid: boo
   const cleanId = identifier.trim().toLowerCase();
   const cleanCode = enteredCode.trim();
 
-  // Allow standard demo OTP in development if needed
-  if (process.env.NODE_ENV !== "production" && cleanCode === "123456") {
-    return { valid: true };
-  }
-
   const entry = otpStore.get(cleanId);
   if (!entry) {
     return { valid: false, error: "No verification code requested or code has expired. Please request a new code." };
@@ -60,12 +56,40 @@ export function verifyOTP(identifier: string, enteredCode: string): { valid: boo
     return { valid: false, error: "Too many failed attempts. Please request a new code." };
   }
 
-  if (entry.code !== cleanCode) {
+  if (entry.verifiedAt) {
+    return { valid: true };
+  }
+
+  const codeMatches =
+    entry.code.length === cleanCode.length &&
+    crypto.timingSafeEqual(Buffer.from(entry.code), Buffer.from(cleanCode));
+
+  if (!codeMatches) {
     entry.attempts += 1;
     return { valid: false, error: "Incorrect verification code. Please check and try again." };
   }
 
-  // Code verified successfully, delete to ensure single-use
+  // Keep only a short-lived verified marker. It is consumed by signup so the
+  // verification cannot be reused to create another account.
+  entry.code = "";
+  entry.verifiedAt = Date.now();
+  entry.attempts = 0;
+  return { valid: true };
+}
+
+export function consumeVerifiedOTP(identifier: string): { valid: boolean; error?: string } {
+  const cleanId = identifier.trim().toLowerCase();
+  const entry = otpStore.get(cleanId);
+
+  if (!entry || !entry.verifiedAt) {
+    return { valid: false, error: "Verify the email code before creating an account." };
+  }
+
+  if (Date.now() > entry.expiresAt) {
+    otpStore.delete(cleanId);
+    return { valid: false, error: "Email verification has expired. Please request a new code." };
+  }
+
   otpStore.delete(cleanId);
   return { valid: true };
 }

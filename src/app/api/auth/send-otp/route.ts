@@ -15,16 +15,16 @@ export async function POST(req: NextRequest) {
 
     if (!target || typeof target !== "string") {
       return NextResponse.json(
-        { success: false, error: "Recipient Gmail address is required." },
+        { success: false, error: "A valid email address is required." },
         { status: 400 }
       );
     }
 
     const cleanTarget = target.trim();
 
-    if (!cleanTarget.toLowerCase().endsWith("@gmail.com")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanTarget)) {
       return NextResponse.json(
-        { success: false, error: "Email must be a valid @gmail.com address." },
+        { success: false, error: "Please enter a valid email address." },
         { status: 400 }
       );
     }
@@ -32,18 +32,16 @@ export async function POST(req: NextRequest) {
     const otpCode = generateOTP(cleanTarget);
     const emailResult = await sendOtpEmail(cleanTarget, otpCode);
 
-    if (!emailResult.success && emailResult.error && !emailResult.error.includes("RESEND_API_KEY")) {
+    if (!emailResult.success) {
       return NextResponse.json(
-        { success: false, error: emailResult.error },
-        { status: 500 }
+        { success: false, error: "We could not send the verification email. Please try again shortly." },
+        { status: 502 }
       );
     }
 
     return NextResponse.json({
       success: true,
       message: `A 6-digit verification code has been dispatched to ${cleanTarget}.`,
-      isSimulated: !process.env.RESEND_API_KEY,
-      demoOtp: !process.env.RESEND_API_KEY ? otpCode : undefined,
     });
   } catch (error: any) {
     console.error("[send-otp error]:", error);
