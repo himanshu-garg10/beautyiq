@@ -4,7 +4,6 @@ import { signupSchema } from "@/lib/auth/validation";
 import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
 import { InputValidator } from "@/lib/security/input-validator";
 import { createUser } from "@/lib/auth/user-store";
-import { consumeVerifiedOTP } from "@/lib/auth/otp-service";
 
 const BCRYPT_COST = 10;
 
@@ -34,17 +33,6 @@ export async function POST(req: NextRequest) {
 
     const { name, password } = parsed.data;
     const email = parsed.data.email.trim().toLowerCase();
-
-    const verification = consumeVerifiedOTP(email);
-    if (!verification.valid) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "EMAIL_VERIFICATION_REQUIRED", message: verification.error },
-        },
-        { status: 403 }
-      );
-    }
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 

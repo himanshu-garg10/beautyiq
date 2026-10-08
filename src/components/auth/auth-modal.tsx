@@ -44,10 +44,6 @@ export function AuthModal() {
   const [registerConfirmPassword, setRegisterConfirmPassword] = React.useState("");
   const [showRegisterPassword, setShowRegisterPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
-  const [registerCode, setRegisterCode] = React.useState("");
-  const [registerCodeSent, setRegisterCodeSent] = React.useState(false);
-  const [registerEmailVerified, setRegisterEmailVerified] = React.useState(false);
-  const [registerVerificationLoading, setRegisterVerificationLoading] = React.useState(false);
 
   // Forgot Password State
   const [forgotEmail, setForgotEmail] = React.useState("");
@@ -107,56 +103,6 @@ export function AuthModal() {
     setMode(newMode);
     setGeneralError(null);
     setForgotSuccess(false);
-  };
-
-  const sendRegistrationCode = async () => {
-    const email = registerEmail.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setGeneralError("Enter a valid email address before requesting a verification code.");
-      return;
-    }
-    setGeneralError(null);
-    setRegisterVerificationLoading(true);
-    try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target: email }),
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(payload?.error || "Could not send the verification code.");
-      setRegisterCodeSent(true);
-      addToast({ type: "success", title: "Code sent", description: "Check your email for the 6-digit code." });
-    } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : "Could not send the verification code.");
-    } finally {
-      setRegisterVerificationLoading(false);
-    }
-  };
-
-  const verifyRegistrationCode = async () => {
-    const email = registerEmail.trim().toLowerCase();
-    if (!/^\d{6}$/.test(registerCode)) {
-      setGeneralError("Enter the 6-digit verification code from your email.");
-      return;
-    }
-    setGeneralError(null);
-    setRegisterVerificationLoading(true);
-    try {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target: email, code: registerCode }),
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(payload?.error || "The verification code is incorrect.");
-      setRegisterEmailVerified(true);
-      addToast({ type: "success", title: "Email verified", description: "You can now create your account." });
-    } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : "Could not verify the code.");
-    } finally {
-      setRegisterVerificationLoading(false);
-    }
   };
 
   // Login Submit Handler
@@ -239,11 +185,6 @@ export function AuthModal() {
         title: "Invalid Email Address",
         message: "Please provide a valid email address (e.g. yourname@gmail.com).",
       });
-      return;
-    }
-
-    if (!registerEmailVerified) {
-      setGeneralError("Verify your email with the 6-digit code before creating an account.");
       return;
     }
 
@@ -527,47 +468,11 @@ export function AuthModal() {
                   type="email"
                   placeholder="name@gmail.com"
                   value={registerEmail}
-                  onChange={(e) => {
-                    setRegisterEmail(e.target.value);
-                    setRegisterCodeSent(false);
-                    setRegisterEmailVerified(false);
-                    setRegisterCode("");
-                  }}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
                   leftIcon={<Mail className="h-4 w-4" />}
                   autoComplete="email"
                   required
                 />
-
-                <div className="rounded-xl border border-line bg-background-elevated/40 p-3 space-y-2">
-                  {registerEmailVerified ? (
-                    <p className="text-xs font-semibold text-status-success">✓ Email verified — ready to create your account.</p>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs text-foreground-muted">Verify this email before creating an account.</p>
-                        <Button type="button" size="sm" variant="outline" onClick={sendRegistrationCode} isLoading={registerVerificationLoading} disabled={registerVerificationLoading}>
-                          {registerCodeSent ? "Resend code" : "Send code"}
-                        </Button>
-                      </div>
-                      {registerCodeSent && (
-                        <div className="flex gap-2">
-                          <Input
-                            id="register-verification-code"
-                            aria-label="6-digit verification code"
-                            placeholder="6-digit code"
-                            value={registerCode}
-                            onChange={(e) => setRegisterCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                          />
-                          <Button type="button" size="sm" variant="accent" onClick={verifyRegistrationCode} isLoading={registerVerificationLoading} disabled={registerVerificationLoading}>
-                            Verify
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
 
                 <Input
                   id="register-password-input"
@@ -622,10 +527,10 @@ export function AuthModal() {
                   size="lg"
                   className="w-full font-semibold shadow-subtle mt-2"
                   isLoading={loading}
-                  disabled={loading || !registerEmailVerified}
+                  disabled={loading}
                   rightIcon={<ArrowRight className="h-4 w-4" />}
                 >
-                  {registerEmailVerified ? "Create Account" : "Verify email to continue"}
+                  Create Account
                 </Button>
 
                 <div className="pt-3 text-center text-xs text-foreground-muted border-t border-line">
