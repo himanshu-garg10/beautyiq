@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import { SearchComparisonWidget } from "@/components/search/search-comparison-widget";
+import { products as allCatalogProducts } from "@/data/products";
 import {
   SlidersHorizontal,
   RotateCcw,
@@ -636,6 +638,14 @@ function ProductsCatalogContent() {
               })}
             </div>
           </div>
+
+          {/* Live Search & Similar Products Cross-Website Comparison Matrix */}
+          {searchQuery.trim().length > 0 && (
+            <SearchComparisonWidget
+              searchQuery={searchQuery}
+              allProducts={allCatalogProducts}
+            />
+          )}
 
           {/* Direct Live Retailer Search Panel */}
           {searchQuery.trim().length > 0 && (

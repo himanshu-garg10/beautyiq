@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Search, X, Sparkles, Tag, Layers, Bookmark, CheckCircle, History } from "lucide-react";
+import { Search, X, Sparkles, Tag, Layers, Bookmark, CheckCircle, History, Scale } from "lucide-react";
 import { ProductService, type GroupedSearchSuggestions } from "@/services/product.service";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -293,6 +293,15 @@ export function GroupedSearchInput({
                   </div>
                 </div>
               )}
+
+              {/* Cross-Website Compare Indicator */}
+              <div className="pt-2.5 mt-1 border-t border-line/70 flex items-center justify-between text-[0.68rem] text-foreground-faint">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Scale className="h-3 w-3 text-sage-deep" />
+                  <span>Auto-compares prices across Amazon, Flipkart, Nykaa &amp; Brand Stores</span>
+                </span>
+                <span className="text-sage-deep font-semibold">Press Enter to Compare</span>
+              </div>
             </div>
           )}
         </div>

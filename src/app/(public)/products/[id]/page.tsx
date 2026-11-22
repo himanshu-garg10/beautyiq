@@ -33,6 +33,8 @@ import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
 import { useComparison } from "@/context/comparison-context";
 import { ValueEngineService } from "@/services/value-engine.service";
+import { SimilarProductsService } from "@/services/similar-products.service";
+import { products as allCatalogProducts } from "@/data/products";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -63,15 +65,14 @@ export default function ProductDetailPage() {
         ProductService.getProductById(id),
         ProductService.getProductPriceListings(id),
         ProductService.getProducts({ pageSize: 4 }),
-      ]).then(([prodRes, priceRes, catalogRes]) => {
+      ]).then(([prodRes, priceRes, _catalogRes]) => {
         if (prodRes.data) {
           setProduct(prodRes.data);
           setSelectedImage(prodRes.data.images[0] || prodRes.data.image);
+          const similarMatches = SimilarProductsService.findSimilarProducts(prodRes.data, allCatalogProducts, 3);
+          setSimilarProducts(similarMatches.map((m) => m.product));
         }
         if (priceRes.data) setListings(priceRes.data);
-        if (catalogRes.data) {
-          setSimilarProducts(catalogRes.data.products.filter((p) => p.id !== id).slice(0, 3));
-        }
 
         // Fetch recently viewed items from localStorage
         const recent = RecentlyViewedService.getRecentlyViewedProducts(user?.id).filter((p) => p.id !== id);
@@ -669,12 +670,27 @@ export default function ProductDetailPage() {
         )}
       </div>
 
-      {/* Similar Products Section */}
-      {similarProducts.length > 0 && (
+      {/* Similar Products Section with Direct Side-by-Side Compare */}
+      {similarProducts.length > 0 && product && (
         <div className="space-y-4 pt-8 border-t border-line">
-          <h2 className="font-display text-2xl font-bold text-foreground">
-            Similar Skincare Products
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-foreground">
+                Similar Formulations &amp; Competing Store Offers
+              </h2>
+              <p className="text-xs text-foreground-muted">
+                Closest alternative products in <strong className="text-foreground">{product.category}</strong> comparing deals live across Amazon, Flipkart, Nykaa &amp; Brand Stores.
+              </p>
+            </div>
+            <Link
+              href={`/compare?ids=${[product.id, ...similarProducts.map((p) => p.id)].join(",")}`}
+            >
+              <Button size="sm" variant="outline" className="gap-1.5 text-xs text-sage-deep border-sage-deep/40 hover:bg-sage-tint/40 shadow-xs">
+                <Scale className="h-3.5 w-3.5" />
+                <span>Compare All {similarProducts.length + 1} Side-by-Side</span>
+              </Button>
+            </Link>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {similarProducts.map((p) => (
               <ProductCard key={p.id} product={p} />

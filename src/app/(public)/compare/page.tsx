@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/layout/container";
 import { ComparisonService } from "@/services/comparison.service";
 import { ProductService } from "@/services/product.service";
@@ -86,12 +87,20 @@ function RetailerPriceLinks({ listings }: { listings: ProductListing[] }) {
   );
 }
 
-export default function CompareMatrixPage() {
+function CompareMatrixContent() {
   const { user, toggleWishlist } = useAuth();
   const userId = user?.id || "guest";
   const { selectedIds, removeFromComparison, addToComparison } = useComparison();
   const { profile } = useSkinProfile();
   const { showToast } = useToast();
+  const searchParams = useSearchParams();
+
+  const urlIds = React.useMemo(() => {
+    return (searchParams?.get("ids") || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }, [searchParams]);
 
   const [items, setItems] = React.useState<ProductComparisonItem[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -116,15 +125,22 @@ export default function CompareMatrixPage() {
   );
 
   React.useEffect(() => {
-    // A comparison starts empty. Only products deliberately added by the visitor appear here.
-    if (selectedIds.length === 0) {
+    if (urlIds.length > 0) {
+      urlIds.forEach((id) => {
+        if (!selectedIds.includes(id)) {
+          addToComparison(id);
+        }
+      });
+      const combined = Array.from(new Set([...selectedIds, ...urlIds]));
+      loadComparison(combined);
+    } else if (selectedIds.length === 0) {
       setItems([]);
       setLoading(false);
     } else {
       loadComparison(selectedIds);
     }
     setHistory(ComparisonService.getComparisonHistory(userId));
-  }, [selectedIds, loadComparison, userId]);
+  }, [selectedIds, loadComparison, userId, urlIds]);
 
   // Load catalog for quick add modal
   React.useEffect(() => {
@@ -556,5 +572,19 @@ export default function CompareMatrixPage() {
         </div>
       )}
     </Container>
+  );
+}
+
+export default function CompareMatrixPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center p-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-sage-deep border-t-transparent" />
+        </div>
+      }
+    >
+      <CompareMatrixContent />
+    </React.Suspense>
   );
 }
