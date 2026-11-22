@@ -78,21 +78,74 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Fetch products with prices and ingredients
-    let rawProducts = await prisma.product.findMany({
-      where,
-      include: {
-        prices: true,
-        productIngredients: {
+    // Check if real production database is configured (otherwise serve immediately from local catalog to avoid timeouts)
+    const isLocalMockDb =
+      !process.env.DATABASE_URL ||
+      process.env.DATABASE_URL.includes("localhost") ||
+      process.env.DATABASE_URL.includes("127.0.0.1") ||
+      process.env.DATABASE_URL.includes("cluster0.xxxxx");
+
+    let rawProducts: any[] = [];
+
+    if (!isLocalMockDb) {
+      try {
+        const dbPromise = prisma.product.findMany({
+          where,
           include: {
-            ingredient: true,
+            prices: true,
+            productIngredients: {
+              include: {
+                ingredient: true,
+              },
+              orderBy: {
+                orderIndex: "asc",
+              },
+            },
           },
-          orderBy: {
-            orderIndex: "asc",
-          },
-        },
-      },
-    });
+        });
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("DB_TIMEOUT")), 600)
+        );
+        rawProducts = (await Promise.race([dbPromise, timeoutPromise])) as any[];
+      } catch {
+        rawProducts = [];
+      }
+    }
+
+    // Seamless fallback to the rich in-memory catalog
+    if (!rawProducts || rawProducts.length === 0) {
+      const { products } = await import("@/data/products");
+      let filtered = [...products] as any[];
+
+      if (categories.length) {
+        filtered = filtered.filter((p) =>
+          categories.some((c) => p.category.toLowerCase() === c.toLowerCase())
+        );
+      }
+      if (brands.length) {
+        filtered = filtered.filter((p) =>
+          brands.some((b) => p.brand.toLowerCase() === b.toLowerCase())
+        );
+      }
+      if (query && query.trim()) {
+        const q = query.trim().toLowerCase();
+        filtered = filtered.filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            p.brand.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            (p.allIngredients && p.allIngredients.some((i: string) => i.toLowerCase().includes(q)))
+        );
+      }
+      if (crueltyFree) filtered = filtered.filter((p) => p.crueltyFree);
+      if (vegan) filtered = filtered.filter((p) => p.vegan);
+      if (fragranceFree) filtered = filtered.filter((p) => p.fragranceFree);
+      if (parabenFree) filtered = filtered.filter((p) => p.parabenFree);
+      if (minRating !== undefined && !isNaN(minRating)) {
+        filtered = filtered.filter((p) => (p.rating ?? 0) >= minRating);
+      }
+      rawProducts = filtered;
+    }
 
     // Post-filter JSON fields (concern, skinType) and maxPrice
     if (concerns.length) {

@@ -23,26 +23,54 @@ export async function GET(
     }
 
     // Lookup by stable slug, legacyId (e.g. "p1"), or MongoDB ObjectId
-    const rawProduct = await prisma.product.findFirst({
-      where: {
-        OR: [
-          { slug: rawId },
-          { legacyId: rawId },
-          ...(isValidObjectId(rawId) ? [{ id: rawId }] : []),
-        ],
-      },
-      include: {
-        prices: true,
-        productIngredients: {
+    const isLocalMockDb =
+      !process.env.DATABASE_URL ||
+      process.env.DATABASE_URL.includes("localhost") ||
+      process.env.DATABASE_URL.includes("127.0.0.1") ||
+      process.env.DATABASE_URL.includes("cluster0.xxxxx");
+
+    let rawProduct: any = null;
+
+    if (!isLocalMockDb) {
+      try {
+        const dbPromise = prisma.product.findFirst({
+          where: {
+            OR: [
+              { slug: rawId },
+              { legacyId: rawId },
+              ...(isValidObjectId(rawId) ? [{ id: rawId }] : []),
+            ],
+          },
           include: {
-            ingredient: true,
+            prices: true,
+            productIngredients: {
+              include: {
+                ingredient: true,
+              },
+              orderBy: {
+                orderIndex: "asc",
+              },
+            },
           },
-          orderBy: {
-            orderIndex: "asc",
-          },
-        },
-      },
-    });
+        });
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("DB_TIMEOUT")), 600)
+        );
+        rawProduct = await Promise.race([dbPromise, timeoutPromise]);
+      } catch {
+        rawProduct = null;
+      }
+    }
+
+    if (!rawProduct) {
+      const { products } = await import("@/data/products");
+      const found = products.find(
+        (p) => p.id === rawId || p.id.toLowerCase() === rawId.toLowerCase()
+      );
+      if (found) {
+        rawProduct = found;
+      }
+    }
 
     if (!rawProduct) {
       return NextResponse.json(

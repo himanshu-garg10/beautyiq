@@ -11,6 +11,11 @@ export async function GET() {
     const { user, response } = await requireSessionUser();
     if (!user) return response!;
 
+    const objectIdPattern = new RegExp("^[a-f\\d]{24}$", "i");
+    if (!objectIdPattern.test(user.id)) {
+      return NextResponse.json({ success: true, savedProducts: [], products: [] });
+    }
+
     const saved = await prisma.savedProduct.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
