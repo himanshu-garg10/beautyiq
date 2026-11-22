@@ -1,4 +1,5 @@
 import { products, categories, brandsList, mockProductListings, ingredients } from "@/lib/mock-data";
+import { RetailerAggregatorService } from "./retailer-aggregator.service";
 import type {
   Product,
   Category,
@@ -48,9 +49,10 @@ export interface GroupedSearchSuggestions {
 
 export class ProductService {
   /**
-   * Get best listing price for a product from its listings
+   * Get all comparative retailer listings (Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira, Brand Store)
    */
-  static getBestListingForProduct(productId: string): ProductListing | undefined {
+  static getListingsForProduct(productId: string): ProductListing[] {
+    const product = products.find((p) => p.id === productId);
     let allListings: ProductListing[] = mockProductListings;
     if (typeof window !== "undefined") {
       try {
@@ -60,7 +62,16 @@ export class ProductService {
         }
       } catch {}
     }
-    const listings = allListings.filter((l) => l.productId === productId && l.price !== null);
+    const filtered = allListings.filter((l) => l.productId === productId);
+    if (!product) return filtered;
+    return RetailerAggregatorService.generateRetailerListings(product, filtered);
+  }
+
+  /**
+   * Get best listing price for a product across all integrated retailers
+   */
+  static getBestListingForProduct(productId: string): ProductListing | undefined {
+    const listings = this.getListingsForProduct(productId).filter((l) => l.price !== null);
     if (listings.length === 0) return undefined;
     return listings.reduce((best, cur) => {
       if (!best) return cur;
@@ -257,16 +268,9 @@ export class ProductService {
    * Get platform & seller price listings for a product
    */
   static async getProductPriceListings(productId: string): Promise<ApiResponse<ProductListing[]>> {
-    await simulateDelay(60);
-    const { AdminDataService } = await import("./admin-data.service");
-    const storedListings = await AdminDataService.getListings({ productId });
-
-    if (storedListings && storedListings.length > 0) {
-      return createSuccessResponse(storedListings);
-    }
-
-    const fallbackListings = mockProductListings.filter((l) => l.productId === productId);
-    return createSuccessResponse(fallbackListings);
+    await simulateDelay(40);
+    const listings = this.getListingsForProduct(productId);
+    return createSuccessResponse(listings);
   }
 
   /**

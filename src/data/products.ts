@@ -641,14 +641,17 @@ export const priceComparison = {
     image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=700&auto=format&fit=crop",
   },
   listings: [
-    { platform: "Nykaa", price: 549, deliveryEstimate: "2–3 days" },
-    { platform: "Amazon", price: 599, deliveryEstimate: "Next day" },
-    { platform: "Flipkart", price: 579, deliveryEstimate: "2 days" },
+    { platform: "Flipkart", price: 519, deliveryEstimate: "2 days (F-Assured)" },
     {
-      platform: "Brand Store",
+      platform: "BeMinimalist Store",
       price: 525,
-      deliveryEstimate: "4–5 days",
+      deliveryEstimate: "3–4 days (Free Samples)",
       isBestValue: true,
     },
+    { platform: "Purplle", price: 535, deliveryEstimate: "3–4 days" },
+    { platform: "Myntra", price: 539, deliveryEstimate: "2–3 days (M-Express)" },
+    { platform: "Amazon", price: 549, deliveryEstimate: "Tomorrow (Prime)" },
+    { platform: "Nykaa", price: 549, deliveryEstimate: "2–3 days (100% Authentic)" },
+    { platform: "Tira Beauty", price: 569, deliveryEstimate: "2 days (Tira Red)" },
   ],
 };

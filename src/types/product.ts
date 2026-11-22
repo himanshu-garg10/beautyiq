@@ -40,6 +40,7 @@ export interface ProductListing {
   availability: AvailabilityStatus;
   productUrl: string;
   lastUpdated: string;
+  deliveryEstimate?: string;
   priceLastUpdated?: string;
   availabilityLastUpdated?: string;
   isVerifiedSource?: boolean;

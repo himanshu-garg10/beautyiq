@@ -37,13 +37,50 @@ function RetailerPriceLinks({ listings }: { listings: ProductListing[] }) {
     return <span className="text-xs text-foreground-faint">No verified seller price yet</span>;
   }
 
+  const lowestPrice = visibleListings[0]?.price;
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {visibleListings.map((listing) => {
-        const content = <><span className="font-semibold">{listing.platform}</span><span className="rounded bg-background-card/70 px-1.5 py-0.5 font-mono font-bold">₹{listing.price?.toLocaleString("en-IN")}</span><ExternalLink className="h-3 w-3 opacity-70" /></>;
+        const isLowest = listing.price === lowestPrice;
+        const content = (
+          <>
+            <span className="font-semibold">{listing.platform}</span>
+            <span className="rounded bg-background-card/80 px-1.5 py-0.5 font-mono font-bold">
+              ₹{listing.price?.toLocaleString("en-IN")}
+            </span>
+            {isLowest && (
+              <span className="rounded bg-emerald-500 text-white text-[0.6rem] px-1 py-0.2 font-bold uppercase">
+                Lowest
+              </span>
+            )}
+            <ExternalLink className="h-3 w-3 opacity-70" />
+          </>
+        );
+
         return listing.productUrl ? (
-          <a key={listing.id} href={listing.productUrl} target="_blank" rel="noreferrer" title={`Open ${listing.platform} listing`} className="inline-flex items-center gap-1 rounded-lg border border-line bg-sage-tint/55 px-2 py-1.5 text-xs text-sage-deep transition-colors hover:border-sage-deep hover:bg-sage-tint">{content}</a>
-        ) : <span key={listing.id} className="inline-flex items-center gap-1 rounded-lg border border-line bg-background-elevated px-2 py-1.5 text-xs text-foreground-muted">{content}</span>;
+          <a
+            key={listing.id}
+            href={listing.productUrl}
+            target="_blank"
+            rel="noreferrer"
+            title={`Open ${listing.platform} offer (${listing.deliveryEstimate || "Direct Link"})`}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
+              isLowest
+                ? "border-sage-deep bg-sage-tint/60 text-sage-deep font-semibold shadow-xs hover:bg-sage-tint"
+                : "border-line bg-background-elevated/70 text-foreground-muted hover:text-foreground hover:border-line-strong"
+            }`}
+          >
+            {content}
+          </a>
+        ) : (
+          <span
+            key={listing.id}
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-background-elevated px-2 py-1 text-xs text-foreground-muted"
+          >
+            {content}
+          </span>
+        );
       })}
     </div>
   );

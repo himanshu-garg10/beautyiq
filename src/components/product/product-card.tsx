@@ -29,10 +29,14 @@ export function ProductCard({
   const isSaved = user?.wishlistIds?.includes(product.id) || false;
   const isCompared = isInComparison(product.id);
 
-  const databasePrices = (product as Product & { prices?: ProductListing[] }).prices || [];
-  const bestListing = databasePrices
-    .filter((listing) => listing.price !== null)
-    .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))[0] || ProductService.getBestListingForProduct(product.id);
+  // Retrieve multi-retailer comparative listings (Amazon, Flipkart, Myntra, Nykaa, Brand Store, etc.)
+  const allProductListings = React.useMemo(() => {
+    return ProductService.getListingsForProduct(product.id).filter((l) => l.price !== null);
+  }, [product.id]);
+
+  const bestListing = allProductListings.length > 0
+    ? [...allProductListings].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))[0]
+    : undefined;
   const price = bestListing?.price ?? null;
   const originalPrice = bestListing?.originalPrice;
   const discountPercent = bestListing?.discountPercent;
@@ -176,6 +180,48 @@ export function ProductCard({
             </span>
           ))}
         </div>
+
+        {/* Multi-Retailer Live Price Comparison Strip */}
+        {allProductListings.length > 0 && (
+          <div className="pt-2 border-t border-line/40 space-y-1.5">
+            <div className="flex items-center justify-between text-[0.68rem] font-medium text-foreground-faint">
+              <span>Compare {allProductListings.length} Stores</span>
+              <span className="text-sage-deep font-semibold">
+                Lowest: ₹{price} ({bestListing?.platform?.replace(" Direct", "").replace(" Store", "")})
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {allProductListings.slice(0, 4).map((l) => (
+                <a
+                  key={l.id}
+                  href={l.productUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  title={`View on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "In Stock"})`}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-colors border",
+                    l.isBestPrice
+                      ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
+                      : "bg-background-elevated/70 text-foreground-muted hover:text-foreground border-line"
+                  )}
+                >
+                  <span className="truncate max-w-[65px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                  <span className="font-mono font-semibold">₹{l.price}</span>
+                </a>
+              ))}
+              {allProductListings.length > 4 && (
+                <Link
+                  href={`/products/${product.id}`}
+                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] text-foreground-faint hover:text-foreground bg-background-elevated border border-line"
+                  title="View all retailer prices and comparison"
+                >
+                  +{allProductListings.length - 4}
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Price & Action Row */}
         <div className="mt-auto pt-3 border-t border-line/60 flex items-center justify-between gap-3">

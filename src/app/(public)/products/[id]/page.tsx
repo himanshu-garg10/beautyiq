@@ -280,6 +280,64 @@ export default function ProductDetailPage() {
                 </>
               )}
             </div>
+
+            {/* Multi-Store Real-Time Price Comparison Box */}
+            {listings.length > 0 && (
+              <div className="pt-3 border-t border-line/60 space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Live Price Across {listings.length} Stores
+                  </span>
+                  {listings.find((l) => l.isBestPrice) && (
+                    <span className="text-[0.7rem] font-bold text-sage-deep bg-sage-tint px-2 py-0.5 rounded-full">
+                      Lowest: ₹{listings.find((l) => l.isBestPrice)?.price} on {listings.find((l) => l.isBestPrice)?.platform}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {listings.slice(0, 6).map((l) => (
+                    <a
+                      key={l.id}
+                      href={l.productUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`p-2.5 rounded-lg border transition-all text-xs space-y-1 block relative group ${
+                        l.isBestPrice
+                          ? "border-sage-deep bg-sage-tint/40 shadow-xs ring-1 ring-sage-deep/30"
+                          : "border-line bg-background-card hover:border-line-strong hover:bg-background-elevated"
+                      }`}
+                    >
+                      {l.isBestPrice && (
+                        <span className="absolute -top-2 right-2 text-[0.6rem] font-bold uppercase tracking-wider bg-sage-deep text-white px-1.5 py-0.2 rounded-full shadow-xs">
+                          Lowest
+                        </span>
+                      )}
+                      <div className="flex items-center justify-between font-semibold text-foreground">
+                        <span className="truncate">{l.platform}</span>
+                        <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                      </div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-display font-bold text-sm text-foreground">
+                          ₹{l.price}
+                        </span>
+                        {l.originalPrice && l.originalPrice > (l.price ?? 0) && (
+                          <span className="text-[0.65rem] text-foreground-faint line-through">
+                            ₹{l.originalPrice}
+                          </span>
+                        )}
+                      </div>
+                      {l.deliveryEstimate && (
+                        <p className="text-[0.65rem] text-foreground-faint truncate">
+                          {l.deliveryEstimate}
+                        </p>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <p className="text-sm text-foreground-muted leading-relaxed">

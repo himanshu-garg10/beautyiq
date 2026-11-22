@@ -57,7 +57,7 @@ export class ComparisonService {
     for (const id of uniqueIds) {
       const product = products.find((p) => p.id === id);
       if (product) {
-        const listings = mockProductListings.filter((l) => l.productId === id);
+        const listings = ProductService.getListingsForProduct(id);
         const bestPriceListing = ValueEngineService.determineBestPriceListing(listings);
         const bestValueListing = ValueEngineService.determineBestValueListing(listings, product.quantity);
 

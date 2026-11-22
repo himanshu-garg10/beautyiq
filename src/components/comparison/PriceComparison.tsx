@@ -94,8 +94,8 @@ export function PriceComparison() {
         <div className="order-1 lg:order-2 space-y-4">
           <SectionHeading
             eyebrow="Marketplace Transparency"
-            title="Stop Checking 5 Apps for 1 Serum"
-            description="BeautyIQ continuously monitors and normalizes prices across Amazon, Nykaa, Flipkart, Brand Direct, and Tira so you never pay retail markup on your daily skincare essentials."
+            title="Stop Checking 7 Apps for 1 Serum"
+            description="BeautyIQ continuously monitors and compares live prices across Amazon, Flipkart, Myntra, Nykaa, Brand Direct Stores (Minimalist, Dot & Key), Purplle, and Tira so you always get the lowest verified price."
           />
           <div className="space-y-3 pt-2 text-sm text-foreground-muted">
             <div className="flex items-start gap-2.5">

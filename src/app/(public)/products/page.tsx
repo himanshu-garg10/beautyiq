@@ -247,6 +247,46 @@ function ProductsCatalogContent() {
 
   return (
     <Container className="max-w-[1500px] px-3 sm:px-5 lg:px-6 py-3 md:py-4 space-y-5">
+      {/* Multi-Store Comparison Ticker / Banner */}
+      <div className="rounded-xl border border-line bg-background-elevated/40 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sage-tint text-sage-deep font-bold text-xs">
+            ⚡
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-foreground">
+              Multi-Retailer Price Comparison Active
+            </p>
+            <p className="text-[0.7rem] text-foreground-muted truncate">
+              Comparing offers live across Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira, &amp; Brand Direct Stores (Minimalist, Dot &amp; Key).
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20">
+            Amazon
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold border border-blue-500/20">
+            Flipkart
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 font-semibold border border-pink-500/20">
+            Myntra
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold border border-rose-500/20">
+            Nykaa
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold border border-purple-500/20">
+            Purplle
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-stone-500/10 text-stone-700 dark:text-stone-300 font-semibold border border-stone-500/20">
+            Tira
+          </span>
+          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-sage-tint text-sage-deep font-semibold border border-sage-deep/30">
+            Brand Stores
+          </span>
+        </div>
+      </div>
+
       <div className="flex justify-end lg:hidden">
         <Button
           variant="outline"

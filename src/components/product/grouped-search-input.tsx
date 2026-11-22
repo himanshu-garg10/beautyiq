@@ -190,12 +190,24 @@ export function GroupedSearchInput({
                       <button
                         key={p.id}
                         onClick={() => handleSelect(p.name, `/products/${p.id}`)}
-                        className="w-full text-left px-2 py-1.5 rounded hover:bg-background-elevated flex items-center justify-between group transition-colors"
+                        className="w-full text-left px-2 py-1.5 rounded hover:bg-background-elevated flex items-center justify-between gap-2 group transition-colors"
                       >
-                        <span className="font-medium text-foreground group-hover:text-sage-deep">
-                          {p.name}
-                        </span>
-                        <span className="text-[0.7rem] text-foreground-faint">{p.brand}</span>
+                        <div className="min-w-0 flex-1">
+                          <span className="font-medium text-foreground group-hover:text-sage-deep block truncate">
+                            {p.name}
+                          </span>
+                          <span className="text-[0.68rem] text-foreground-faint">{p.brand} • {p.category}</span>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          {p.bestPrice ? (
+                            <span className="inline-flex items-center gap-1 font-mono text-[0.72rem] font-bold text-sage-deep bg-sage-tint px-2 py-0.5 rounded-full">
+                              ₹{p.bestPrice}
+                              {p.bestStore && <span className="font-sans font-normal opacity-75">({p.bestStore})</span>}
+                            </span>
+                          ) : (
+                            <span className="text-[0.7rem] text-foreground-faint">{p.brand}</span>
+                          )}
+                        </div>
                       </button>
                     ))}
                   </div>

@@ -1,4 +1,5 @@
 import { products, categories, brandsList, mockProductListings, ingredients } from "@/lib/mock-data";
+import { RetailerAggregatorService } from "./retailer-aggregator.service";
 import type {
   Product,
   Category,
@@ -48,7 +49,15 @@ export interface PaginatedProductsResult {
 }
 
 export interface GroupedSearchSuggestions {
-  products: { id: string; name: string; brand: string; category: string }[];
+  products: {
+    id: string;
+    name: string;
+    brand: string;
+    category: string;
+    bestPrice?: number;
+    storeCount?: number;
+    bestStore?: string;
+  }[];
   brands: { id: string; name: string }[];
   ingredients: { id: string; name: string }[];
   categories: { id: string; name: string }[];
@@ -57,9 +66,10 @@ export interface GroupedSearchSuggestions {
 
 export class ProductService {
   /**
-   * Get best listing price for a product from its listings
+   * Get all comparative retailer listings (Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira, Brand Store)
    */
-  static getBestListingForProduct(productId: string): ProductListing | undefined {
+  static getListingsForProduct(productId: string): ProductListing[] {
+    const product = products.find((p) => p.id === productId);
     let allListings: ProductListing[] = mockProductListings;
     if (typeof window !== "undefined") {
       try {
@@ -69,7 +79,16 @@ export class ProductService {
         }
       } catch {}
     }
-    const listings = allListings.filter((l) => l.productId === productId && l.price !== null);
+    const filtered = allListings.filter((l) => l.productId === productId);
+    if (!product) return filtered;
+    return RetailerAggregatorService.generateRetailerListings(product, filtered);
+  }
+
+  /**
+   * Get best listing price for a product across all integrated retailers
+   */
+  static getBestListingForProduct(productId: string): ProductListing | undefined {
+    const listings = this.getListingsForProduct(productId).filter((l) => l.price !== null);
     if (listings.length === 0) return undefined;
     return listings.reduce((best, cur) => {
       if (!best) return cur;
@@ -346,16 +365,9 @@ export class ProductService {
       }
     }
 
-    await simulateDelay(60);
-    const { AdminDataService } = await import("./admin-data.service");
-    const storedListings = await AdminDataService.getListings({ productId });
-
-    if (storedListings && storedListings.length > 0) {
-      return createSuccessResponse(storedListings);
-    }
-
-    const fallbackListings = mockProductListings.filter((l) => l.productId === productId);
-    return createSuccessResponse(fallbackListings);
+    await simulateDelay(40);
+    const listings = this.getListingsForProduct(productId);
+    return createSuccessResponse(listings);
   }
 
   /**
@@ -473,8 +485,20 @@ export class ProductService {
 
     const matchedProducts = products
       .filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q))
-      .slice(0, 4)
-      .map((p) => ({ id: p.id, name: p.name, brand: p.brand, category: p.category }));
+      .slice(0, 5)
+      .map((p) => {
+        const best = this.getBestListingForProduct(p.id);
+        const all = this.getListingsForProduct(p.id);
+        return {
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          category: p.category,
+          bestPrice: best?.price ?? undefined,
+          bestStore: best?.platform?.replace(" Direct", "").replace(" Store", "") ?? undefined,
+          storeCount: all.length,
+        };
+      });
 
     const matchedBrands = brandsList
       .filter((b) => b.name.toLowerCase().includes(q))
