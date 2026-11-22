@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatProduct } from "@/lib/product-format";
+import { RetailerAggregatorService } from "@/services/retailer-aggregator.service";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
     const minPrice = minPriceStr ? parseFloat(minPriceStr) : undefined;
     const skinTypes = (searchParams.get("skinType") || "").split(",").map((item) => item.trim()).filter(Boolean);
     const brands = (searchParams.get("brand") || "").split(",").map((item) => item.trim()).filter(Boolean);
+    const store = (searchParams.get("store") || searchParams.get("platform") || "").toLowerCase().trim();
     const query = searchParams.get("q") || searchParams.get("query");
     const minRatingStr = searchParams.get("minRating");
     const minRating = minRatingStr ? parseFloat(minRatingStr) : undefined;
@@ -144,49 +146,140 @@ export async function GET(request: NextRequest) {
       if (minRating !== undefined && !isNaN(minRating)) {
         filtered = filtered.filter((p) => (p.rating ?? 0) >= minRating);
       }
-      rawProducts = filtered;
+
+      // Ensure every fallback product has live multi-retailer comparative prices attached
+      rawProducts = filtered.map((p) => {
+        const listings = RetailerAggregatorService.generateListingsForProduct(p);
+        return {
+          ...p,
+          prices: listings.map((l) => ({
+            id: l.id,
+            productId: p.id,
+            platformId: l.platform,
+            platform: l.platform,
+            price: l.price,
+            originalPrice: l.originalPrice,
+            discountPercent: l.discountPercent,
+            productUrl: l.productUrl,
+            availability: l.availability,
+            deliveryEstimate: l.deliveryEstimate,
+            seller: l.seller,
+            isBestPrice: l.isBestPrice,
+            isBestValue: l.isBestValue,
+            lastUpdated: new Date().toISOString(),
+          })),
+        };
+      });
+    } else {
+      // For products from DB, ensure prices array is present
+      rawProducts = rawProducts.map((p) => {
+        if (!p.prices || p.prices.length === 0) {
+          const listings = RetailerAggregatorService.generateListingsForProduct(p);
+          return {
+            ...p,
+            prices: listings.map((l) => ({
+              id: l.id,
+              productId: p.id,
+              platformId: l.platform,
+              platform: l.platform,
+              price: l.price,
+              originalPrice: l.originalPrice,
+              discountPercent: l.discountPercent,
+              productUrl: l.productUrl,
+              availability: l.availability,
+              deliveryEstimate: l.deliveryEstimate,
+              seller: l.seller,
+              isBestPrice: l.isBestPrice,
+              isBestValue: l.isBestValue,
+              lastUpdated: new Date().toISOString(),
+            })),
+          };
+        }
+        return p;
+      });
+    }
+
+    // Safe helper to extract string array whether stored as JSON string or raw array
+    const extractList = (val: any): string[] => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {
+          return [val];
+        }
+      }
+      return [];
+    };
+
+    // Filter by store/platform if requested (Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira, Brand Store)
+    if (store && store !== "all" && store !== "") {
+      rawProducts = rawProducts.filter((p: any) => {
+        const prices = p.prices || [];
+        return prices.some((pr: any) => {
+          const plat = String(pr.platformId || pr.platform || "").toLowerCase();
+          if (store === "amazon") return plat.includes("amazon");
+          if (store === "flipkart") return plat.includes("flipkart");
+          if (store === "myntra") return plat.includes("myntra");
+          if (store === "nykaa") return plat.includes("nykaa");
+          if (store === "purplle") return plat.includes("purplle");
+          if (store === "tira") return plat.includes("tira");
+          if (store === "minimalist") return plat.includes("minimalist");
+          if (store === "dot-and-key" || store === "dotandkey") return plat.includes("dot");
+          if (store === "brand" || store === "direct") return plat.includes("direct") || plat.includes("store");
+          return plat.includes(store);
+        });
+      });
     }
 
     // Post-filter JSON fields (concern, skinType) and maxPrice
     if (concerns.length) {
       const normalizedConcerns = concerns.map((concern) => concern.toLowerCase());
       rawProducts = rawProducts.filter((p: any) => {
-        try {
-          const concerns: string[] = JSON.parse(p.targetConcerns);
-          return concerns.some((c) => normalizedConcerns.some((concern) => c.toLowerCase().includes(concern)));
-        } catch {
-          return false;
-        }
+        const productConcerns = extractList(p.targetConcerns);
+        return productConcerns.some((c) =>
+          normalizedConcerns.some((concern) => c.toLowerCase().includes(concern))
+        );
       });
     }
 
     if (skinTypes.length) {
       const normalizedSkins = skinTypes.map((skinType) => skinType.toLowerCase());
       rawProducts = rawProducts.filter((p: any) => {
-        try {
-          const skinTypes: string[] = JSON.parse(p.skinTypes);
-          return skinTypes.some((s) => normalizedSkins.some((skinType) => s.toLowerCase().includes(skinType)));
-        } catch {
-          return false;
-        }
+        const productSkins = extractList(p.skinTypes);
+        return (
+          productSkins.some((s) => s.toLowerCase() === "all skin types") ||
+          productSkins.some((s) => normalizedSkins.some((skinType) => s.toLowerCase().includes(skinType)))
+        );
       });
     }
 
+    const getMinProductPrice = (p: any): number => {
+      const prices = (p.prices || [])
+        .map((pr: any) => pr.price)
+        .filter((val: unknown): val is number => typeof val === "number" && val > 0);
+      return prices.length > 0 ? Math.min(...prices) : 99999;
+    };
+
+    const getMaxProductPrice = (p: any): number => {
+      const prices = (p.prices || [])
+        .map((pr: any) => pr.price)
+        .filter((val: unknown): val is number => typeof val === "number" && val > 0);
+      return prices.length > 0 ? Math.max(...prices) : 0;
+    };
+
     if (maxPrice !== undefined && !isNaN(maxPrice)) {
       rawProducts = rawProducts.filter((p: any) => {
-        const availablePrices = p.prices
-          .map((pr: any) => pr.price)
-          .filter((val: unknown): val is number => typeof val === "number" && val > 0);
-        if (availablePrices.length === 0) return true; // keep if no price listed yet
-        const minPrice = Math.min(...availablePrices);
-        return minPrice <= maxPrice;
+        const minP = getMinProductPrice(p);
+        return minP <= maxPrice;
       });
     }
     if (minPrice !== undefined && !isNaN(minPrice)) {
       rawProducts = rawProducts.filter((p: any) => {
-        const availablePrices = p.prices.map((pr: any) => pr.price).filter((val: unknown): val is number => typeof val === "number" && val > 0);
-        if (availablePrices.length === 0) return true;
-        return Math.min(...availablePrices) >= minPrice;
+        const minP = getMinProductPrice(p);
+        return minP >= minPrice;
       });
     }
 
@@ -194,17 +287,9 @@ export async function GET(request: NextRequest) {
     if (sortBy === "rating") {
       rawProducts.sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0));
     } else if (sortBy === "price-asc") {
-      rawProducts.sort((a: any, b: any) => {
-        const aMin = Math.min(...(a.prices.map((p: any) => p.price ?? 99999)));
-        const bMin = Math.min(...(b.prices.map((p: any) => p.price ?? 99999)));
-        return aMin - bMin;
-      });
+      rawProducts.sort((a: any, b: any) => getMinProductPrice(a) - getMinProductPrice(b));
     } else if (sortBy === "price-desc") {
-      rawProducts.sort((a: any, b: any) => {
-        const aMin = Math.max(...(a.prices.map((p: any) => p.price ?? 0)));
-        const bMin = Math.max(...(b.prices.map((p: any) => p.price ?? 0)));
-        return bMin - aMin;
-      });
+      rawProducts.sort((a: any, b: any) => getMaxProductPrice(b) - getMaxProductPrice(a));
     }
 
     const facets = {

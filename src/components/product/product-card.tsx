@@ -16,15 +16,19 @@ export function ProductCard({
   product,
   className,
   returnTo,
+  selectedStore,
 }: {
   product: Product;
   className?: string;
   /** Catalog context so the detail page can return to the exact filters/page. */
   returnTo?: string;
+  /** Filtered store if user selected a specific marketplace */
+  selectedStore?: string;
 }) {
   const { user, toggleWishlist } = useAuth();
   const { addToast } = useToast();
   const { isInComparison, addToComparison, removeFromComparison } = useComparison();
+  const [showAllStores, setShowAllStores] = React.useState(false);
 
   const isSaved = user?.wishlistIds?.includes(product.id) || false;
   const isCompared = isInComparison(product.id);
@@ -34,13 +38,30 @@ export function ProductCard({
     return ProductService.getListingsForProduct(product.id).filter((l) => l.price !== null);
   }, [product.id]);
 
-  const bestListing = allProductListings.length > 0
+  const bestOverallListing = allProductListings.length > 0
     ? [...allProductListings].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity))[0]
     : undefined;
-  const price = bestListing?.price ?? null;
-  const originalPrice = bestListing?.originalPrice;
-  const discountPercent = bestListing?.discountPercent;
-  const availability = bestListing?.availability || "Available";
+
+  const targetStoreListing = React.useMemo(() => {
+    if (!selectedStore) return undefined;
+    const s = selectedStore.toLowerCase();
+    return allProductListings.find((l) => {
+      const plat = l.platform.toLowerCase();
+      if (s === "amazon") return plat.includes("amazon");
+      if (s === "flipkart") return plat.includes("flipkart");
+      if (s === "nykaa") return plat.includes("nykaa");
+      if (s === "myntra") return plat.includes("myntra");
+      if (s === "purplle") return plat.includes("purplle");
+      if (s === "tira") return plat.includes("tira");
+      if (s === "brand" || s === "direct") return plat.includes("direct") || plat.includes("store");
+      return plat.includes(s);
+    });
+  }, [allProductListings, selectedStore]);
+
+  const activeListing = targetStoreListing || bestOverallListing;
+  const price = activeListing?.price ?? null;
+  const originalPrice = activeListing?.originalPrice;
+  const discountPercent = activeListing?.discountPercent;
 
   // Calculate Unit Cost (₹/ml or ₹/g)
   const unitPriceCalc = ProductService.getUnitPrice(product);
@@ -185,41 +206,116 @@ export function ProductCard({
         {allProductListings.length > 0 && (
           <div className="pt-2 border-t border-line/40 space-y-1.5">
             <div className="flex items-center justify-between text-[0.68rem] font-medium text-foreground-faint">
-              <span>Compare {allProductListings.length} Stores</span>
+              <span className="flex items-center gap-1">
+                <span>Compare {allProductListings.length} Stores</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowAllStores((v) => !v);
+                  }}
+                  className="text-sage-deep font-semibold hover:underline"
+                >
+                  {showAllStores ? "Hide" : "View All ▾"}
+                </button>
+              </span>
               <span className="text-sage-deep font-semibold">
-                Lowest: ₹{price} ({bestListing?.platform?.replace(" Direct", "").replace(" Store", "")})
+                Lowest: ₹{bestOverallListing?.price} ({bestOverallListing?.platform?.replace(" Direct", "").replace(" Store", "")})
               </span>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {allProductListings.slice(0, 4).map((l) => (
-                <a
-                  key={l.id}
-                  href={l.productUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  title={`View on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "In Stock"})`}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-colors border",
-                    l.isBestPrice
-                      ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
-                      : "bg-background-elevated/70 text-foreground-muted hover:text-foreground border-line"
-                  )}
-                >
-                  <span className="truncate max-w-[65px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                  <span className="font-mono font-semibold">₹{l.price}</span>
-                </a>
-              ))}
-              {allProductListings.length > 4 && (
-                <Link
-                  href={`/products/${product.id}`}
-                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] text-foreground-faint hover:text-foreground bg-background-elevated border border-line"
-                  title="View all retailer prices and comparison"
-                >
-                  +{allProductListings.length - 4}
-                </Link>
-              )}
-            </div>
+
+            {/* Expanded Multi-Store Comparison Drawer */}
+            {showAllStores ? (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="p-2.5 rounded-lg border border-sage-deep/30 bg-background-elevated/90 space-y-1.5 shadow-sm my-1 text-xs"
+              >
+                <div className="flex items-center justify-between font-semibold text-[0.72rem] pb-1 border-b border-line">
+                  <span className="text-foreground">Store &amp; Offer</span>
+                  <span className="text-foreground">Price &amp; Link</span>
+                </div>
+                <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                  {allProductListings.map((l) => (
+                    <div
+                      key={l.id}
+                      className={cn(
+                        "flex items-center justify-between p-1.5 rounded transition-colors text-[0.7rem]",
+                        l.isBestPrice
+                          ? "bg-sage-tint/60 text-sage-deep font-semibold border border-sage-deep/30"
+                          : "hover:bg-background-card"
+                      )}
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="flex items-center gap-1">
+                          <span className="truncate font-medium text-foreground">{l.platform}</span>
+                          {l.isBestPrice && (
+                            <span className="bg-sage-deep text-white text-[0.58rem] font-bold px-1 rounded">
+                              LOWEST
+                            </span>
+                          )}
+                        </div>
+                        {l.deliveryEstimate && (
+                          <span className="text-[0.62rem] text-foreground-faint block truncate">
+                            {l.deliveryEstimate}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="font-mono font-bold text-foreground">₹{l.price}</span>
+                        {l.productUrl && (
+                          <a
+                            href={l.productUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[0.62rem] font-semibold bg-sage-deep text-white hover:bg-sage-deep/90 transition-colors"
+                          >
+                            <span>Buy</span>
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {allProductListings.slice(0, 4).map((l) => (
+                  <a
+                    key={l.id}
+                    href={l.productUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    title={`View on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "In Stock"})`}
+                    className={cn(
+                      "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-colors border",
+                      l.isBestPrice
+                        ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
+                        : "bg-background-elevated/70 text-foreground-muted hover:text-foreground border-line"
+                    )}
+                  >
+                    <span className="truncate max-w-[65px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                    <span className="font-mono font-semibold">₹{l.price}</span>
+                  </a>
+                ))}
+                {allProductListings.length > 4 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowAllStores(true);
+                    }}
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] text-foreground-faint hover:text-foreground bg-background-elevated border border-line"
+                    title="View all retailer prices and comparison"
+                  >
+                    +{allProductListings.length - 4} more
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -255,15 +351,16 @@ export function ProductCard({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {bestListing?.productUrl && (
+            {activeListing?.productUrl && (
               <a
-                href={bestListing.productUrl}
+                href={activeListing.productUrl}
                 target="_blank"
                 rel="noreferrer"
-                title={`Open ${bestListing.platform} listing`}
+                title={`Open on ${activeListing.platform} (${activeListing.deliveryEstimate || "Direct Link"})`}
                 className="flex items-center gap-1 rounded-lg border border-line bg-background-card px-2.5 py-1.5 text-xs font-semibold text-sage-deep transition-all hover:border-sage-deep hover:bg-sage-tint"
               >
-                <span>{bestListing.platform}</span><ExternalLink className="h-3 w-3" />
+                <span className="truncate max-w-[80px]">{activeListing.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                <ExternalLink className="h-3 w-3 shrink-0" />
               </a>
             )}
             <button

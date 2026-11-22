@@ -14,6 +14,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { cn } from "@/lib/utils";
 import {
   SlidersHorizontal,
   RotateCcw,
@@ -81,6 +82,31 @@ const availabilityOptions = [
   { value: "Limited Information", label: "Limited Stock" },
 ];
 
+const storeOptions = [
+  { value: "", label: "All Stores & Marketplaces" },
+  { value: "amazon", label: "Amazon India" },
+  { value: "flipkart", label: "Flipkart" },
+  { value: "nykaa", label: "Nykaa" },
+  { value: "myntra", label: "Myntra" },
+  { value: "purplle", label: "Purplle" },
+  { value: "tira", label: "Tira Beauty" },
+  { value: "minimalist", label: "BeMinimalist Direct" },
+  { value: "dot-and-key", label: "Dot & Key Direct" },
+  { value: "brand", label: "Brand Official Stores" },
+];
+
+const MARKETPLACE_PILLS = [
+  { id: "", label: "All Stores", icon: "✨" },
+  { id: "amazon", label: "Amazon India", icon: "📦" },
+  { id: "flipkart", label: "Flipkart", icon: "⚡" },
+  { id: "nykaa", label: "Nykaa", icon: "💄" },
+  { id: "myntra", label: "Myntra", icon: "👗" },
+  { id: "purplle", label: "Purplle", icon: "💜" },
+  { id: "tira", label: "Tira Beauty", icon: "💎" },
+  { id: "minimalist", label: "Minimalist Direct", icon: "🌿" },
+  { id: "dot-and-key", label: "Dot & Key Direct", icon: "🌸" },
+];
+
 const sortOptions = [
   { value: "relevance", label: "Relevance & Popularity" },
   { value: "rating", label: "Highest Rated" },
@@ -95,6 +121,7 @@ function ProductsCatalogContent() {
   const router = useRouter();
   const initialCategory = searchParams?.get("category") || "";
   const initialBrand = searchParams?.get("brand") || "";
+  const initialStore = searchParams?.get("store") || "";
   const initialQuery = searchParams?.get("q") || "";
   const initialSkinType = searchParams?.get("skinType") || "";
   const initialConcern = searchParams?.get("concern") || "";
@@ -105,6 +132,7 @@ function ProductsCatalogContent() {
   const [searchQuery, setSearchQuery] = React.useState(initialQuery);
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialCategory ? initialCategory.split(",").filter(Boolean) : []);
   const [selectedBrands, setSelectedBrands] = React.useState<string[]>(initialBrand ? initialBrand.split(",").filter(Boolean) : []);
+  const [selectedStore, setSelectedStore] = React.useState(initialStore);
   const [selectedSkinTypes, setSelectedSkinTypes] = React.useState<string[]>(initialSkinType ? initialSkinType.split(",").filter(Boolean) : []);
   const [selectedConcerns, setSelectedConcerns] = React.useState<string[]>(initialConcern ? initialConcern.split(",").filter(Boolean) : []);
   const [minPrice, setMinPrice] = React.useState<number>(initialMinPrice);
@@ -135,6 +163,7 @@ function ProductsCatalogContent() {
       query: searchQuery,
       categories: selectedCategories,
       brands: selectedBrands,
+      store: selectedStore || undefined,
       skinTypes: selectedSkinTypes,
       skinConcerns: selectedConcerns,
       minPrice: minPrice > 0 ? minPrice : undefined,
@@ -162,6 +191,7 @@ function ProductsCatalogContent() {
     searchQuery,
     selectedCategories,
     selectedBrands,
+    selectedStore,
     selectedSkinTypes,
     selectedConcerns,
     minPrice,
@@ -184,6 +214,7 @@ function ProductsCatalogContent() {
     setSearchQuery("");
     setSelectedCategories([]);
     setSelectedBrands([]);
+    setSelectedStore("");
     setSelectedSkinTypes([]);
     setSelectedConcerns([]);
     setMinPrice(0);
@@ -202,6 +233,7 @@ function ProductsCatalogContent() {
     Boolean(searchQuery) ||
     selectedCategories.length > 0 ||
     selectedBrands.length > 0 ||
+    Boolean(selectedStore) ||
     selectedSkinTypes.length > 0 ||
     selectedConcerns.length > 0 ||
     minPrice > 0 ||
@@ -229,6 +261,7 @@ function ProductsCatalogContent() {
     if (searchQuery) params.set("q", searchQuery);
     if (selectedCategories.length) params.set("category", selectedCategories.join(","));
     if (selectedBrands.length) params.set("brand", selectedBrands.join(","));
+    if (selectedStore) params.set("store", selectedStore);
     if (selectedSkinTypes.length) params.set("skinType", selectedSkinTypes.join(","));
     if (selectedConcerns.length) params.set("concern", selectedConcerns.join(","));
     if (minPrice) params.set("minPrice", String(minPrice));
@@ -238,7 +271,7 @@ function ProductsCatalogContent() {
     if (page > 1) params.set("page", String(page));
     const query = params.toString();
     return query ? `/products?${query}` : "/products";
-  }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrands, selectedCategories, selectedConcerns, selectedSkinTypes]);
+  }, [availability, maxPrice, minPrice, minRating, page, searchQuery, selectedBrands, selectedCategories, selectedConcerns, selectedSkinTypes, selectedStore]);
 
   React.useEffect(() => {
     // Do not call window.history.replaceState directly: Next stores its router tree there.
@@ -321,6 +354,17 @@ function ProductsCatalogContent() {
             value={searchQuery}
             onChange={(val) => {
               setSearchQuery(val);
+              setPage(1);
+            }}
+          />
+
+          {/* Store / Marketplace Filter */}
+          <Select
+            label="Marketplace / Store"
+            options={storeOptions}
+            value={selectedStore}
+            onChange={(e) => {
+              setSelectedStore(e.target.value);
               setPage(1);
             }}
           />
@@ -435,6 +479,12 @@ function ProductsCatalogContent() {
                 value={searchQuery}
                 onChange={(val) => setSearchQuery(val)}
               />
+              <Select
+                label="Marketplace / Store"
+                options={storeOptions}
+                value={selectedStore}
+                onChange={(e) => setSelectedStore(e.target.value)}
+              />
               <MultiSelect label="Skin Type" options={skinTypePills.map(({ id, label }) => ({ value: id, label }))} value={selectedSkinTypes} onChange={setSelectedSkinTypes} />
               <MultiSelect label="Category" options={categoryOptions.filter((option) => option.value)} value={selectedCategories} onChange={setSelectedCategories} />
               <MultiSelect label="Brands" options={brandOptions} value={selectedBrands} onChange={setSelectedBrands} />
@@ -473,6 +523,12 @@ function ProductsCatalogContent() {
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 rounded border border-line bg-background-elevated/40 px-4 py-2.5 text-xs">
               <span className="font-semibold text-foreground-faint">Active Filters:</span>
+              {selectedStore && (
+                <Badge variant="sage" className="gap-1 font-semibold">
+                  Store: {storeOptions.find((s) => s.value === selectedStore)?.label || selectedStore}
+                  <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedStore("")} />
+                </Badge>
+              )}
               {selectedCategories.map((category) => <Badge key={category} variant="sage" className="gap-1">Category: {category}<X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedCategories((current) => current.filter((item) => item !== category))} /></Badge>)}
               {selectedBrands.map((brand) => <Badge key={brand} variant="sage" className="gap-1">Brand: {brand}<X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedBrands((current) => current.filter((item) => item !== brand))} /></Badge>)}
               {selectedSkinTypes.map((st) => (
@@ -523,6 +579,61 @@ function ProductsCatalogContent() {
                   setPage(1);
                 }}
               />
+            </div>
+          </div>
+
+          {/* Quick Marketplace / Multi-Store Filter Strip */}
+          <div className="rounded-xl border border-line bg-background-card p-3 sm:p-4 space-y-2 shadow-xs">
+            <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+              <span className="flex items-center gap-1.5">
+                <span>🛒 Filter or Compare by Marketplace:</span>
+                {selectedStore ? (
+                  <span className="text-[0.72rem] text-sage-deep font-bold">
+                    Showing offers on {storeOptions.find((s) => s.value === selectedStore)?.label}
+                  </span>
+                ) : (
+                  <span className="text-[0.72rem] text-foreground-faint font-normal">
+                    (Showing lowest price across all verified stores)
+                  </span>
+                )}
+              </span>
+              {selectedStore ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedStore("");
+                    setPage(1);
+                  }}
+                  className="text-[0.72rem] text-sage-deep font-semibold hover:underline"
+                >
+                  Reset to All Stores
+                </button>
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              {MARKETPLACE_PILLS.map((p) => {
+                const isSelected = selectedStore === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedStore(p.id);
+                      setPage(1);
+                    }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0",
+                      isSelected
+                        ? "bg-sage-deep text-white border-sage-deep shadow-xs ring-2 ring-sage-deep/20"
+                        : "bg-background-elevated hover:bg-background-card text-foreground-muted hover:text-foreground border-line"
+                    )}
+                  >
+                    <span>{p.icon}</span>
+                    <span>{p.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -628,7 +739,12 @@ function ProductsCatalogContent() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {dataResult.products.map((product) => (
-                <ProductCard key={product.id} product={product} returnTo={catalogReturnTo} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  returnTo={catalogReturnTo}
+                  selectedStore={selectedStore}
+                />
               ))}
             </div>
           )}

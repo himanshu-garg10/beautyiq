@@ -207,6 +207,13 @@ function getEstimatedMrp(product: Product): number {
 }
 
 export class RetailerAggregatorService {
+  static generateListingsForProduct(
+    product: Product,
+    existingListings: ProductListing[] = []
+  ): ProductListing[] {
+    return this.generateRetailerListings(product, existingListings);
+  }
+
   /**
    * Generates or enhances multi-retailer listings for any product.
    * Compares Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira, and Brand Store (Minimalist / Dot & Key).

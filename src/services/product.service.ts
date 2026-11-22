@@ -18,6 +18,8 @@ export interface ProductFilterOptions {
   categories?: string[];
   brand?: string;
   brands?: string[];
+  store?: string;
+  stores?: string[];
   skinType?: SkinType;
   skinTypes?: string[];
   skinConcern?: DetailedSkinConcern | string;
@@ -159,6 +161,11 @@ export class ProductService {
         if (brands.length) {
           params.set("brand", brands.join(","));
         }
+        if (filters.store) {
+          params.set("store", filters.store);
+        } else if (filters.stores && filters.stores.length) {
+          params.set("store", filters.stores.join(","));
+        }
         const skinTypes = filters.skinTypes || (filters.skinType ? [filters.skinType] : []);
         const skinConcerns = filters.skinConcerns || (filters.skinConcern ? [filters.skinConcern] : []);
         if (skinTypes.length) params.set("skinType", skinTypes.join(","));
@@ -222,6 +229,27 @@ export class ProductService {
       if (brands.length) {
         const normalized = brands.map((brand) => brand.toLowerCase());
         result = result.filter((p) => normalized.includes(p.brand.toLowerCase()));
+      }
+
+      // Filter by Store / Marketplace
+      const targetStore = (filters.store || (filters.stores && filters.stores[0]) || "").toLowerCase();
+      if (targetStore && targetStore !== "all") {
+        result = result.filter((p) => {
+          const listings = this.getListingsForProduct(p.id);
+          return listings.some((l) => {
+            const plat = l.platform.toLowerCase();
+            if (targetStore === "amazon") return plat.includes("amazon");
+            if (targetStore === "flipkart") return plat.includes("flipkart");
+            if (targetStore === "nykaa") return plat.includes("nykaa");
+            if (targetStore === "myntra") return plat.includes("myntra");
+            if (targetStore === "purplle") return plat.includes("purplle");
+            if (targetStore === "tira") return plat.includes("tira");
+            if (targetStore === "minimalist") return plat.includes("minimalist");
+            if (targetStore === "dot-and-key" || targetStore === "dotandkey") return plat.includes("dot");
+            if (targetStore === "brand" || targetStore === "direct") return plat.includes("direct") || plat.includes("store");
+            return plat.includes(targetStore);
+          });
+        });
       }
 
       // Filter by Skin Type
