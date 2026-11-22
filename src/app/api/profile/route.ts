@@ -13,6 +13,14 @@ export async function GET() {
     const { user, response } = await requireSessionUser();
     if (!user) return response!;
 
+    const objectIdPattern = /^[a-f\d]{24}$/i;
+    if (!objectIdPattern.test(user.id)) {
+      return NextResponse.json({
+        success: true,
+        data: null,
+      });
+    }
+
     const profile = await prisma.skinProfile.findUnique({
       where: { userId: user.id },
     });
@@ -78,6 +86,14 @@ export async function PUT(req: NextRequest) {
       siliconeFree: input.siliconeFree,
       isOnboardingComplete: input.isOnboardingComplete ?? true,
     };
+
+    const objectIdPattern = /^[a-f\d]{24}$/i;
+    if (!objectIdPattern.test(user.id)) {
+      return NextResponse.json({
+        success: true,
+        data: { id: "profile-local", userId: user.id, ...data },
+      });
+    }
 
     const profile = await prisma.skinProfile.upsert({
       where: { userId: user.id },

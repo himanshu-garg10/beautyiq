@@ -22,7 +22,6 @@ export async function GET() {
     });
 
     const productIds = saved.map((item: any) => item.productId);
-    const objectIdPattern = new RegExp("^[a-f\\d]{24}$", "i");
     const mongoIds = productIds.filter((id: string) => objectIdPattern.test(id));
 
     const products =
