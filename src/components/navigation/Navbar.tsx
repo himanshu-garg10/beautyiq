@@ -269,8 +269,8 @@ export function Navbar() {
           >
             <div className="flex items-center justify-between pb-2 border-b border-line/60">
               <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Sparkles className="h-4 w-4 text-champagne-deep" />
-                <span>Search BeautyIQ Database</span>
+                <Sparkles className="h-4 w-4 text-sage-deep" />
+                <span>Search &amp; Compare Across Stores</span>
               </div>
               <button
                 type="button"
@@ -288,17 +288,21 @@ export function Navbar() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, brands, or active ingredients (e.g. Niacinamide, Dot & Key)..."
-                className="w-full rounded-xl border border-line bg-background px-4 py-3 pl-11 text-sm text-foreground placeholder:text-foreground-faint focus:border-champagne-deep focus:outline-none focus:ring-2 focus:ring-champagne/20"
+                placeholder="Search products, brands, or active ingredients (e.g. Minimalist, Salicylic Acid, Dot & Key)..."
+                className="w-full rounded-xl border border-line bg-background px-4 py-3 pl-11 pr-36 text-sm text-foreground placeholder:text-foreground-faint focus:border-sage-deep focus:outline-none focus:ring-2 focus:ring-sage-deep/20"
               />
               <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-foreground-faint" />
               <button
                 type="submit"
-                className="absolute right-2.5 top-2.5 rounded-lg bg-foreground text-background px-3 py-1.5 text-xs font-semibold hover:bg-foreground/90 transition-colors"
+                className="absolute right-2 top-2 rounded-lg bg-sage-deep text-white px-3.5 py-1.5 text-xs font-bold hover:bg-sage-deep/90 transition-colors shadow-2xs"
               >
-                Search
+                Search &amp; Compare
               </button>
             </form>
+
+            <p className="text-[0.7rem] text-foreground-faint">
+              ⚡ Compares live prices across Amazon, Flipkart, Nykaa, Myntra, Purplle, Tira &amp; Brand Stores with direct buying links.
+            </p>
 
             <div className="pt-2 text-xs text-foreground-muted space-y-2">
               <span className="font-semibold uppercase tracking-wider text-[0.68rem] text-foreground-faint">

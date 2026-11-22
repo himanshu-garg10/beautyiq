@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Search,
 } from "lucide-react";
 
 const categoryOptions = [
@@ -132,6 +133,17 @@ function ProductsCatalogContent() {
   const initialPage = searchParams?.get("page") ? Math.max(1, parseInt(searchParams.get("page")!, 10) || 1) : 1;
 
   const [searchQuery, setSearchQuery] = React.useState(initialQuery);
+  const [searchInputText, setSearchInputText] = React.useState(initialQuery);
+
+  React.useEffect(() => {
+    setSearchInputText(searchQuery);
+  }, [searchQuery]);
+
+  const handleTopSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSearchQuery(searchInputText.trim());
+    setPage(1);
+  };
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialCategory ? initialCategory.split(",").filter(Boolean) : []);
   const [selectedBrands, setSelectedBrands] = React.useState<string[]>(initialBrand ? initialBrand.split(",").filter(Boolean) : []);
   const [selectedStore, setSelectedStore] = React.useState(initialStore);
@@ -214,6 +226,7 @@ function ProductsCatalogContent() {
 
   const handleResetFilters = () => {
     setSearchQuery("");
+    setSearchInputText("");
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedStore("");
@@ -320,6 +333,103 @@ function ProductsCatalogContent() {
           <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-sage-tint text-sage-deep font-semibold border border-sage-deep/30">
             Brand Stores
           </span>
+        </div>
+      </div>
+
+      {/* Prominent Multi-Store Search & Compare Bar with Search Button */}
+      <div className="rounded-2xl border border-sage-deep/30 bg-background-card p-4 sm:p-5 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+              <Search className="h-4 w-4 text-sage-deep" />
+              <span>Search Products &amp; Compare Live Store Prices</span>
+            </h2>
+            <p className="text-xs text-foreground-muted">
+              Enter any product, brand, or active ingredient. We fetch real-time offers across Amazon, Flipkart, Nykaa, Myntra, Purplle, Tira &amp; Direct Stores with direct buying links.
+            </p>
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchInputText("");
+                setSearchQuery("");
+                setPage(1);
+              }}
+              className="text-xs text-sage-deep font-semibold hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Clear Search</span>
+            </button>
+          )}
+        </div>
+
+        <form onSubmit={handleTopSearchSubmit} className="flex flex-col sm:flex-row items-stretch gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={searchInputText}
+              onChange={(e) => setSearchInputText(e.target.value)}
+              placeholder="Search product, brand, or active (e.g. Minimalist Salicylic Acid, Dot & Key, CeraVe, Vitamin C)..."
+              className="w-full rounded-xl border border-line bg-background-elevated/70 px-4 py-2.5 pl-10 text-sm text-foreground placeholder:text-foreground-faint focus:border-sage-deep focus:bg-background focus:outline-none focus:ring-2 focus:ring-sage-deep/20 transition-all font-medium"
+            />
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-foreground-faint" />
+            {searchInputText && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInputText("");
+                  setSearchQuery("");
+                  setPage(1);
+                }}
+                className="absolute right-3.5 top-3 text-foreground-faint hover:text-foreground p-0.5"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+          <Button
+            type="submit"
+            variant="accent"
+            className="rounded-xl px-5 font-bold shadow-xs flex items-center justify-center gap-2 shrink-0 bg-sage-deep text-white hover:bg-sage-deep/90 h-[42px]"
+          >
+            <Search className="h-4 w-4" />
+            <span>Search &amp; Compare</span>
+          </Button>
+        </form>
+
+        {/* Quick Search Tag Suggestions */}
+        <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-xs text-foreground-muted">
+          <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-foreground-faint">
+            Popular:
+          </span>
+          {[
+            "Minimalist 10% Niacinamide",
+            "Salicylic Acid Face Wash",
+            "Dot & Key Watermelon",
+            "CeraVe Cleanser",
+            "The Ordinary Niacinamide",
+            "SPF 50 Sunscreen",
+            "Vitamin C Serum",
+            "Neutrogena Hydro Boost",
+          ].map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => {
+                setSearchInputText(tag);
+                setSearchQuery(tag);
+                setPage(1);
+              }}
+              className={cn(
+                "rounded-full border px-2.5 py-0.5 text-[0.7rem] font-medium transition-all",
+                searchQuery.toLowerCase() === tag.toLowerCase()
+                  ? "bg-sage-deep text-white border-sage-deep font-semibold"
+                  : "bg-background-elevated hover:bg-sage-tint hover:text-sage-deep text-foreground-muted border-line"
+              )}
+            >
+              {tag}
+            </button>
+          ))}
         </div>
       </div>
 

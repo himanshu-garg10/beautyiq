@@ -12,6 +12,17 @@ import { useToast } from "@/context/toast-context";
 import { useComparison } from "@/context/comparison-context";
 import { cn } from "@/lib/utils";
 
+function getStoreChipStyle(platform: string) {
+  const p = platform.toLowerCase();
+  if (p.includes("amazon")) return "bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700";
+  if (p.includes("flipkart")) return "bg-blue-500/10 hover:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700";
+  if (p.includes("nykaa")) return "bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-700";
+  if (p.includes("myntra")) return "bg-pink-500/10 hover:bg-pink-500/20 text-pink-800 dark:text-pink-300 border-pink-300 dark:border-pink-700";
+  if (p.includes("purplle")) return "bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700";
+  if (p.includes("tira")) return "bg-stone-500/10 hover:bg-stone-500/20 text-stone-900 dark:text-stone-200 border-stone-300 dark:border-stone-700";
+  return "bg-sage-tint hover:bg-sage-tint/80 text-sage-deep border-sage-deep/30";
+}
+
 export function ProductCard({
   product,
   className,
@@ -288,16 +299,16 @@ export function ProductCard({
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    title={`View on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "In Stock"})`}
+                    title={`Buy on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "Direct Link"})`}
                     className={cn(
-                      "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-colors border",
-                      l.isBestPrice
-                        ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
-                        : "bg-background-elevated/70 text-foreground-muted hover:text-foreground border-line"
+                      "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-all border font-semibold",
+                      getStoreChipStyle(l.platform),
+                      l.isBestPrice && "ring-1 ring-emerald-500/50 shadow-2xs font-bold"
                     )}
                   >
                     <span className="truncate max-w-[65px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                    <span className="font-mono font-semibold">₹{l.price}</span>
+                    <span className="font-mono">₹{l.price}</span>
+                    <ExternalLink className="h-2 w-2 opacity-60" />
                   </a>
                 ))}
                 {allProductListings.length > 4 && (

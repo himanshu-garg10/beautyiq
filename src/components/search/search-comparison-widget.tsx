@@ -28,6 +28,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+function getStoreStyle(platform: string) {
+  const p = platform.toLowerCase();
+  if (p.includes("amazon")) {
+    return "bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700";
+  }
+  if (p.includes("flipkart")) {
+    return "bg-blue-500/10 hover:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700";
+  }
+  if (p.includes("nykaa")) {
+    return "bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-700";
+  }
+  if (p.includes("myntra")) {
+    return "bg-pink-500/10 hover:bg-pink-500/20 text-pink-800 dark:text-pink-300 border-pink-300 dark:border-pink-700";
+  }
+  if (p.includes("purplle")) {
+    return "bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700";
+  }
+  if (p.includes("tira")) {
+    return "bg-stone-500/10 hover:bg-stone-500/20 text-stone-900 dark:text-stone-200 border-stone-300 dark:border-stone-700";
+  }
+  return "bg-sage-tint hover:bg-sage-tint/80 text-sage-deep border-sage-deep/30";
+}
+
 interface SearchComparisonWidgetProps {
   searchQuery: string;
   allProducts: Product[];
@@ -282,40 +305,48 @@ export function SearchComparisonWidget({
                       </div>
                     )}
 
-                    {/* Store Price Matrix Preview */}
-                    <div className="space-y-1.5 border-t border-line/60 pt-2">
+                    {/* Direct Buying Links Across Websites */}
+                    <div className="space-y-2 border-t border-line/60 pt-2.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-foreground-faint text-[0.68rem]">Cheapest Store:</span>
-                        <span className="font-bold text-sage-deep font-mono">
-                          ₹{bestListing?.price} ({bestListing?.platform?.replace(" Direct", "").replace(" Store", "")})
+                        <span className="text-[0.68rem] font-semibold text-foreground-faint uppercase tracking-wider">
+                          Direct Store Deals:
                         </span>
+                        {bestListing && (
+                          <span className="text-[0.68rem] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                            Lowest: ₹{bestListing.price} ({bestListing.platform.replace(" Direct", "").replace(" Store", "")})
+                          </span>
+                        )}
                       </div>
 
-                      {/* Store Price Chips */}
-                      <div className="flex flex-wrap gap-1">
-                        {item.listings.slice(0, 3).map((l) => (
+                      {/* Prominent Direct Store Links */}
+                      <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+                        {item.listings.map((l) => (
                           <a
                             key={l.id}
                             href={l.productUrl}
                             target="_blank"
                             rel="noreferrer"
-                            title={`Buy on ${l.platform} for ₹${l.price}`}
+                            title={`Click to buy directly on ${l.platform} for ₹${l.price} (${l.deliveryEstimate || "Direct Store Link"})`}
                             className={cn(
-                              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.62rem] border transition-colors",
-                              l.isBestPrice
-                                ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
-                                : "bg-background-elevated text-foreground-muted hover:text-foreground border-line"
+                              "flex items-center justify-between px-2 py-1 rounded-md text-[0.68rem] font-semibold transition-all group border",
+                              getStoreStyle(l.platform),
+                              l.isBestPrice && "ring-1 ring-emerald-500/50 shadow-2xs"
                             )}
                           >
-                            <span className="truncate max-w-[55px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                            <span className="font-mono">₹{l.price}</span>
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="truncate">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                              {l.isBestPrice && (
+                                <span className="bg-emerald-600 text-white text-[0.55rem] font-bold px-1 rounded uppercase">
+                                  BEST
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 ml-1">
+                              <span className="font-mono font-bold">₹{l.price}</span>
+                              <ExternalLink className="h-2.5 w-2.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                            </div>
                           </a>
                         ))}
-                        {item.listings.length > 3 && (
-                          <span className="text-[0.62rem] text-foreground-faint px-1 py-0.5 font-mono">
-                            +{item.listings.length - 3} stores
-                          </span>
-                        )}
                       </div>
 
                       <div className="text-[0.65rem] font-mono text-foreground-faint flex items-center justify-between pt-0.5">
@@ -331,9 +362,10 @@ export function SearchComparisonWidget({
                           href={bestListing.productUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-sage-deep hover:bg-sage-deep/90 text-white text-xs font-semibold py-1.5 px-2 transition-colors shadow-2xs"
+                          title={`Buy directly on ${bestListing.platform} (${bestListing.deliveryEstimate || "In Stock"})`}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-sage-deep hover:bg-sage-deep/90 text-white text-xs font-semibold py-2 px-2.5 transition-colors shadow-2xs"
                         >
-                          <span>Buy on {bestListing.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                          <span>Buy on {bestListing.platform.replace(" Direct", "").replace(" Store", "")} (₹{bestListing.price})</span>
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
@@ -341,7 +373,7 @@ export function SearchComparisonWidget({
                         onClick={() => handleToggleCompare(item.product.id, item.product.name)}
                         title={isCompared ? "Remove from comparison" : "Add to comparison"}
                         className={cn(
-                          "px-2 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center transition-colors shrink-0",
+                          "px-2.5 py-2 rounded-lg border text-xs font-semibold flex items-center justify-center transition-colors shrink-0",
                           isCompared
                             ? "border-sage-deep bg-sage-tint text-sage-deep"
                             : "border-line bg-background-elevated hover:bg-background-card text-foreground-muted hover:text-foreground"
@@ -413,22 +445,25 @@ export function SearchComparisonWidget({
                     </td>
                     {allComparedItems.map((item) => (
                       <td key={item.product.id} className="p-3 border-l border-line space-y-1">
-                        <div className="flex flex-wrap gap-1">
-                          {item.listings.slice(0, 4).map((l) => (
+                        <div className="flex flex-col gap-1">
+                          {item.listings.map((l) => (
                             <a
                               key={l.id}
                               href={l.productUrl}
                               target="_blank"
                               rel="noreferrer"
+                              title={`Buy directly on ${l.platform} — ₹${l.price}`}
                               className={cn(
-                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.62rem] border",
-                                l.isBestPrice
-                                  ? "bg-sage-tint text-sage-deep border-sage-deep/40 font-bold"
-                                  : "border-line bg-background-elevated text-foreground-muted"
+                                "flex items-center justify-between px-2 py-1 rounded text-[0.65rem] border font-semibold transition-colors",
+                                getStoreStyle(l.platform),
+                                l.isBestPrice && "ring-1 ring-emerald-500/50"
                               )}
                             >
-                              <span>{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                              <span className="font-mono font-semibold">₹{l.price}</span>
+                              <span className="truncate">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <span className="font-mono font-bold">₹{l.price}</span>
+                                <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                              </div>
                             </a>
                           ))}
                         </div>
