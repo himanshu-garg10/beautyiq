@@ -17,6 +17,7 @@ import { Container } from "@/components/layout/container";
 import { EditableRequirementCard } from "@/components/ai-requirement/editable-requirement-card";
 import { ManualRequirementForm } from "@/components/ai-requirement/manual-requirement-form";
 import { ProductCard } from "@/components/product/product-card";
+import { SkincareChat } from "@/components/chat/skincare-chat";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -81,7 +82,7 @@ function AISearchContent() {
   const { profile } = useSkinProfile();
 
   const [queryText, setQueryText] = React.useState(searchParams?.get("q") || "");
-  const [mode, setMode] = React.useState<"input" | "processing" | "result" | "manual" | "error">("input");
+  const [mode, setMode] = React.useState<"chat" | "input" | "processing" | "result" | "manual" | "error">("chat");
   const [loadingStepIndex, setLoadingStepIndex] = React.useState(0);
 
   const [parseResult, setParseResult] = React.useState<AIRequirementParseResult | null>(null);
@@ -200,12 +201,13 @@ function AISearchContent() {
   const hasAutoTriggered = React.useRef(false);
   React.useEffect(() => {
     const qParam = searchParams?.get("q");
-    if (qParam && !hasAutoTriggered.current) {
+    // In chat mode the query seeds the conversation (see <SkincareChat initialQuery>); only the classic flow auto-runs it.
+    if (qParam && !hasAutoTriggered.current && mode !== "chat") {
       hasAutoTriggered.current = true;
       setQueryText(qParam);
       handleAnalyze(qParam);
     }
-  }, [searchParams, handleAnalyze]);
+  }, [searchParams, handleAnalyze, mode]);
 
   const handleConfirmAndProceed = () => {
     if (!requirement) return;
@@ -238,7 +240,7 @@ function AISearchContent() {
   return (
     <Container className="py-6 md:py-8 space-y-6 max-w-5xl">
       <section className="overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(circle_at_top_right,rgba(215,188,141,0.28),transparent_32%),linear-gradient(135deg,rgba(250,244,234,0.96),rgba(255,255,255,0.96),rgba(230,240,229,0.72))] p-6 shadow-subtle dark:bg-[radial-gradient(circle_at_top_right,rgba(161,124,68,0.2),transparent_35%),linear-gradient(135deg,rgba(32,35,34,0.98),rgba(29,31,30,0.98),rgba(38,48,41,0.92))] sm:p-8">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-2xl"><div className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/20 bg-background-card/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-champagne-deep shadow-sm"><Sparkles className="h-4 w-4" /> AI Match</div><h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl">Tell us what your skin needs.</h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground-muted sm:text-base">Ask a real question in English, Hindi, or Hinglish. Describe your skin, concern, budget or product type—and BeautyIQ will turn it into a clear product search.</p></div><Button variant="outline" size="sm" leftIcon={<Sliders className="h-4 w-4" />} onClick={() => setMode("manual")}>Manual form</Button></div>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-2xl"><div className="inline-flex items-center gap-2 rounded-full border border-champagne-deep/20 bg-background-card/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-champagne-deep shadow-sm"><Sparkles className="h-4 w-4" /> AI Match</div><h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl">Tell us what your skin needs.</h1><p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground-muted sm:text-base">Ask a real question in English, Hindi, or Hinglish. Describe your skin, concern, budget or product type—and BeautyIQ will turn it into a clear product search.</p></div><div className="flex gap-2">{mode !== "chat" && <Button variant="outline" size="sm" leftIcon={<Sparkles className="h-4 w-4" />} onClick={() => setMode("chat")}>Chat</Button>}{mode === "chat" && <Button variant="outline" size="sm" onClick={() => setMode("input")}>Classic search</Button>}<Button variant="outline" size="sm" leftIcon={<Sliders className="h-4 w-4" />} onClick={() => setMode("manual")}>Manual form</Button></div></div>
         <div className="mt-6 flex flex-wrap gap-2"><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">Ask naturally</span><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">English · Hindi · Hinglish</span><span className="rounded-full border border-line bg-background-card/80 px-3 py-1.5 text-xs font-medium text-foreground-muted">Catalog-based matches</span></div>
       </section>
 
@@ -249,6 +251,9 @@ function AISearchContent() {
           <strong className="text-foreground font-semibold">Skincare Product Matching Disclaimer:</strong> BeautyIQ extracts product parameters for cosmetic suitability matching. It does not provide medical diagnosis, prescribe drugs, or claim to cure skin conditions.
         </div>
       </div>
+
+      {/* Conversational skincare assistant (default) */}
+      {mode === "chat" && <SkincareChat initialQuery={searchParams?.get("q") || undefined} />}
 
       {/* Main Input State */}
       {mode === "input" && (
@@ -391,9 +396,16 @@ function AISearchContent() {
                     <p className="text-sm leading-relaxed text-foreground"><strong>Based on what you asked, here&apos;s a tailored cosmetic-care direction.</strong></p>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-champagne-deep">BeautyIQ&apos;s suggestions</p>
-                      <ul className="mt-2 grid gap-2 text-sm leading-relaxed text-foreground-muted sm:grid-cols-3">
-                        {guidance.slice(0, 3).map((item) => <li key={item} className="rounded-xl bg-background-elevated px-3 py-2.5">{item}</li>)}
-                      </ul>
+                      {/* One box: a paragraph for a single point, bullet points when there are several. */}
+                      <div className="mt-2 rounded-xl bg-background-elevated px-4 py-3 text-sm leading-relaxed text-foreground-muted">
+                        {guidance.length > 1 ? (
+                          <ul className="list-disc space-y-1.5 pl-5">
+                            {guidance.slice(0, 6).map((item) => <li key={item}>{item}</li>)}
+                          </ul>
+                        ) : (
+                          <p>{guidance[0]}</p>
+                        )}
+                      </div>
                     </div>
                     <p className="text-xs text-foreground-faint">This is cosmetic product guidance, not a diagnosis. For persistent, painful, or severe skin symptoms, consult a dermatologist.</p>
                   </div>
