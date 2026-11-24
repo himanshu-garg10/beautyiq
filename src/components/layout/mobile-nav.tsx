@@ -25,6 +25,9 @@ interface NavLink {
   label: string;
   href: string;
   isHighlight?: boolean;
+  isAi?: boolean;
+  isScan?: boolean;
+  showBadge?: boolean;
 }
 
 export function MobileNav({ links }: { links: NavLink[] }) {

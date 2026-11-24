@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Sparkles,
+  Camera,
   User,
   Heart,
   Search,
@@ -30,6 +31,7 @@ const navLinks = [
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
   { label: "AI Match", href: "/ai-search", isAi: true },
+  { label: "Skin Scan", href: "/skin-scan", isScan: true },
 ];
 
 export function Navbar() {
@@ -129,6 +131,9 @@ export function Navbar() {
                     >
                       {link.isAi && (
                         <Sparkles className="h-3.5 w-3.5 text-champagne-deep shrink-0" />
+                      )}
+                      {link.isScan && (
+                        <Camera className="h-3.5 w-3.5 text-sage-deep shrink-0" />
                       )}
                       <span>{link.label}</span>
                       {link.showBadge && compareCount > 0 && (
