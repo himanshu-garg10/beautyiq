@@ -19,7 +19,7 @@ async function main() {
   console.log("  - Tira Beauty (tirabeauty.com)");
   console.log("------------------------------------------------------------------");
 
-  const stats = await RetailerSyncService.syncAllRetailerApis(15);
+  const stats = await RetailerSyncService.syncAllRetailerApis(80);
 
   console.log("\n✅ Sync Completed Successfully!");
   console.log(`📦 Total Products Synced: ${stats.totalImported}`);

@@ -28,6 +28,7 @@ import {
   HelpCircle,
   Eye,
   Info,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
@@ -334,6 +335,11 @@ export default function ProductDetailPage() {
                           {l.deliveryEstimate}
                         </p>
                       )}
+                      <div className="pt-1 flex items-center justify-between border-t border-line/40">
+                        <span className="text-[0.62rem] font-bold text-emerald-700 dark:text-emerald-400 group-hover:underline flex items-center gap-0.5">
+                          Buy Now <ExternalLink className="h-2.5 w-2.5" />
+                        </span>
+                      </div>
                     </a>
                   ))}
                 </div>
@@ -346,7 +352,20 @@ export default function ProductDetailPage() {
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4 pt-2 border-t border-line">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-line">
+            {(bestListing?.productUrl || product.directBuyUrl) && (
+              <a
+                href={bestListing?.productUrl || product.directBuyUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Buy Now on {bestListing?.platform || "Official Store"} — ₹{bestPrice || product.price}</span>
+                <ExternalLink className="h-3.5 w-3.5 opacity-80" />
+              </a>
+            )}
+
             <Button
               variant={isSaved ? "outline" : "accent"}
               size="lg"

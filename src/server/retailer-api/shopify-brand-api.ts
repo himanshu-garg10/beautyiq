@@ -124,7 +124,7 @@ export class ShopifyBrandApiClient {
           "User-Agent": "BeautyIQ-Retailer-Catalog-Aggregator/2.0 (Skincare Price Intelligence)",
           Accept: "application/json",
         },
-        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(8000) : undefined,
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(15000) : undefined,
       });
 
       if (!response.ok) {

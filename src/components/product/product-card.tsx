@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Scale, Star, Heart, Check, Sparkles, ExternalLink } from "lucide-react";
+import { Scale, Star, Heart, Check, Sparkles, ExternalLink, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Product, ProductListing } from "@/types";
 import { ProductService } from "@/services/product.service";
@@ -362,18 +362,33 @@ export function ProductCard({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {activeListing?.productUrl && (
+            {activeListing?.productUrl ? (
               <a
                 href={activeListing.productUrl}
                 target="_blank"
                 rel="noreferrer"
-                title={`Open on ${activeListing.platform} (${activeListing.deliveryEstimate || "Direct Link"})`}
-                className="flex items-center gap-1 rounded-lg border border-line bg-background-card px-2.5 py-1.5 text-xs font-semibold text-sage-deep transition-all hover:border-sage-deep hover:bg-sage-tint"
+                onClick={(e) => e.stopPropagation()}
+                title={`Buy ${product.name} on ${activeListing.platform} — ₹${price} (${activeListing.deliveryEstimate || "Direct Link"})`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:shadow-sm transition-all active:scale-[0.98]"
               >
-                <span className="truncate max-w-[80px]">{activeListing.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                <ExternalLink className="h-3 w-3 shrink-0" />
+                <ShoppingBag className="h-3.5 w-3.5" />
+                <span>Buy</span>
+                <ExternalLink className="h-2.5 w-2.5 opacity-80" />
               </a>
-            )}
+            ) : product.directBuyUrl ? (
+              <a
+                href={product.directBuyUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={`Buy ${product.name} on Official Store — ₹${product.price}`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:shadow-sm transition-all active:scale-[0.98]"
+              >
+                <ShoppingBag className="h-3.5 w-3.5" />
+                <span>Buy</span>
+                <ExternalLink className="h-2.5 w-2.5 opacity-80" />
+              </a>
+            ) : null}
             <button
               onClick={handleCompare}
               title={isCompared ? "Remove from comparison" : "Add to comparison"}
