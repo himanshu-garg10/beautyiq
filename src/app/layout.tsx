@@ -7,6 +7,7 @@ import { SkinProfileProvider } from "@/context/skin-profile-context";
 import { ToastProvider } from "@/context/toast-context";
 import { ComparisonProvider } from "@/context/comparison-context";
 import { NextAuthSessionProvider } from "@/components/auth/session-provider";
+import { ChatProvider } from "@/components/chat/ChatProvider";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -53,7 +54,11 @@ export default function RootLayout({
             <NextAuthSessionProvider>
               <AuthProvider>
                 <SkinProfileProvider>
-                  <ComparisonProvider>{children}</ComparisonProvider>
+                  <ChatProvider>
+                    <ComparisonProvider>
+                    <ChatProvider>{children}</ChatProvider>
+                  </ComparisonProvider>
+                  </ChatProvider>
                 </SkinProfileProvider>
               </AuthProvider>
             </NextAuthSessionProvider>

@@ -154,9 +154,9 @@ export default function CustomerDashboardPage() {
 
   const quickActions = [
     {
-      title: "AI Requirements",
-      description: "Extract structured parameters from natural language",
-      href: "/ai-search",
+      title: "BeautyIQ AI Chat",
+      description: "Ask the AI about your skin type, concerns, or product needs",
+      href: "/",
       icon: Sparkles,
       color: "text-sage-deep",
       badge: "Intelligent",
@@ -348,8 +348,8 @@ export default function CustomerDashboardPage() {
           <EmptyState
             title="No Active Recommendations"
             description="Run an AI requirement search or complete your skin questionnaire to unlock precision recommendations."
-            actionLabel="Start AI Search"
-            onAction={() => router.push("/ai-search")}
+            actionLabel="Go to Skin Scan"
+            onAction={() => router.push("/skin-scan")}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -594,7 +594,7 @@ export default function CustomerDashboardPage() {
                   </div>
 
                   <Link
-                    href={s.searchType === "ai-requirement" ? "/ai-search" : `/products?q=${encodeURIComponent(s.query)}`}
+                    href={s.searchType === "ai-requirement" ? "/" : `/products?q=${encodeURIComponent(s.query)}`}
                     className="text-xs font-semibold text-sage-deep hover:underline flex items-center gap-1"
                   >
                     Re-run Search <ArrowRight className="h-3 w-3" />

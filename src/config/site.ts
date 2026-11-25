@@ -11,7 +11,7 @@ export const siteConfig = {
     { title: "Compare", href: "/compare" },
     { title: "Recommendations", href: "/recommendations" },
     { title: "Ingredients", href: "/ingredients" },
-    { title: "AI Search", href: "/ai-search" },
+    { title: "Skin Scan", href: "/skin-scan" },
   ],
   footerNav: {
     platform: [

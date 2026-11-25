@@ -82,8 +82,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/ai-search" className="hover:text-foreground transition-colors flex items-center gap-1">
-                  <span>AI Natural Search</span>
+                <Link href="/skin-scan" className="hover:text-foreground transition-colors flex items-center gap-1">
+                  <span>Skin Scan</span>
                   <Sparkles className="h-2.5 w-2.5 text-champagne-deep" />
                 </Link>
               </li>

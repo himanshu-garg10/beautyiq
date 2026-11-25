@@ -30,7 +30,6 @@ const navLinks = [
   { label: "Concerns", href: "/ingredients" },
   { label: "Products", href: "/products" },
   { label: "Compare", href: "/compare", showBadge: true },
-  { label: "AI Match", href: "/ai-search", isAi: true },
   { label: "Skin Scan", href: "/skin-scan", isScan: true },
 ];
 
@@ -117,7 +116,7 @@ export function Navbar() {
             <ul className="hidden lg:flex items-center gap-2 xl:gap-4">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href ||
-                  (link.href === "/ai-search" && pathname === "/recommendations");
+                  (link.href === "/skin-scan" && pathname === "/skin-scan");
                 return (
                   <li key={link.href} className={link.href === "/" ? "mr-2" : undefined}>
                     <Link
@@ -129,9 +128,6 @@ export function Navbar() {
                           : "font-medium text-foreground-muted hover:text-foreground"
                       )}
                     >
-                      {link.isAi && (
-                        <Sparkles className="h-3.5 w-3.5 text-champagne-deep shrink-0" />
-                      )}
                       {link.isScan && (
                         <Camera className="h-3.5 w-3.5 text-sage-deep shrink-0" />
                       )}

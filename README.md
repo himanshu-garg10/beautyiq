@@ -10,11 +10,12 @@
 
 Finding skincare online can feel noisy: the same product is described differently on every store, ingredient labels are hard to read, and it is difficult to know where to begin. BeautyIQ brings those early research steps together in one place.
 
-It is designed as a product-discovery and comparison experience—not a diagnostic or medical service. The AI Match feature gives cosmetic-care guidance and uses the project catalog to surface relevant products; it does not replace advice from a dermatologist.
+It is designed as a product-discovery and comparison experience—not a diagnostic or medical service. The floating **BeautyIQ AI** chatbot and **Skin Scan** feature give cosmetic-care guidance and use the project catalog to surface relevant products; they do not replace advice from a dermatologist.
 
 ## What the platform includes
 
-- **AI Match chat** — a conversational skincare assistant. Describe your skin type, concerns, budget and ingredient allergies in English, Hindi, or Hinglish; it remembers your profile, recommends *real catalog products* (ranked, with verified price, ingredients and a View Product link), and handles follow-ups such as “why this serum?”, “compare these two”, “suggest a cheaper alternative” or “give me a morning routine”. Product facts come only from the database; the LLM provider (`AI_ENGINE_PROVIDER`: gemini, openai, anthropic or none) is optional and can't alter them.
+- **BeautyIQ AI floating chatbot** — a conversational skincare assistant available from the bottom-right bubble on every public page. Ask in English, Hindi, or Hinglish about your skin type, concerns, or routine, get real catalog product cards, or jump to Skin Scan.
+- **Face Skin Scan** — upload or capture a photo in-memory (never stored) for cosmetic skin observations, concern breakdown, routine tips, and matching catalog products.
 - **Product discovery** — browse the catalog by category, concern, skin type, brand, ingredient, or price range.
 - **Concern guides** — practical starting points for concerns such as dullness, acne, dryness, oiliness, texture, pigmentation, dark circles, and more.
 - **Ingredient intelligence** — explore ingredient names and the cosmetic concerns they are commonly associated with.
