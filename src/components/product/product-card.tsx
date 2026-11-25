@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Scale, Star, Heart, Check, Sparkles, ExternalLink, ShoppingBag } from "lucide-react";
+import { Scale, Star, Heart, Check, Sparkles, ExternalLink, ShoppingBag, Tag, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Product, ProductListing } from "@/types";
 import { ProductService } from "@/services/product.service";
@@ -20,7 +20,7 @@ function getStoreChipStyle(platform: string) {
   if (p.includes("myntra")) return "bg-pink-500/10 hover:bg-pink-500/20 text-pink-800 dark:text-pink-300 border-pink-300 dark:border-pink-700";
   if (p.includes("purplle")) return "bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700";
   if (p.includes("tira")) return "bg-stone-500/10 hover:bg-stone-500/20 text-stone-900 dark:text-stone-200 border-stone-300 dark:border-stone-700";
-  return "bg-sage-tint hover:bg-sage-tint/80 text-sage-deep border-sage-deep/30";
+  return "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700";
 }
 
 export function ProductCard({
@@ -70,9 +70,15 @@ export function ProductCard({
   }, [allProductListings, selectedStore]);
 
   const activeListing = targetStoreListing || bestOverallListing;
-  const price = activeListing?.price ?? null;
-  const originalPrice = activeListing?.originalPrice;
-  const discountPercent = activeListing?.discountPercent;
+  const price = activeListing?.price ?? product.price ?? null;
+  const originalPrice = activeListing?.originalPrice ?? product.mrp;
+  const discountPercent =
+    activeListing?.discountPercent ??
+    (originalPrice && price && originalPrice > price
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : 0);
+  const savingsAmount =
+    originalPrice && price && originalPrice > price ? originalPrice - price : 0;
 
   // Calculate Unit Cost (₹/ml or ₹/g)
   const unitPriceCalc = ProductService.getUnitPrice(product);
@@ -111,56 +117,86 @@ export function ProductCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-background-card transition-all duration-300 hover:border-line-strong hover:shadow-md h-full",
+        "group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line/80 bg-background-card transition-all duration-300 hover:border-sage-soft/60 hover:shadow-xl hover:-translate-y-0.5 h-full",
         className
       )}
     >
       {/* Top Image Box */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-background-elevated">
-        <Link href={`/products/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="block h-full w-full">
+        <Link
+          href={`/products/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
+          className="block h-full w-full"
+        >
           <Image
             src={product.image}
             alt={`${product.brand} ${product.name}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
           />
+          {/* Subtle bottom gradient vignette for contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
         </Link>
 
-        {/* Wishlist Button (Top Left) */}
-        {user && <button
-          onClick={handleWishlist}
-          aria-label={isSaved ? "Remove from wishlist" : "Save to wishlist"}
-          title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
-          className={cn(
-            "absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line/80 bg-background-card/90 backdrop-blur-xs transition-all hover:scale-110 shadow-xs",
-            isSaved ? "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200" : "text-foreground-muted hover:text-rose-500"
-          )}
-        ><Heart className={cn("h-4 w-4", isSaved && "fill-current")} /></button>}
+        {/* Top Floating Badges */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+          <div className="flex items-center gap-1.5 pointer-events-auto">
+            {/* Wishlist Button */}
+            {user && (
+              <button
+                onClick={handleWishlist}
+                aria-label={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+                title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/90 dark:bg-black/60 backdrop-blur-md transition-all hover:scale-110 shadow-sm",
+                  isSaved
+                    ? "text-rose-500 bg-rose-50 dark:bg-rose-950/60 border-rose-300"
+                    : "text-foreground-muted hover:text-rose-500"
+                )}
+              >
+                <Heart className={cn("h-4 w-4", isSaved && "fill-current")} />
+              </button>
+            )}
 
-        {/* Compatibility Match Pill (Top Right) */}
-        {product.compatibilityScore ? (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-sage-deep/30 bg-background-card/95 backdrop-blur-xs px-2.5 py-0.5 shadow-xs">
-            <Sparkles className="h-3 w-3 text-sage-deep shrink-0" />
-            <span className="text-[0.7rem] font-bold text-sage-deep font-mono">
-              {product.compatibilityScore}% Match
-            </span>
+            {/* Savings Badge */}
+            {discountPercent > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/95 text-white px-2.5 py-0.5 text-[0.68rem] font-bold tracking-wide backdrop-blur-xs shadow-sm">
+                <Tag className="h-2.5 w-2.5" />
+                {discountPercent}% OFF
+              </span>
+            )}
           </div>
-        ) : null}
 
-        {/* Category Pill (Bottom Left) */}
-        <div className="absolute bottom-2.5 left-3">
-          <span className="text-[0.65rem] font-medium tracking-wide text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
+          {/* Compatibility Match Pill */}
+          {product.compatibilityScore ? (
+            <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-sage-deep/30 bg-background-card/95 backdrop-blur-md px-2.5 py-0.5 shadow-sm">
+              <Sparkles className="h-3 w-3 text-sage-deep shrink-0" />
+              <span className="text-[0.7rem] font-bold text-sage-deep font-mono">
+                {product.compatibilityScore}% Match
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Category & Offer Pill (Bottom of Image) */}
+        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between pointer-events-none">
+          <span className="text-[0.65rem] font-semibold tracking-wide text-white bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20">
             {product.category}
           </span>
+
+          {activeListing?.offerTag && (
+            <span className="text-[0.62rem] font-semibold text-emerald-200 bg-emerald-950/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-emerald-500/40 truncate max-w-[170px]">
+              {activeListing.offerTag}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Card Content */}
+      {/* Card Body */}
       <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
-        {/* Brand & Rating Bar */}
+        {/* Brand & Star Rating Header */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.72rem] font-bold uppercase tracking-wider text-sage-deep truncate">
+          <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-sage-deep truncate font-sans">
             {product.brand}
           </span>
 
@@ -168,23 +204,17 @@ export function ProductCard({
           <div className="flex items-center gap-1 text-xs shrink-0">
             {product.rating !== null ? (
               <>
-                <Star className="h-3.5 w-3.5 fill-clay text-clay" aria-hidden="true" />
-                <span className="font-semibold text-foreground text-xs">{product.rating}</span>
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" aria-hidden="true" />
+                <span className="font-bold text-foreground text-xs">{product.rating}</span>
                 <span className="text-foreground-faint text-[0.7rem]">
                   ({product.reviewCount.toLocaleString()})
                 </span>
               </>
             ) : (
-              <span className="text-foreground-faint text-[0.68rem] font-mono">New</span>
+              <span className="text-foreground-faint text-[0.68rem] font-mono">Verified Brand</span>
             )}
           </div>
         </div>
-
-        {product.productStatus === "Incomplete" && (
-          <span className="w-fit rounded-full bg-champagne-tint px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-champagne-deep">
-            Label data · price pending
-          </span>
-        )}
 
         {/* Product Title */}
         <Link href={`/products/${product.id}`} className="block">
@@ -194,11 +224,11 @@ export function ProductCard({
         </Link>
 
         {/* Key Actives & Benefits Pills */}
-        <div className="flex flex-wrap items-center gap-1 min-h-[32px]">
+        <div className="flex flex-wrap items-center gap-1 min-h-[30px]">
           {product.keyIngredients.slice(0, 2).map((ing) => (
             <span
               key={ing}
-              className="text-[0.68rem] font-medium px-2 py-0.5 rounded bg-sage-tint/60 text-sage-deep dark:bg-sage-deep/15"
+              className="text-[0.68rem] font-medium px-2 py-0.5 rounded-md bg-sage-tint/80 text-sage-deep border border-sage-deep/15 dark:bg-sage-deep/20"
             >
               {ing}
             </span>
@@ -206,7 +236,7 @@ export function ProductCard({
           {product.targetConcerns.slice(0, 1).map((concern) => (
             <span
               key={concern}
-              className="text-[0.68rem] font-medium px-2 py-0.5 rounded bg-clay-tint/70 text-clay dark:bg-clay-tint/20"
+              className="text-[0.68rem] font-medium px-2 py-0.5 rounded-md bg-clay-tint/80 text-clay border border-clay/15 dark:bg-clay-tint/20"
             >
               {concern}
             </span>
@@ -215,10 +245,10 @@ export function ProductCard({
 
         {/* Multi-Retailer Live Price Comparison Strip */}
         {allProductListings.length > 0 && (
-          <div className="pt-2 border-t border-line/40 space-y-1.5">
+          <div className="pt-2 border-t border-line/50 space-y-1.5">
             <div className="flex items-center justify-between text-[0.68rem] font-medium text-foreground-faint">
               <span className="flex items-center gap-1">
-                <span>Compare {allProductListings.length} Stores</span>
+                <span className="font-semibold text-foreground-muted">Compare {allProductListings.length} Stores:</span>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -226,13 +256,17 @@ export function ProductCard({
                     e.stopPropagation();
                     setShowAllStores((v) => !v);
                   }}
-                  className="text-sage-deep font-semibold hover:underline"
+                  className="text-sage-deep font-bold hover:underline flex items-center gap-0.5"
                 >
-                  {showAllStores ? "Hide" : "View All ▾"}
+                  {showAllStores ? (
+                    <>Hide <ChevronUp className="h-3 w-3" /></>
+                  ) : (
+                    <>View All <ChevronDown className="h-3 w-3" /></>
+                  )}
                 </button>
               </span>
-              <span className="text-sage-deep font-semibold">
-                Lowest: ₹{bestOverallListing?.price} ({bestOverallListing?.platform?.replace(" Direct", "").replace(" Store", "")})
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                Best: ₹{bestOverallListing?.price} ({bestOverallListing?.platform?.replace(" Direct", "").replace(" Store", "")})
               </span>
             </div>
 
@@ -240,37 +274,41 @@ export function ProductCard({
             {showAllStores ? (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="p-2.5 rounded-lg border border-sage-deep/30 bg-background-elevated/90 space-y-1.5 shadow-sm my-1 text-xs"
+                className="p-2.5 rounded-xl border border-sage-deep/30 bg-background-elevated space-y-1.5 shadow-sm my-1 text-xs"
               >
-                <div className="flex items-center justify-between font-semibold text-[0.72rem] pb-1 border-b border-line">
-                  <span className="text-foreground">Store &amp; Offer</span>
-                  <span className="text-foreground">Price &amp; Link</span>
+                <div className="flex items-center justify-between font-semibold text-[0.7rem] pb-1 border-b border-line text-foreground-muted">
+                  <span>Store &amp; Offer</span>
+                  <span>Payable Price</span>
                 </div>
-                <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {allProductListings.map((l) => (
                     <div
                       key={l.id}
                       className={cn(
-                        "flex items-center justify-between p-1.5 rounded transition-colors text-[0.7rem]",
+                        "flex items-center justify-between p-1.5 rounded-lg transition-colors text-[0.7rem]",
                         l.isBestPrice
-                          ? "bg-sage-tint/60 text-sage-deep font-semibold border border-sage-deep/30"
-                          : "hover:bg-background-card"
+                          ? "bg-emerald-500/10 text-emerald-950 dark:text-emerald-300 font-semibold border border-emerald-500/30"
+                          : "hover:bg-background-card border border-transparent"
                       )}
                     >
                       <div className="min-w-0 pr-2">
                         <div className="flex items-center gap-1">
-                          <span className="truncate font-medium text-foreground">{l.platform}</span>
+                          <span className="truncate font-semibold text-foreground">{l.platform}</span>
                           {l.isBestPrice && (
-                            <span className="bg-sage-deep text-white text-[0.58rem] font-bold px-1 rounded">
+                            <span className="bg-emerald-600 text-white text-[0.55rem] font-bold px-1 rounded">
                               LOWEST
                             </span>
                           )}
                         </div>
-                        {l.deliveryEstimate && (
+                        {l.offerTag ? (
+                          <span className="text-[0.62rem] text-emerald-700 dark:text-emerald-400 block truncate">
+                            {l.offerTag}
+                          </span>
+                        ) : l.deliveryEstimate ? (
                           <span className="text-[0.62rem] text-foreground-faint block truncate">
                             {l.deliveryEstimate}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="font-mono font-bold text-foreground">₹{l.price}</span>
@@ -279,7 +317,7 @@ export function ProductCard({
                             href={l.productUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[0.62rem] font-semibold bg-sage-deep text-white hover:bg-sage-deep/90 transition-colors"
+                            className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[0.65rem] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
                           >
                             <span>Buy</span>
                             <ExternalLink className="h-2.5 w-2.5" />
@@ -299,15 +337,17 @@ export function ProductCard({
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    title={`Buy on ${l.platform} — ₹${l.price} (${l.deliveryEstimate || "Direct Link"})`}
+                    title={`Buy on ${l.platform} — ₹${l.price} (${l.offerTag || l.deliveryEstimate || "Direct Link"})`}
                     className={cn(
-                      "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] transition-all border font-semibold",
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[0.65rem] transition-all border font-semibold",
                       getStoreChipStyle(l.platform),
-                      l.isBestPrice && "ring-1 ring-emerald-500/50 shadow-2xs font-bold"
+                      l.isBestPrice && "ring-1.5 ring-emerald-500/60 shadow-2xs font-bold"
                     )}
                   >
-                    <span className="truncate max-w-[65px]">{l.platform.replace(" Direct", "").replace(" Store", "")}</span>
-                    <span className="font-mono">₹{l.price}</span>
+                    <span className="truncate max-w-[65px]">
+                      {l.platform.replace(" Direct", "").replace(" Store", "")}
+                    </span>
+                    <span className="font-mono font-bold">₹{l.price}</span>
                     <ExternalLink className="h-2 w-2 opacity-60" />
                   </a>
                 ))}
@@ -319,7 +359,7 @@ export function ProductCard({
                       e.stopPropagation();
                       setShowAllStores(true);
                     }}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] text-foreground-faint hover:text-foreground bg-background-elevated border border-line"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded-lg text-[0.65rem] font-semibold text-foreground-faint hover:text-foreground bg-background-elevated border border-line"
                     title="View all retailer prices and comparison"
                   >
                     +{allProductListings.length - 4} more
@@ -331,12 +371,12 @@ export function ProductCard({
         )}
 
         {/* Price & Action Row */}
-        <div className="mt-auto pt-3 border-t border-line/60 flex items-center justify-between gap-3">
+        <div className="mt-auto pt-3 border-t border-line/70 flex items-center justify-between gap-3">
           <div>
-            <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
               {price !== null ? (
                 <>
-                  <span className="font-display text-base sm:text-lg font-bold text-foreground">
+                  <span className="font-display text-lg sm:text-xl font-bold text-foreground">
                     ₹{price.toLocaleString()}
                   </span>
                   {originalPrice && originalPrice > price && (
@@ -344,11 +384,11 @@ export function ProductCard({
                       ₹{originalPrice.toLocaleString()}
                     </span>
                   )}
-                  {discountPercent ? (
-                    <span className="text-[0.65rem] font-bold text-status-success">
-                      -{discountPercent}%
+                  {savingsAmount > 0 && (
+                    <span className="text-[0.65rem] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded">
+                      Save ₹{savingsAmount}
                     </span>
-                  ) : null}
+                  )}
                 </>
               ) : (
                 <span className="text-xs font-semibold text-foreground-muted">Check Availability</span>
@@ -368,11 +408,11 @@ export function ProductCard({
                 target="_blank"
                 rel="noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                title={`Buy ${product.name} on ${activeListing.platform} — ₹${price} (${activeListing.deliveryEstimate || "Direct Link"})`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:shadow-sm transition-all active:scale-[0.98]"
+                title={`Buy ${product.name} on ${activeListing.platform} — ₹${price} (${activeListing.offerTag || activeListing.deliveryEstimate || "Direct Link"})`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white px-3.5 py-2 text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
               >
                 <ShoppingBag className="h-3.5 w-3.5" />
-                <span>Buy</span>
+                <span>Buy Now</span>
                 <ExternalLink className="h-2.5 w-2.5 opacity-80" />
               </a>
             ) : product.directBuyUrl ? (
@@ -382,24 +422,35 @@ export function ProductCard({
                 rel="noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 title={`Buy ${product.name} on Official Store — ₹${product.price}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:shadow-sm transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white px-3.5 py-2 text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
               >
                 <ShoppingBag className="h-3.5 w-3.5" />
-                <span>Buy</span>
+                <span>Buy Now</span>
                 <ExternalLink className="h-2.5 w-2.5 opacity-80" />
               </a>
             ) : null}
+
             <button
               onClick={handleCompare}
               title={isCompared ? "Remove from comparison" : "Add to comparison"}
               className={cn(
-                "flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all",
+                "flex items-center gap-1 text-xs font-semibold px-2.5 py-2 rounded-xl border transition-all",
                 isCompared
                   ? "border-sage-deep bg-sage-deep text-white shadow-xs"
                   : "border-line bg-background-card hover:bg-background-elevated text-foreground-muted hover:text-foreground"
               )}
             >
-              {isCompared ? <><Check className="h-3.5 w-3.5" /><span>Added</span></> : <><Scale className="h-3.5 w-3.5 text-sage-deep" /><span>Compare</span></>}
+              {isCompared ? (
+                <>
+                  <Check className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Added</span>
+                </>
+              ) : (
+                <>
+                  <Scale className="h-3.5 w-3.5 text-sage-deep" />
+                  <span className="hidden sm:inline">Compare</span>
+                </>
+              )}
             </button>
           </div>
         </div>

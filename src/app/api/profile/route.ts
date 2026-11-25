@@ -8,13 +8,14 @@ import { InputValidator } from "@/lib/security/input-validator";
 // Session lookup reads request headers/cookies; this must never be prerendered.
 export const dynamic = "force-dynamic";
 
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+
 export async function GET() {
   try {
     const { user, response } = await requireSessionUser();
     if (!user) return response!;
 
-    const objectIdPattern = /^[a-f\d]{24}$/i;
-    if (!objectIdPattern.test(user.id)) {
+    if (!OBJECT_ID_PATTERN.test(user.id)) {
       return NextResponse.json({
         success: true,
         data: null,
@@ -87,8 +88,7 @@ export async function PUT(req: NextRequest) {
       isOnboardingComplete: input.isOnboardingComplete ?? true,
     };
 
-    const objectIdPattern = /^[a-f\d]{24}$/i;
-    if (!objectIdPattern.test(user.id)) {
+    if (!OBJECT_ID_PATTERN.test(user.id)) {
       return NextResponse.json({
         success: true,
         data: { id: "profile-local", userId: user.id, ...data },

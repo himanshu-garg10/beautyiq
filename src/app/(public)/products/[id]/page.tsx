@@ -285,59 +285,71 @@ export default function ProductDetailPage() {
 
             {/* Multi-Store Real-Time Price Comparison Box */}
             {listings.length > 0 && (
-              <div className="pt-3 border-t border-line/60 space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+              <div className="pt-3 border-t border-line/60 space-y-3">
+                <div className="flex items-center justify-between text-xs flex-wrap gap-2">
+                  <span className="font-bold text-foreground flex items-center gap-1.5">
                     <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Price Across {listings.length} Stores
+                    Live Offers Across {listings.length} Verified Stores
                   </span>
                   {listings.find((l) => l.isBestPrice) && (
-                    <span className="text-[0.7rem] font-bold text-sage-deep bg-sage-tint px-2 py-0.5 rounded-full">
-                      Lowest: ₹{listings.find((l) => l.isBestPrice)?.price} on {listings.find((l) => l.isBestPrice)?.platform}
+                    <span className="text-[0.72rem] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full shadow-2xs">
+                      Best Deal: ₹{listings.find((l) => l.isBestPrice)?.price} on {listings.find((l) => l.isBestPrice)?.platform}
                     </span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {listings.slice(0, 6).map((l) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {listings.map((l) => (
                     <a
                       key={l.id}
                       href={l.productUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className={`p-2.5 rounded-lg border transition-all text-xs space-y-1 block relative group ${
+                      className={`p-3 rounded-xl border transition-all text-xs space-y-1.5 block relative group shadow-2xs hover:shadow-sm ${
                         l.isBestPrice
-                          ? "border-sage-deep bg-sage-tint/40 shadow-xs ring-1 ring-sage-deep/30"
+                          ? "border-emerald-500 bg-emerald-500/10 dark:bg-emerald-950/20 ring-1 ring-emerald-500/30"
                           : "border-line bg-background-card hover:border-line-strong hover:bg-background-elevated"
                       }`}
                     >
                       {l.isBestPrice && (
-                        <span className="absolute -top-2 right-2 text-[0.6rem] font-bold uppercase tracking-wider bg-sage-deep text-white px-1.5 py-0.2 rounded-full shadow-xs">
-                          Lowest
+                        <span className="absolute -top-2 right-2 text-[0.6rem] font-bold uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.2 rounded-full shadow-xs">
+                          Lowest Price
                         </span>
                       )}
-                      <div className="flex items-center justify-between font-semibold text-foreground">
+                      <div className="flex items-center justify-between font-bold text-foreground">
                         <span className="truncate">{l.platform}</span>
-                        <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                        <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="font-display font-bold text-sm text-foreground">
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-display font-bold text-base text-foreground">
                           ₹{l.price}
                         </span>
                         {l.originalPrice && l.originalPrice > (l.price ?? 0) && (
-                          <span className="text-[0.65rem] text-foreground-faint line-through">
+                          <span className="text-xs text-foreground-faint line-through">
                             ₹{l.originalPrice}
                           </span>
                         )}
+                        {l.discountPercent && l.discountPercent > 0 ? (
+                          <span className="text-[0.65rem] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1 rounded">
+                            {l.discountPercent}% off
+                          </span>
+                        ) : null}
                       </div>
-                      {l.deliveryEstimate && (
-                        <p className="text-[0.65rem] text-foreground-faint truncate">
-                          {l.deliveryEstimate}
+                      {l.offerTag ? (
+                        <p className="text-[0.68rem] font-medium text-emerald-700 dark:text-emerald-400 truncate">
+                          🏷️ {l.offerTag}
                         </p>
-                      )}
-                      <div className="pt-1 flex items-center justify-between border-t border-line/40">
-                        <span className="text-[0.62rem] font-bold text-emerald-700 dark:text-emerald-400 group-hover:underline flex items-center gap-0.5">
-                          Buy Now <ExternalLink className="h-2.5 w-2.5" />
+                      ) : l.deliveryEstimate ? (
+                        <p className="text-[0.68rem] text-foreground-faint truncate">
+                          🚚 {l.deliveryEstimate}
+                        </p>
+                      ) : null}
+                      <div className="pt-1.5 flex items-center justify-between border-t border-line/40">
+                        <span className="text-[0.65rem] text-foreground-faint font-mono">
+                          {l.seller}
+                        </span>
+                        <span className="text-[0.68rem] font-bold text-emerald-700 dark:text-emerald-400 group-hover:underline flex items-center gap-0.5">
+                          Buy Now ↗
                         </span>
                       </div>
                     </a>

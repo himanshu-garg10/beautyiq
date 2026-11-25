@@ -6,13 +6,14 @@ import { InputValidator } from "@/lib/security/input-validator";
 
 export const dynamic = "force-dynamic";
 
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+
 export async function GET() {
   try {
     const { user, response } = await requireSessionUser();
     if (!user) return response!;
 
-    const objectIdPattern = new RegExp("^[a-f\\d]{24}$", "i");
-    if (!objectIdPattern.test(user.id)) {
+    if (!OBJECT_ID_PATTERN.test(user.id)) {
       return NextResponse.json({ success: true, savedProducts: [], products: [] });
     }
 
@@ -22,7 +23,7 @@ export async function GET() {
     });
 
     const productIds = saved.map((item: any) => item.productId);
-    const mongoIds = productIds.filter((id: string) => objectIdPattern.test(id));
+    const mongoIds = productIds.filter((id: string) => OBJECT_ID_PATTERN.test(id));
 
     const products =
       productIds.length === 0

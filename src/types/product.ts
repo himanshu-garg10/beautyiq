@@ -46,6 +46,8 @@ export interface ProductListing {
   isVerifiedSource?: boolean;
   isBestValue?: boolean;
   isBestPrice?: boolean;
+  offerTag?: string; // e.g. "5% Prepaid Off Auto-Applied", "Prime Coupon Applied"
+  couponCode?: string; // e.g. "PREPAID5", "BEAUTY10"
   unitPricePerMl?: number;
   unitPricePerGram?: number;
   valueScore?: number; // 0 - 100
