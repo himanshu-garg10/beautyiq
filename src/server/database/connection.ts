@@ -47,8 +47,7 @@ export const db: Database.Database = new Proxy({} as Database.Database, {
     return getDatabase()[prop as keyof Database.Database];
   },
   set(_target, prop, value) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (getDatabase() as any)[prop] = value;
+    (getDatabase() as unknown as Record<string, unknown>)[prop as string] = value;
     return true;
   },
 });
