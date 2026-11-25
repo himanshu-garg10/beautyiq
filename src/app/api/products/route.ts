@@ -116,8 +116,9 @@ export async function GET(request: NextRequest) {
 
     // Seamless fallback to the rich in-memory catalog
     if (!rawProducts || rawProducts.length === 0) {
-      const { products } = await import("@/data/products");
+      const { products, productListings } = await import("@/data/products");
       let filtered = [...products] as any[];
+      const allSavedListings = Array.isArray(productListings) ? productListings : [];
 
       if (categories.length) {
         filtered = filtered.filter((p) =>
@@ -149,7 +150,11 @@ export async function GET(request: NextRequest) {
 
       // Ensure every fallback product has live multi-retailer comparative prices attached
       rawProducts = filtered.map((p) => {
-        const listings = RetailerAggregatorService.generateListingsForProduct(p);
+        const existingForProduct = allSavedListings.filter((l) => l.productId === p.id);
+        const listings =
+          existingForProduct.length >= 7
+            ? existingForProduct
+            : RetailerAggregatorService.generateListingsForProduct(p, existingForProduct);
         return {
           ...p,
           prices: listings.map((l) => ({

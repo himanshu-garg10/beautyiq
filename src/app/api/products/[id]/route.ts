@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatProduct } from "@/lib/product-format";
+import { RetailerAggregatorService } from "@/services/retailer-aggregator.service";
 
 export const dynamic = "force-dynamic";
 
@@ -63,12 +64,21 @@ export async function GET(
     }
 
     if (!rawProduct) {
-      const { products } = await import("@/data/products");
+      const { products, productListings } = await import("@/data/products");
       const found = products.find(
         (p) => p.id === rawId || p.id.toLowerCase() === rawId.toLowerCase()
       );
       if (found) {
-        rawProduct = found;
+        const allSaved = Array.isArray(productListings) ? productListings : [];
+        const existingForProduct = allSaved.filter((l) => l.productId === found.id);
+        const listings =
+          existingForProduct.length >= 7
+            ? existingForProduct
+            : RetailerAggregatorService.generateListingsForProduct(found, existingForProduct);
+        rawProduct = {
+          ...found,
+          prices: listings,
+        };
       }
     }
 

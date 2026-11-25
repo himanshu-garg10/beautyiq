@@ -30,6 +30,27 @@ export function formatProduct(p: any): Product & { prices?: any[] } {
     productId: stableId,
   }));
 
+  const bestPriceListing = formattedPrices.find((pr: any) => typeof pr.price === "number" && pr.price > 0);
+  const bestMrpListing = formattedPrices.find((pr: any) => typeof pr.originalPrice === "number" && pr.originalPrice > 0);
+  const directListing = formattedPrices.find((pr: any) => pr.id?.endsWith("-direct") || pr.platform?.toLowerCase().includes("direct"));
+
+  const resolvedPrice =
+    typeof p.price === "number" && p.price > 0
+      ? p.price
+      : bestPriceListing?.price ?? null;
+
+  const resolvedMrp =
+    typeof p.mrp === "number" && p.mrp > 0
+      ? p.mrp
+      : bestMrpListing?.originalPrice ?? resolvedPrice;
+
+  const resolvedDirectUrl =
+    p.directBuyUrl ||
+    directListing?.productUrl ||
+    (p.source && p.source.includes("http") ? p.source.split(" | ")[1] : null) ||
+    formattedPrices[0]?.productUrl ||
+    null;
+
   return {
     id: stableId,
     name: p.name,
@@ -40,6 +61,9 @@ export function formatProduct(p: any): Product & { prices?: any[] } {
     image: p.image,
     quantity: p.quantity,
     unit: p.unit as ProductUnit,
+    price: resolvedPrice,
+    mrp: resolvedMrp,
+    directBuyUrl: resolvedDirectUrl,
     rating: p.rating,
     reviewCount: p.reviewCount,
     productStatus: p.productStatus as ProductStatus,

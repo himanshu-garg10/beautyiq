@@ -114,6 +114,9 @@ export class ProductService {
       } catch {}
     }
     const filtered = allListings.filter((l) => l.productId === productId);
+    if (filtered.length >= 7) {
+      return filtered;
+    }
     if (!product) return filtered;
     return RetailerAggregatorService.generateRetailerListings(product, filtered);
   }

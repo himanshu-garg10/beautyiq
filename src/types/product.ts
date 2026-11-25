@@ -61,6 +61,9 @@ export interface Product {
   image: string; // primary cover image
   quantity: number;
   unit: ProductUnit;
+  price?: number; // Verified live base selling price from official store / primary source
+  mrp?: number; // Verified Maximum Retail Price / compare-at price
+  directBuyUrl?: string; // Direct canonical purchase URL
   keyIngredients: string[];
   allIngredients: string[];
   rating: number | null; // null for Not Available
