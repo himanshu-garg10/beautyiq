@@ -33,6 +33,98 @@ const navLinks = [
   { label: "Skin Scan", href: "/skin-scan", isScan: true },
 ];
 
+// ─── Desktop nav link with hover pill, animated underline grow, text lift ───
+
+interface NavLinkProps {
+  link: (typeof navLinks)[number];
+  isActive: boolean;
+  compareCount: number;
+}
+
+function NavLink({ link, isActive, compareCount }: NavLinkProps) {
+  const [hovered, setHovered] = React.useState(false);
+
+  return (
+    <Link
+      href={link.href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={cn(
+        // base — slightly bigger text, medium weight, generous padding
+        "relative flex items-center gap-1.5 px-4 py-2 rounded-xl",
+        "text-[0.9375rem] font-medium tracking-tight select-none",
+        "outline-none focus-visible:ring-2 focus-visible:ring-champagne focus-visible:ring-offset-1",
+        "transition-colors duration-200",
+        isActive ? "text-foreground font-semibold" : "text-foreground-muted hover:text-foreground",
+      )}
+    >
+      {/* Pill background — fades in on hover */}
+      <motion.span
+        aria-hidden
+        className="absolute inset-0 rounded-xl bg-champagne-tint/50 dark:bg-champagne/10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+      />
+
+      {/* Camera icon (Skin Scan) — wiggles on hover */}
+      {link.isScan && (
+        <motion.span
+          className="relative z-10 shrink-0"
+          animate={
+            hovered
+              ? { rotate: [0, -12, 10, -6, 4, 0], scale: [1, 1.15, 1.1, 1.05, 1] }
+              : { rotate: 0, scale: 1 }
+          }
+          transition={{ duration: 0.45, ease: "easeOut" }}
+        >
+          <Camera className="h-4 w-4 text-sage-deep" />
+        </motion.span>
+      )}
+
+      {/* Label — lifts 2px on hover */}
+      <motion.span
+        className="relative z-10"
+        animate={{ y: hovered ? -2 : 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        // Respect prefers-reduced-motion — override via style
+        style={{ willChange: "transform" }}
+      >
+        {link.label}
+      </motion.span>
+
+      {/* Compare badge */}
+      {link.showBadge && compareCount > 0 && (
+        <span className="relative z-10 ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-champagne text-[0.62rem] font-bold text-[#1A1510] px-1">
+          {compareCount}
+        </span>
+      )}
+
+      {/* Active underline — shared layout animation slides between links */}
+      {isActive && (
+        <motion.span
+          layoutId="nav-active-underline"
+          className="absolute bottom-0.5 left-3 right-3 h-[2px] rounded-full bg-champagne"
+          transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        />
+      )}
+
+      {/* Hover underline — grows from center when NOT active */}
+      {!isActive && (
+        <motion.span
+          aria-hidden
+          className="absolute bottom-0.5 left-1/2 h-[2px] rounded-full bg-champagne/60 -translate-x-1/2"
+          initial={{ width: 0 }}
+          animate={{ width: hovered ? "calc(100% - 1.5rem)" : 0 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+        />
+      )}
+
+      {/* Press scale — handled via CSS active state below */}
+    </Link>
+  );
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -123,7 +215,7 @@ export function Navbar() {
             </div>
 
             {/* Center: Main Navigation */}
-            <ul className="hidden lg:flex items-center gap-1.5 xl:gap-3">
+            <ul className="hidden lg:flex items-center gap-0.5 xl:gap-1">
               {navLinks.map((link) => {
                 const isActive =
                   link.href === "/"
@@ -131,32 +223,7 @@ export function Navbar() {
                     : pathname === link.href || pathname.startsWith(link.href + "/");
                 return (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className={cn(
-                        "relative px-3.5 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1.5 tracking-tight",
-                        isActive
-                          ? "font-semibold text-foreground"
-                          : "text-foreground-muted hover:text-foreground"
-                      )}
-                    >
-                      {link.isScan && (
-                        <Camera className="h-3.5 w-3.5 text-sage-deep shrink-0" />
-                      )}
-                      <span>{link.label}</span>
-                      {link.showBadge && compareCount > 0 && (
-                        <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-champagne text-[0.62rem] font-bold text-[#1A1510] px-1">
-                          {compareCount}
-                        </span>
-                      )}
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-active"
-                          transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                          className="absolute -bottom-px left-0 right-0 h-0.5 bg-champagne rounded-full"
-                        />
-                      )}
-                    </Link>
+                    <NavLink link={link} isActive={isActive} compareCount={compareCount} />
                   </li>
                 );
               })}

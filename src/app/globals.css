@@ -236,6 +236,17 @@
   }
 }
 
+/* ── Desktop nav link press state ───────────────────────────────────────── */
+/* Applied via CSS so it works without JS and doesn't interfere with Framer Motion */
+nav a:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  nav a:active {
+    transform: none;
+  }
+}
+
 /* Native range tracks remain invisible; only their draggable thumbs sit above RangeSlider's custom track. */
 .range-thumb::-webkit-slider-thumb {
   pointer-events: auto;
