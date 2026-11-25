@@ -112,8 +112,17 @@ export default function ProductDetailPage() {
   const bestPrice = bestListing?.price ?? null;
   const originalPrice = bestListing?.originalPrice;
   const discountPercent = bestListing?.discountPercent;
-  const unitPriceCalc = bestPrice !== null && product.quantity > 0
-    ? { unitPrice: Math.round((bestPrice / product.quantity) * 10) / 10, unitLabel: `₹${Math.round((bestPrice / product.quantity) * 10) / 10}/${product.unit}` }
+  const officialPrice = product.price ?? bestPrice;
+  const officialMrp = product.mrp ?? originalPrice;
+  const officialDiscount =
+    officialMrp && officialPrice && officialMrp > officialPrice
+      ? Math.round(((officialMrp - officialPrice) / officialMrp) * 100)
+      : 0;
+  const unitPriceCalc = (officialPrice ?? bestPrice) !== null && product.quantity > 0
+    ? {
+        unitPrice: Math.round(((officialPrice ?? bestPrice)! / product.quantity) * 10) / 10,
+        unitLabel: `₹${Math.round(((officialPrice ?? bestPrice)! / product.quantity) * 10) / 10}/${product.unit}`,
+      }
     : { unitPrice: null, unitLabel: `₹ / ${product.unit}` };
 
   const handleWishlist = () => {
@@ -239,21 +248,21 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Pricing Box (Requirement #1, #2, #19) */}
-          <div className="rounded border border-line bg-background-elevated/40 p-5 space-y-2">
+          <div className="rounded border border-line bg-background-elevated/40 p-5 space-y-2.5">
             <div className="flex items-baseline gap-3 flex-wrap">
-              {bestPrice !== null ? (
+              {officialPrice !== null ? (
                 <>
                   <span className="font-display text-3xl font-bold text-foreground">
-                    ₹{bestPrice.toLocaleString("en-IN")}
+                    ₹{officialPrice.toLocaleString("en-IN")}
                   </span>
-                  {originalPrice && originalPrice > bestPrice && (
+                  {officialMrp && officialMrp > officialPrice && (
                     <span className="text-sm text-foreground-faint line-through">
-                      ₹{originalPrice.toLocaleString("en-IN")}
+                      ₹{officialMrp.toLocaleString("en-IN")}
                     </span>
                   )}
-                  {discountPercent && discountPercent > 0 && originalPrice ? (
+                  {officialDiscount > 0 && officialMrp ? (
                     <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-md shadow-2xs">
-                      {discountPercent}% OFF · Save ₹{(originalPrice - bestPrice).toLocaleString("en-IN")}
+                      {officialDiscount}% OFF on Official Store · Save ₹{(officialMrp - officialPrice).toLocaleString("en-IN")}
                     </span>
                   ) : null}
                 </>
@@ -263,6 +272,15 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
+
+            {bestListing && bestListing.price && officialPrice && bestListing.price < officialPrice && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-950/30 px-3 py-1.5 rounded-lg border border-emerald-500/25">
+                <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Lowest Deal Across Stores:</span>
+                <span className="font-bold font-mono">₹{bestListing.price}</span>
+                <span className="text-foreground-faint font-normal">on {bestListing.platform} (Save extra ₹{officialPrice - bestListing.price} vs Official Store)</span>
+              </div>
+            )}
 
             {/* Quantity & Normalized Unit Price */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-foreground-muted pt-1 border-t border-line/60">

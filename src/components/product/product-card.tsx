@@ -69,9 +69,11 @@ export function ProductCard({
     });
   }, [allProductListings, selectedStore]);
 
-  const activeListing = targetStoreListing || bestOverallListing;
-  const price = activeListing?.price ?? product.price ?? null;
-  const originalPrice = activeListing?.originalPrice ?? product.mrp;
+  // When a store is explicitly selected in filter, display that store's price & offer.
+  // Otherwise, display the product's official website selling price and official discount.
+  const activeListing = targetStoreListing;
+  const price = activeListing ? activeListing.price : (product.price ?? bestOverallListing?.price ?? null);
+  const originalPrice = activeListing ? activeListing.originalPrice : (product.mrp ?? bestOverallListing?.originalPrice);
   const discountPercent =
     activeListing?.discountPercent ??
     (originalPrice && price && originalPrice > price
@@ -422,6 +424,19 @@ export function ProductCard({
                 rel="noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 title={`Buy ${product.name} on Official Store — ₹${product.price}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white px-3.5 py-2 text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+              >
+                <ShoppingBag className="h-3.5 w-3.5" />
+                <span>Buy Now</span>
+                <ExternalLink className="h-2.5 w-2.5 opacity-80" />
+              </a>
+            ) : bestOverallListing?.productUrl ? (
+              <a
+                href={bestOverallListing.productUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={`Buy ${product.name} on ${bestOverallListing.platform} — ₹${bestOverallListing.price}`}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white px-3.5 py-2 text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
               >
                 <ShoppingBag className="h-3.5 w-3.5" />
