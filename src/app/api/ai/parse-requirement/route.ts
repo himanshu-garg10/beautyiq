@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, code: "INVALID_QUERY" }, { status: 400 });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-lite";
   const prompt = `You are BeautyIQ, a cosmetic skincare shopping assistant. The request may be in Hindi, Hinglish, or English. Return ONLY valid JSON, with these exact keys:
 {"skinType":null,"concerns":[],"goals":[],"category":null,"minPrice":null,"maxPrice":null,"preferredIngredients":[],"avoidIngredients":[],"guidance":[]}
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, ShieldCheck } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 
@@ -40,6 +40,17 @@ export function FinalCta() {
               >
                 <span>Start Your Beauty Journey</span>
                 <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+
+            <Link href="/skin-scan">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-6 py-3.5 font-medium text-sm border-sage/40 hover:border-sage-deep/60 bg-background hover:bg-sage-tint/40 gap-2"
+              >
+                <Camera className="h-4 w-4 text-sage-deep" />
+                <span>Try Skin Scan</span>
               </Button>
             </Link>
 

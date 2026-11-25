@@ -132,6 +132,20 @@ model User {
   skinProfile   SkinProfile?
   savedProducts SavedProduct[]
   quizResults   QuizResult[]
+  skinScans     SkinScan[]
+}
+
+model SkinScan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  skinType    String
+  concerns    Json     // array of {name, severity, region, confidence}
+  summary     String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model SkinProfile {

@@ -10,7 +10,8 @@
     "lint": "next lint",
     "catalog:import": "tsx scripts/import-open-beauty-facts.ts",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "tsx --test \"tests/**/*.test.ts\""
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

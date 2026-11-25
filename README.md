@@ -14,7 +14,7 @@ It is designed as a product-discovery and comparison experience—not a diagnost
 
 ## What the platform includes
 
-- **AI Match** — write a normal question in English, Hindi, or Hinglish. Gemini extracts useful product filters and returns short, tailored cosmetic-care suggestions.
+- **AI Match chat** — a conversational skincare assistant. Describe your skin type, concerns, budget and ingredient allergies in English, Hindi, or Hinglish; it remembers your profile, recommends *real catalog products* (ranked, with verified price, ingredients and a View Product link), and handles follow-ups such as “why this serum?”, “compare these two”, “suggest a cheaper alternative” or “give me a morning routine”. Product facts come only from the database; the LLM provider (`AI_ENGINE_PROVIDER`: gemini, openai, anthropic or none) is optional and can't alter them.
 - **Product discovery** — browse the catalog by category, concern, skin type, brand, ingredient, or price range.
 - **Concern guides** — practical starting points for concerns such as dullness, acne, dryness, oiliness, texture, pigmentation, dark circles, and more.
 - **Ingredient intelligence** — explore ingredient names and the cosmetic concerns they are commonly associated with.
@@ -120,6 +120,7 @@ npm run start            # run the production build
 npm run db:push          # sync Prisma schema with MongoDB
 npm run db:seed          # seed initial project data
 npm run catalog:import   # run the catalog import script
+npm test                 # run the skincare chat test suite
 ```
 
 ## Project structure
