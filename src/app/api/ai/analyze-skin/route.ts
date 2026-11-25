@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { RateLimiter } from "@/server/security/rate-limiter";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Allow up to 60 s for Gemini vision calls
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -213,6 +214,26 @@ IMPORTANT:
 - Maximum 6 concerns total.
 - Keep all text concise and easy to understand for a general audience.`;
 
+// ─── Gemini fetch with one automatic retry on failure ───────────────────────
+
+async function callGeminiWithRetry(
+  url: string,
+  body: string,
+  attempt = 1
+): Promise<Response> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+  });
+  if (!res.ok && attempt < 2) {
+    // Wait 1.5 s before retrying
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    return callGeminiWithRetry(url, body, attempt + 1);
+  }
+  return res;
+}
+
 // ─── Route handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
@@ -296,28 +317,24 @@ export async function POST(request: NextRequest) {
 
   let geminiRaw: unknown;
   try {
-    const geminiRes = await fetch(
+    const geminiRes = await callGeminiWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { inlineData: { mimeType: file.type, data: base64String } },
-                { text: ANALYSIS_PROMPT },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1800,
-            responseMimeType: "application/json",
+      JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: file.type, data: base64String } },
+              { text: ANALYSIS_PROMPT },
+            ],
           },
-        }),
-      }
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 1800,
+          responseMimeType: "application/json",
+        },
+      })
     );
 
     if (!geminiRes.ok) {
