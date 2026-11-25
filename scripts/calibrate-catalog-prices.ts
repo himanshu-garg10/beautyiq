@@ -80,10 +80,14 @@ async function calibrate() {
       listingMap.set(l.id, l);
     }
 
+    const storePrices = listings.map((l) => l.price).filter((pr): pr is number => typeof pr === "number" && pr > 0);
+    const lowestPrice = storePrices.length > 0 ? Math.min(...storePrices) : (p.price || 499);
+    const highestMrp = Math.max(p.mrp || 0, p.price || 0, ...listings.map((l) => l.originalPrice || 0));
+
     return {
       ...p,
-      price: p.price,
-      mrp: p.mrp,
+      price: lowestPrice,
+      mrp: highestMrp > lowestPrice ? highestMrp : Math.round(lowestPrice * 1.15),
     };
   });
 
@@ -97,11 +101,57 @@ async function calibrate() {
     },
     listings: [
       {
+        platform: "Myntra",
+        price: 512,
+        originalPrice: 599,
+        discountPercent: 15,
+        offerTag: "15% OFF with Code BEAUTY10 (Save ₹87)",
+        deliveryEstimate: "2–3 days (M-Express)",
+        isBestPrice: true,
+        productUrl: "https://www.myntra.com/minimalist-10-niacinamide-face-serum",
+      },
+      {
+        platform: "Amazon India",
+        price: 523,
+        originalPrice: 599,
+        discountPercent: 13,
+        offerTag: "13% OFF Prime Deal (Save ₹76)",
+        deliveryEstimate: "Tomorrow (Prime)",
+        productUrl: "https://www.amazon.in/s?k=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
+      },
+      {
+        platform: "Purplle",
+        price: 535,
+        originalPrice: 599,
+        discountPercent: 11,
+        offerTag: "11% OFF Purplle Elite (Save ₹64)",
+        deliveryEstimate: "3–4 days",
+        productUrl: "https://www.purplle.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
+      },
+      {
+        platform: "Flipkart",
+        price: 541,
+        originalPrice: 599,
+        discountPercent: 10,
+        offerTag: "10% OFF (Flipkart Assured Deal)",
+        deliveryEstimate: "2 days (F-Assured)",
+        productUrl: "https://www.flipkart.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
+      },
+      {
+        platform: "Tira Beauty",
+        price: 546,
+        originalPrice: 599,
+        discountPercent: 9,
+        offerTag: "9% OFF Tira Red Deal (Save ₹53)",
+        deliveryEstimate: "2 days (Tira Red)",
+        productUrl: "https://www.tirabeauty.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
+      },
+      {
         platform: "BeMinimalist Direct",
         price: 569,
         originalPrice: 599,
         discountPercent: 5,
-        offerTag: "5% OFF Mentioned on Official Store (Save ₹30)",
+        offerTag: "5% OFF on Official Store (Save ₹30)",
         deliveryEstimate: "3–4 days (Free Samples)",
         isBestValue: true,
         productUrl: "https://beminimalist.co/products/niacinamide-10-with-matmarine",
@@ -113,58 +163,7 @@ async function calibrate() {
         discountPercent: 5,
         offerTag: "5% OFF on Nykaa (100% Authentic Luxe)",
         deliveryEstimate: "2–3 days (100% Authentic)",
-        isBestPrice: true,
         productUrl: "https://www.nykaa.com/search/result/?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
-      },
-      {
-        platform: "Amazon India",
-        price: 569,
-        originalPrice: 599,
-        discountPercent: 5,
-        offerTag: "5% OFF on Amazon (Prime Fast Delivery)",
-        deliveryEstimate: "Tomorrow (Prime)",
-        isBestPrice: true,
-        productUrl: "https://www.amazon.in/s?k=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
-      },
-      {
-        platform: "Flipkart",
-        price: 569,
-        originalPrice: 599,
-        discountPercent: 5,
-        offerTag: "5% OFF (Flipkart Assured)",
-        deliveryEstimate: "2 days (F-Assured)",
-        isBestPrice: true,
-        productUrl: "https://www.flipkart.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
-      },
-      {
-        platform: "Myntra",
-        price: 569,
-        originalPrice: 599,
-        discountPercent: 5,
-        offerTag: "5% OFF on Myntra (M-Express Verified)",
-        deliveryEstimate: "2–3 days (M-Express)",
-        isBestPrice: true,
-        productUrl: "https://www.myntra.com/minimalist-10-niacinamide-face-serum",
-      },
-      {
-        platform: "Purplle",
-        price: 569,
-        originalPrice: 599,
-        discountPercent: 5,
-        offerTag: "5% OFF on Purplle Verified",
-        deliveryEstimate: "3–4 days",
-        isBestPrice: true,
-        productUrl: "https://www.purplle.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
-      },
-      {
-        platform: "Tira Beauty",
-        price: 569,
-        originalPrice: 599,
-        discountPercent: 5,
-        offerTag: "5% OFF on Tira Beauty",
-        deliveryEstimate: "2 days (Tira Red)",
-        isBestPrice: true,
-        productUrl: "https://www.tirabeauty.com/search?q=Minimalist%2010%25%20Niacinamide%20Face%20Serum",
       },
     ],
   };
