@@ -240,7 +240,7 @@ export default function ProductDetailPage() {
 
           {/* Pricing Box (Requirement #1, #2, #19) */}
           <div className="rounded border border-line bg-background-elevated/40 p-5 space-y-2">
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-baseline gap-3 flex-wrap">
               {bestPrice !== null ? (
                 <>
                   <span className="font-display text-3xl font-bold text-foreground">
@@ -251,9 +251,9 @@ export default function ProductDetailPage() {
                       ₹{originalPrice.toLocaleString("en-IN")}
                     </span>
                   )}
-                  {discountPercent ? (
-                    <span className="text-xs font-bold text-status-success">
-                      Save {discountPercent}%
+                  {discountPercent && discountPercent > 0 && originalPrice ? (
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-md shadow-2xs">
+                      {discountPercent}% OFF · Save ₹{(originalPrice - bestPrice).toLocaleString("en-IN")}
                     </span>
                   ) : null}
                 </>
@@ -329,9 +329,9 @@ export default function ProductDetailPage() {
                             ₹{l.originalPrice}
                           </span>
                         )}
-                        {l.discountPercent && l.discountPercent > 0 ? (
-                          <span className="text-[0.65rem] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1 rounded">
-                            {l.discountPercent}% off
+                        {l.discountPercent && l.discountPercent > 0 && l.originalPrice ? (
+                          <span className="text-[0.68rem] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                            {l.discountPercent}% OFF (Save ₹{l.originalPrice - l.price!})
                           </span>
                         ) : null}
                       </div>

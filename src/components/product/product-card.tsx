@@ -385,8 +385,8 @@ export function ProductCard({
                     </span>
                   )}
                   {savingsAmount > 0 && (
-                    <span className="text-[0.65rem] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded">
-                      Save ₹{savingsAmount}
+                    <span className="text-[0.68rem] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md shadow-2xs">
+                      {discountPercent}% OFF · Save ₹{savingsAmount}
                     </span>
                   )}
                 </>

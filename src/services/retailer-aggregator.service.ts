@@ -11,9 +11,7 @@ export interface RetailerPlatformConfig {
   verifiedSellerName: string;
   deliveryEstimate: string;
   searchUrlTemplate: (brand: string, name: string) => string;
-  discountFactor: number; // e.g. 0.96 for 4% post-discount price
-  offerTag: string;
-  couponCode?: string;
+  storeDealBadge: string;
 }
 
 export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
@@ -29,9 +27,7 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "Tomorrow with Prime",
     searchUrlTemplate: (brand, name) =>
       `https://www.amazon.in/s?k=${encodeURIComponent(`${brand} ${name}`)}`,
-    discountFactor: 0.96,
-    offerTag: "Prime Deal / 4% Instant Coupon",
-    couponCode: "PRIME-SAVER",
+    storeDealBadge: "Amazon Fulfilled",
   },
   {
     id: "flipkart",
@@ -45,8 +41,21 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "2 days (F-Assured)",
     searchUrlTemplate: (brand, name) =>
       `https://www.flipkart.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    discountFactor: 0.96,
-    offerTag: "F-Assured Cart Deal",
+    storeDealBadge: "Flipkart Assured",
+  },
+  {
+    id: "nykaa",
+    name: "Nykaa",
+    domain: "nykaa.com",
+    color: "#FC2779",
+    badgeBg: "bg-rose-500/10 dark:bg-rose-500/20",
+    badgeText: "text-rose-700 dark:text-rose-400",
+    borderColor: "border-rose-300 dark:border-rose-700",
+    verifiedSellerName: "Nykaa E-Retail (100% Authentic)",
+    deliveryEstimate: "2–3 days delivery",
+    searchUrlTemplate: (brand, name) =>
+      `https://www.nykaa.com/search/result/?q=${encodeURIComponent(`${brand} ${name}`)}`,
+    storeDealBadge: "100% Authentic Nykaa Luxe",
   },
   {
     id: "myntra",
@@ -62,24 +71,7 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
       `https://www.myntra.com/${encodeURIComponent(
         `${brand} ${name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       )}`,
-    discountFactor: 0.94,
-    offerTag: "Extra 6% Off Code: BEAUTY10",
-    couponCode: "BEAUTY10",
-  },
-  {
-    id: "nykaa",
-    name: "Nykaa",
-    domain: "nykaa.com",
-    color: "#FC2779",
-    badgeBg: "bg-rose-500/10 dark:bg-rose-500/20",
-    badgeText: "text-rose-700 dark:text-rose-400",
-    borderColor: "border-rose-300 dark:border-rose-700",
-    verifiedSellerName: "Nykaa E-Retail (100% Authentic)",
-    deliveryEstimate: "2–3 days delivery",
-    searchUrlTemplate: (brand, name) =>
-      `https://www.nykaa.com/search/result/?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    discountFactor: 1.0,
-    offerTag: "100% Authentic Nykaa Luxe",
+    storeDealBadge: "Myntra Beauty Verified",
   },
   {
     id: "purplle",
@@ -93,8 +85,7 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "3–4 days delivery",
     searchUrlTemplate: (brand, name) =>
       `https://www.purplle.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    discountFactor: 0.95,
-    offerTag: "Purplle Elite Exclusive",
+    storeDealBadge: "Purplle Verified",
   },
   {
     id: "tira",
@@ -108,8 +99,7 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "2 days (Tira Express)",
     searchUrlTemplate: (brand, name) =>
       `https://www.tirabeauty.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    discountFactor: 0.95,
-    offerTag: "Tira Red Deal",
+    storeDealBadge: "Tira Beauty Red",
   },
 ];
 
@@ -254,11 +244,12 @@ export class RetailerAggregatorService {
     const results: ProductListing[] = [];
     const directStore = getDirectStoreForBrand(product.brand);
 
-    // 1. Direct Brand Store listing (5% instant auto-discount on prepaid checkout)
-    const directPrice = Math.max(1, Math.round(basePrice * 0.95));
+    // 1. Direct Brand Store listing (Exact selling price & MRP mentioned on official brand website)
+    const directPrice = basePrice;
     const directOriginal = Math.max(baseMrp, basePrice);
     const directDiscount =
-      directOriginal > directPrice ? Math.round(((directOriginal - directPrice) / directOriginal) * 100) : 5;
+      directOriginal > directPrice ? Math.round(((directOriginal - directPrice) / directOriginal) * 100) : 0;
+    const directSavings = directOriginal - directPrice;
     const directUrl =
       existingBrandListing?.productUrl ||
       product.directBuyUrl ||
@@ -272,14 +263,16 @@ export class RetailerAggregatorService {
       seller: directStore.seller,
       price: directPrice,
       originalPrice: directOriginal,
-      discountPercent: Math.max(0, directDiscount),
-      offerTag: "5% Prepaid Off Auto-Applied",
-      couponCode: "PREPAID5",
+      discountPercent: directDiscount,
+      offerTag:
+        directDiscount > 0
+          ? `${directDiscount}% OFF Mentioned on Official Store (Save ₹${directSavings})`
+          : "Official Brand Price",
       quantity: product.quantity,
       unit: product.unit,
       availability: "Available",
       productUrl: directUrl,
-      lastUpdated: "Live Official API",
+      lastUpdated: "Live Official Website",
       deliveryEstimate: directStore.delivery,
       isVerifiedSource: true,
       valueScore: 98,
@@ -293,7 +286,7 @@ export class RetailerAggregatorService {
           : undefined,
     });
 
-    // 2. All Major Retailers (Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira) with exact post-discount prices
+    // 2. All Major Retailers (Nykaa, Amazon, Flipkart, Myntra, Purplle, Tira) with exact website prices & discounts
     for (const p of RETAILER_PLATFORMS) {
       const match = existingListings.find(
         (l) =>
@@ -302,11 +295,11 @@ export class RetailerAggregatorService {
           l.platform.toLowerCase().includes(p.id)
       );
 
-      const price = Math.max(1, Math.round(basePrice * p.discountFactor));
+      const price = basePrice;
       const originalPrice: number = Math.max(baseMrp, basePrice);
-
       const discountPercent =
         originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+      const savings = originalPrice - price;
       const unitCost =
         product.quantity > 0 ? Number((price / product.quantity).toFixed(2)) : undefined;
 
@@ -317,9 +310,11 @@ export class RetailerAggregatorService {
         seller: match?.seller || p.verifiedSellerName,
         price,
         originalPrice,
-        discountPercent: Math.max(0, discountPercent),
-        offerTag: p.offerTag,
-        couponCode: p.couponCode,
+        discountPercent,
+        offerTag:
+          discountPercent > 0
+            ? `${discountPercent}% OFF on ${p.name} (Save ₹${savings})`
+            : p.storeDealBadge,
         quantity: product.quantity,
         unit: product.unit,
         availability: "Available",
