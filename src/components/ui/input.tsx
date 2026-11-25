@@ -52,10 +52,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             disabled={disabled}
             className={cn(
-              "flex h-11 w-full rounded border border-line bg-background-card px-3.5 py-2 text-sm text-foreground placeholder:text-foreground-faint transition-all duration-200 focus:border-sage-deep focus:outline-none focus:ring-1 focus:ring-sage-deep disabled:cursor-not-allowed disabled:opacity-50",
+              "flex h-11 w-full rounded-xl border border-line/60 bg-background-card px-3.5 py-2 text-sm text-foreground placeholder:text-foreground-faint transition-all duration-200 focus:border-champagne focus:outline-none focus:ring-2 focus:ring-champagne/20 disabled:cursor-not-allowed disabled:opacity-50",
               leftIcon && "pl-10",
               rightIcon && "pr-10",
-              error && "border-status-error focus:border-status-error focus:ring-status-error",
+              error && "border-status-error focus:border-status-error focus:ring-status-error/20",
               className
             )}
             ref={ref}

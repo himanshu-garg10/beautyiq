@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope, IBM_Plex_Mono } from "next/font/google";
+import { Playfair_Display, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/theme-context";
 import { AuthProvider } from "@/context/auth-context";
@@ -9,18 +9,18 @@ import { ComparisonProvider } from "@/context/comparison-context";
 import { NextAuthSessionProvider } from "@/components/auth/session-provider";
 import { ChatProvider } from "@/components/chat/ChatProvider";
 
-const fraunces = Fraunces({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
+  variable: "--font-display",
   display: "swap",
 });
 
-const manrope = Manrope({
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -45,20 +45,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${manrope.variable} ${plexMono.variable}`}
+      className={`${playfair.variable} ${dmSans.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-sage-tint selection:text-foreground">
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-sage-tint selection:text-foreground">
         <ThemeProvider>
           <ToastProvider>
             <NextAuthSessionProvider>
               <AuthProvider>
                 <SkinProfileProvider>
-                  <ChatProvider>
-                    <ComparisonProvider>
+                  <ComparisonProvider>
                     <ChatProvider>{children}</ChatProvider>
                   </ComparisonProvider>
-                  </ChatProvider>
                 </SkinProfileProvider>
               </AuthProvider>
             </NextAuthSessionProvider>

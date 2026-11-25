@@ -659,7 +659,7 @@ export default function SkinScanPage() {
   const topConcernName = scanResult?.detectedConcerns[0]?.name ?? "";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background-elevated/40 to-background">
       <Container className="max-w-2xl py-10 sm:py-14">
         <AnimatePresence mode="wait">
 
@@ -689,7 +689,7 @@ export default function SkinScanPage() {
               </div>
 
               {/* Quick tips */}
-              <div className="rounded-2xl border border-line bg-background-card p-5 space-y-3">
+              <div className="rounded-2xl border border-line/60 bg-background-card p-5 space-y-3 shadow-card">
                 <p className="text-sm font-semibold text-foreground">3 tips for a better scan</p>
                 <ul className="space-y-2">
                   {[
@@ -1016,7 +1016,7 @@ export default function SkinScanPage() {
                   </div>
 
                   {/* ── Overall Summary ─────────────────────────── */}
-                  <div className="rounded-2xl border border-line bg-background-card p-5 space-y-3">
+                  <div className="rounded-2xl border border-line/60 bg-background-card p-5 space-y-3 shadow-card">
                     <p className="text-sm font-semibold text-foreground flex items-center gap-2">
                       <Info className="h-4 w-4 text-champagne-deep" />
                       Overall Picture
@@ -1103,7 +1103,7 @@ export default function SkinScanPage() {
                   )}
 
                   {/* ── Scan History ─────────────────────────────── */}
-                  <div className="rounded-2xl border border-line bg-background-card overflow-hidden">
+                  <div className="rounded-2xl border border-line/60 bg-background-card overflow-hidden shadow-card">
                     <button
                       type="button"
                       onClick={() => {

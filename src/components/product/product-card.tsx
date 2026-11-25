@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Scale, Star, Heart, Check, Sparkles, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Product, ProductListing } from "@/types";
@@ -73,22 +74,30 @@ export function ProductCard({
   };
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-xl border border-line bg-background-card transition-all duration-300 hover:border-line-strong hover:shadow-md h-full",
+        "group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-line/80 bg-background-card shadow-card transition-all duration-300 hover:border-champagne/60 hover:shadow-card-hover",
         className
       )}
     >
       {/* Top Image Box */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-background-elevated">
         <Link href={`/products/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="block h-full w-full">
-          <Image
-            src={product.image}
-            alt={`${product.brand} ${product.name}`}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative h-full w-full"
+          >
+            <Image
+              src={product.image}
+              alt={`${product.brand} ${product.name}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover"
+            />
+          </motion.div>
         </Link>
 
         {/* Wishlist Button (Top Left) */}
@@ -124,7 +133,7 @@ export function ProductCard({
       <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
         {/* Brand & Rating Bar */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.72rem] font-bold uppercase tracking-wider text-sage-deep truncate">
+          <span className="text-xs font-semibold uppercase tracking-wider text-foreground-faint truncate">
             {product.brand}
           </span>
 
@@ -183,7 +192,7 @@ export function ProductCard({
             <div className="flex items-baseline gap-1.5">
               {price !== null ? (
                 <>
-                  <span className="font-display text-base sm:text-lg font-bold text-foreground">
+                  <span className="font-display text-base sm:text-lg font-semibold text-foreground">
                     ₹{price.toLocaleString()}
                   </span>
                   {originalPrice && originalPrice > price && (
@@ -235,6 +244,6 @@ export function ProductCard({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

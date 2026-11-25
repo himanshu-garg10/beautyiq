@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Sparkles,
   ArrowRight,
-  HeartHandshake,
   Check,
   Sliders,
   DollarSign,
@@ -15,7 +14,7 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
-import { SectionHeading } from "@/components/ui/section-heading";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { cn } from "@/lib/utils";
 
 interface PreferenceOption {
@@ -113,23 +112,23 @@ export function PersonalizedDiscovery() {
   );
 
   return (
-    <section id="discovery" className="border-b border-line bg-background py-16 sm:py-20">
+    <section id="discovery" className="border-b border-line/70 bg-background py-16 sm:py-24">
       <Container>
         {/* Header */}
-        <div className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-champagne/40 bg-champagne-tint/70 text-xs font-semibold text-champagne-deep">
+        <ScrollReveal className="mx-auto flex max-w-2xl flex-col items-center space-y-3 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-champagne/40 bg-champagne-tint/80 px-3.5 py-1 text-xs font-semibold tracking-wide text-champagne-deep">
             <Sparkles className="h-3.5 w-3.5 text-champagne-deep" />
             <span>Interactive Preference Matching</span>
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-[2.6rem] font-bold tracking-tight text-foreground">
+          <h2 className="font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl lg:text-[2.65rem]">
             Beauty That Fits You
           </h2>
 
-          <p className="text-base text-foreground-muted leading-relaxed max-w-xl">
+          <p className="max-w-xl text-base leading-relaxed text-foreground-muted">
             Tell BeautyIQ what you need. We&apos;ll help you discover products that match your preferences.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* 4 Interactive Preference Cards Grid */}
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -140,31 +139,32 @@ export function PersonalizedDiscovery() {
             return (
               <motion.div
                 key={cat.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="group flex flex-col justify-between rounded-2xl border border-line bg-background-card p-6 shadow-subtle hover:shadow-md transition-all duration-300 hover:border-champagne/50"
+                whileHover={{ y: -4 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.45, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="group flex flex-col justify-between rounded-3xl border border-line/80 bg-[image:var(--gradient-card)] p-6 shadow-card transition-all duration-300 hover:border-champagne/60 hover:shadow-card-hover"
               >
                 <div>
                   {/* Category Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-line/60">
+                  <div className="flex items-center justify-between border-b border-line/60 pb-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep border border-champagne/30">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-champagne/35 bg-champagne-tint text-champagne-deep">
                         <Icon className="h-4 w-4" />
                       </div>
-                      <h3 className="font-display text-base font-bold text-foreground">
+                      <h3 className="font-display text-lg font-semibold text-foreground">
                         {cat.title}
                       </h3>
                     </div>
                     {currentSelected.length > 0 && (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-champagne-deep text-[0.68rem] font-bold text-white">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[image:var(--gradient-gold)] text-[11px] font-bold text-[#1A1510]">
                         {currentSelected.length}
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 text-xs text-foreground-muted leading-relaxed">
+                  <p className="mt-3 text-xs leading-relaxed text-foreground-muted">
                     {cat.description}
                   </p>
 
@@ -178,14 +178,14 @@ export function PersonalizedDiscovery() {
                           type="button"
                           onClick={() => toggleOption(cat.id, opt.id)}
                           className={cn(
-                            "flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all duration-150 text-left",
+                            "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-left text-xs font-medium transition-all duration-150",
                             isChecked
-                              ? "border-champagne-deep bg-champagne-tint text-foreground font-semibold shadow-xs dark:bg-champagne-tint/40"
-                              : "border-line bg-background hover:bg-background-elevated text-foreground-muted hover:text-foreground"
+                              ? "border-champagne/80 bg-champagne-tint font-semibold text-foreground shadow-xs dark:bg-champagne-tint/70"
+                              : "border-line/70 bg-background/70 text-foreground-muted hover:border-line-strong hover:bg-background-elevated hover:text-foreground"
                           )}
                         >
                           {isChecked && (
-                            <Check className="h-3 w-3 text-champagne-deep shrink-0 stroke-[3]" />
+                            <Check className="h-3 w-3 shrink-0 stroke-[3] text-champagne-deep" />
                           )}
                           <span>{opt.label}</span>
                         </button>
@@ -194,7 +194,7 @@ export function PersonalizedDiscovery() {
                   </div>
                 </div>
 
-                <div className="mt-6 pt-3 border-t border-line/50 text-[0.7rem] text-foreground-faint font-mono">
+                <div className="mt-6 border-t border-line/50 pt-3 font-mono text-[11px] text-foreground-faint">
                   {currentSelected.length} selected
                 </div>
               </motion.div>
@@ -203,29 +203,25 @@ export function PersonalizedDiscovery() {
         </div>
 
         {/* Action CTA Bar */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <ScrollReveal delay={0.15} className="mt-10 flex flex-col items-center justify-center gap-4 text-center sm:flex-row">
           <Link href="/onboarding">
             <Button
               size="lg"
               variant="accent"
-              className="rounded-full px-8 py-3.5 font-semibold text-sm shadow-md hover:shadow-lg transition-all gap-2 bg-foreground text-background hover:bg-foreground/90 dark:bg-champagne-deep dark:text-white"
+              className="rounded-full px-8"
+              leftIcon={<Sparkles className="h-4 w-4" />}
+              rightIcon={<ArrowRight className="h-4 w-4" />}
             >
-              <Sparkles className="h-4 w-4 text-champagne" />
-              <span>Build My Beauty Profile</span>
-              <ArrowRight className="h-4 w-4" />
+              Build My Beauty Profile
             </Button>
           </Link>
 
           <Link href="/recommendations">
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full px-6 py-3.5 font-medium text-sm border-line hover:border-champagne/60 bg-background-card hover:bg-background-elevated"
-            >
-              <span>View Recommendations ({totalSelected} preferences)</span>
+            <Button size="lg" variant="outline" className="rounded-full px-6">
+              View Recommendations ({totalSelected} preferences)
             </Button>
           </Link>
-        </div>
+        </ScrollReveal>
       </Container>
     </section>
   );

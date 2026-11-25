@@ -36,7 +36,7 @@ export function Alert({
     <div
       role="alert"
       className={cn(
-        "relative flex w-full items-start gap-3 rounded border p-4 text-sm transition-all duration-200",
+        "relative flex w-full items-start gap-3 rounded-2xl border p-4 text-sm shadow-card transition-all duration-200",
         variantStyles[variant],
         className
       )}

@@ -159,7 +159,7 @@ export default function CompareMatrixPage() {
 
       {/* Main Comparison Matrix Display */}
       {loading ? (
-        <div className="h-96 rounded border border-line bg-background-card animate-pulse" />
+        <div className="h-96 rounded-2xl border border-line/70 bg-background-card shadow-card animate-pulse" />
       ) : items.length === 0 ? (
         <EmptyState
           title="No Products Selected for Comparison"
@@ -170,7 +170,7 @@ export default function CompareMatrixPage() {
       ) : (
         <div className="space-y-8">
           {/* DESKTOP COMPARISON TABLE (>= 768px) */}
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-line bg-background-card shadow-subtle">
+          <div className="hidden md:block overflow-x-auto rounded-2xl border border-line/70 bg-background-card shadow-card">
             <Table>
               <TableHeader>
                 <TableRow className="bg-background-elevated/50">
@@ -365,7 +365,7 @@ export default function CompareMatrixPage() {
           {/* MOBILE RESPONSIVE COMPARISON (< 768px) */}
           <div className="block md:hidden space-y-6">
             {items.map((item) => (
-              <div key={item.product.id} className="rounded-2xl border border-line bg-background-card p-5 space-y-4 shadow-subtle relative">
+              <div key={item.product.id} className="rounded-2xl border border-line/70 bg-background-card p-5 space-y-4 shadow-card relative">
                 <button
                   onClick={() => handleRemove(item.product.id)}
                   className="absolute top-4 right-4 text-foreground-faint hover:text-status-error p-1"
@@ -424,9 +424,9 @@ export default function CompareMatrixPage() {
 
           {/* COMPARISON HISTORY SECTION */}
           {history.length > 0 && (
-            <div className="rounded-lg border border-line bg-background-card p-6 space-y-4 shadow-subtle">
+            <div className="rounded-2xl border border-line/70 bg-background-card p-6 space-y-4 shadow-card">
               <div className="flex items-center justify-between border-b border-line pb-3">
-                <h3 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
+                <h3 className="font-display text-xl font-semibold text-foreground flex items-center gap-2">
                   <Clock className="h-5 w-5 text-sage-deep" /> Comparison History
                 </h3>
                 <Button variant="ghost" size="sm" onClick={handleClearHistory}>
@@ -439,7 +439,7 @@ export default function CompareMatrixPage() {
                   <div
                     key={sess.id}
                     onClick={() => handleReopenSession(sess)}
-                    className="p-4 rounded border border-line bg-background-elevated/50 hover:border-sage-deep cursor-pointer transition-all space-y-2 relative group"
+                    className="p-4 rounded-2xl border border-line/70 bg-background-elevated/50 hover:border-champagne/60 hover:shadow-card cursor-pointer transition-all space-y-2 relative group"
                   >
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-mono text-foreground-faint">
@@ -470,10 +470,10 @@ export default function CompareMatrixPage() {
 
       {/* QUICK ADD PRODUCT MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-lg border border-line bg-background-card p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-lg rounded-3xl border border-line/60 bg-background-card p-6 shadow-elevated space-y-4">
             <div className="flex items-center justify-between border-b border-line pb-3">
-              <h3 className="font-display text-lg font-bold text-foreground">
+              <h3 className="font-display text-xl font-semibold text-foreground">
                 Add Product to Comparison Matrix
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-foreground-faint hover:text-foreground">
@@ -486,7 +486,7 @@ export default function CompareMatrixPage() {
               placeholder="Search product name, brand, or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded border border-line bg-background-elevated px-3.5 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-sage-deep"
+              className="w-full rounded-xl border border-line bg-background-elevated px-3.5 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-sage-deep"
             />
 
             <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
@@ -497,7 +497,7 @@ export default function CompareMatrixPage() {
                   <div
                     key={p.id}
                     onClick={() => handleAddProduct(p.id)}
-                    className="flex items-center justify-between p-2.5 rounded border border-line hover:border-sage-deep hover:bg-sage-tint/20 cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-line/70 hover:border-champagne/60 hover:bg-champagne-tint/30 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative h-10 w-10 rounded overflow-hidden bg-background-elevated flex-shrink-0">

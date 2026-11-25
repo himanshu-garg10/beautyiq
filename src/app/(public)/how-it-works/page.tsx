@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sliders, Brain, CheckCircle2, Scale, Heart } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export const metadata: Metadata = {
   title: "How BeautyIQ Works — Skincare Recommendation Methodology",
@@ -57,31 +58,36 @@ export default function HowItWorksPage() {
       {/* 4 Steps Flow Grid */}
       <Section className="bg-background-elevated/40 border-y border-line">
         <Container>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map((step) => {
+          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-[12%] right-[12%] top-11 hidden h-px bg-gradient-to-r from-champagne/20 via-champagne/55 to-champagne/20 lg:block"
+            />
+            {steps.map((step, idx) => {
               const Icon = step.icon;
               return (
-                <div
-                  key={step.num}
-                  className="relative flex flex-col justify-between rounded border border-line bg-background-card p-6 shadow-subtle space-y-4"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-mono text-2xl font-bold text-sage-deep">
-                        {step.num}
-                      </span>
-                      <div className="h-9 w-9 rounded-full bg-sage-tint flex items-center justify-center text-sage-deep">
-                        <Icon className="h-4 w-4" />
+                <ScrollReveal key={step.num} delay={idx * 0.15} className="h-full">
+                  <div
+                    className="group relative flex h-full flex-col justify-between space-y-4 rounded-3xl border border-line/75 bg-background-card p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-champagne/60 hover:shadow-card-hover"
+                  >
+                    <div>
+                      <div className="mb-5 flex items-center justify-between">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-champagne/40 bg-champagne-tint font-mono text-sm font-bold text-champagne-deep shadow-xs">
+                          {step.num}
+                        </span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sage/30 bg-sage-tint text-sage-deep transition-transform duration-300 group-hover:scale-105">
+                          <Icon className="h-4 w-4" />
+                        </div>
                       </div>
+                      <h3 className="mb-2 font-display text-xl font-semibold text-foreground">
+                        {step.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-foreground-muted">
+                        {step.description}
+                      </p>
                     </div>
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-                      {step.title}
-                    </h3>
-                    <p className="text-sm text-foreground-muted leading-relaxed">
-                      {step.description}
-                    </p>
                   </div>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>

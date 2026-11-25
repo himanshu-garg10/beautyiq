@@ -7,7 +7,7 @@ export function Table({
   ...props
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="relative w-full overflow-x-auto rounded border border-line bg-background-card shadow-subtle">
+    <div className="relative w-full overflow-x-auto rounded-2xl border border-line/70 bg-background-card shadow-card">
       <table
         className={cn("w-full caption-bottom text-sm text-left text-foreground", className)}
         {...props}

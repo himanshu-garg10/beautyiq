@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 const categories = [
   {
@@ -189,70 +190,71 @@ export function CategoriesBrowser() {
 
       {/* Grid of Uniform Sized Cards Matching Sketch (4 columns in row) */}
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {visibleCategories.map((item) => {
+        {visibleCategories.map((item, idx) => {
           const Icon = item.icon;
           return (
-            <Link
-              key={item.name}
-              href={`/products?category=${encodeURIComponent(item.category)}`}
-              className="group flex flex-col h-full rounded-3xl border border-line bg-background-card overflow-hidden shadow-subtle hover:shadow-xl hover:border-sage-deep/50 hover:-translate-y-1.5 transition-all duration-300"
-            >
-              {/* UPPER SECTION: Image + Top-Left Circular Badge + Category Title (as per sketch) */}
-              <div className="relative h-56 w-full overflow-hidden bg-background-elevated shrink-0">
-                {/* Real Category Photo */}
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
+            <ScrollReveal key={item.name} delay={(idx % 4) * 0.06} className="h-full">
+              <Link
+                href={`/products?category=${encodeURIComponent(item.category)}`}
+                className="group flex h-full flex-col overflow-hidden rounded-3xl border border-line/80 bg-background-card shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:border-champagne/60 hover:shadow-card-hover"
+              >
+                {/* UPPER SECTION: Image + Top-Left Circular Badge + Category Title (as per sketch) */}
+                <div className="relative h-56 w-full overflow-hidden bg-background-elevated shrink-0">
+                  {/* Real Category Photo */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
 
-                {/* Subtle gradient overlay to make category title pop */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/15" />
+                  {/* Subtle gradient overlay to make category title pop */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/15" />
 
-                {/* Top-Left Circular Icon Badge (drawn as circle with icon in sketch) */}
-                <div className="absolute top-3.5 left-3.5 h-10 w-10 rounded-full bg-background-card/90 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-md flex items-center justify-center text-sage-deep transition-transform duration-300 group-hover:scale-110">
-                  <Icon className="h-5 w-5" />
+                  {/* Top-Left Circular Icon Badge (drawn as circle with icon in sketch) */}
+                  <div className="absolute top-3.5 left-3.5 h-10 w-10 rounded-full bg-background-card/90 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-md flex items-center justify-center text-sage-deep transition-transform duration-300 group-hover:scale-110">
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  {/* Category Title at the bottom of the upper section (drawn as 'Face Wash' in sketch) */}
+                  <div className="absolute bottom-3.5 left-4 right-4">
+                    <h2 className="font-display text-xl font-bold text-white drop-shadow-md tracking-tight group-hover:text-champagne transition-colors">
+                      {item.name}
+                    </h2>
+                  </div>
                 </div>
 
-                {/* Category Title at the bottom of the upper section (drawn as 'Face Wash' in sketch) */}
-                <div className="absolute bottom-3.5 left-4 right-4">
-                  <h2 className="font-display text-xl font-bold text-white drop-shadow-md tracking-tight group-hover:text-champagne transition-colors">
-                    {item.name}
-                  </h2>
-                </div>
-              </div>
+                {/* LOWER SECTION: Separated by divider, contains bullet points (as per sketch) */}
+                <div className="flex-1 flex flex-col justify-between p-5 bg-background-card border-t border-line/70">
+                  {/* Bullet Points list */}
+                  <ul className="space-y-2.5">
+                    {item.points.map((point) => (
+                      <li
+                        key={point}
+                        className="flex items-start gap-2.5 text-xs text-foreground-muted leading-relaxed"
+                      >
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sage-deep group-hover:bg-champagne-deep transition-colors" />
+                        <span className="font-medium text-foreground/85">
+                          {point}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
 
-              {/* LOWER SECTION: Separated by divider, contains bullet points (as per sketch) */}
-              <div className="flex-1 flex flex-col justify-between p-5 bg-background-card border-t border-line/70">
-                {/* Bullet Points list */}
-                <ul className="space-y-2.5">
-                  {item.points.map((point) => (
-                    <li
-                      key={point}
-                      className="flex items-start gap-2.5 text-xs text-foreground-muted leading-relaxed"
-                    >
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sage-deep group-hover:bg-champagne-deep transition-colors" />
-                      <span className="font-medium text-foreground/85">
-                        {point}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Bottom Card Action */}
-                <div className="pt-4 mt-4 border-t border-line/40 flex items-center justify-between text-xs font-bold text-sage-deep group-hover:text-foreground transition-colors">
-                  <span>View Products</span>
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5 text-champagne-deep" />
+                  {/* Bottom Card Action */}
+                  <div className="pt-4 mt-4 border-t border-line/40 flex items-center justify-between text-xs font-bold text-sage-deep group-hover:text-foreground transition-colors">
+                    <span>View Products</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5 text-champagne-deep" />
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </ScrollReveal>
           );
         })}
       </div>
 
       {visibleCategories.length === 0 && (
-        <div className="rounded-3xl border border-line bg-background-card p-12 text-center space-y-3">
+        <div className="space-y-3 rounded-3xl border border-line bg-background-card p-12 text-center shadow-card">
           <p className="font-display text-lg font-bold text-foreground">
             No categories found
           </p>

@@ -28,8 +28,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           disabled={disabled}
           className={cn(
-            "flex min-h-[100px] w-full rounded border border-line bg-background-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-foreground-faint transition-all duration-200 focus:border-sage-deep focus:outline-none focus:ring-1 focus:ring-sage-deep disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-status-error focus:border-status-error focus:ring-status-error",
+            "flex min-h-[100px] w-full rounded-xl border border-line/60 bg-background-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-foreground-faint transition-all duration-200 focus:border-champagne focus:outline-none focus:ring-2 focus:ring-champagne/20 disabled:cursor-not-allowed disabled:opacity-50",
+            error && "border-status-error focus:border-status-error focus:ring-status-error/20",
             className
           )}
           ref={ref}

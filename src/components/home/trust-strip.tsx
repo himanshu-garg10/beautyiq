@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Sparkles, Dna, Scale, Compass } from "lucide-react";
 import { Container } from "@/components/layout/container";
+import { StaggerReveal, StaggerItem } from "@/components/ui/scroll-reveal";
 
 const valueProps = [
   {
@@ -29,31 +30,30 @@ const valueProps = [
 
 export function TrustStrip() {
   return (
-    <section className="border-b border-line bg-background-elevated/40 py-6 sm:py-8">
+    <section className="border-b border-line/70 bg-background-elevated/50 py-7 sm:py-9">
       <Container>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          {valueProps.map((item, i) => {
+        <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+          {valueProps.map((item) => {
             const Icon = item.icon;
             return (
-              <div
-                key={item.title}
-                className="group flex items-start gap-3.5 transition-all"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep border border-champagne/30 group-hover:scale-105 transition-transform">
-                  <Icon className="h-5 w-5" />
+              <StaggerItem key={item.title}>
+                <div className="group flex items-start gap-3.5 rounded-2xl border border-transparent p-3 -m-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-line/60 hover:bg-background-card/80 hover:shadow-card">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-champagne/35 bg-[image:var(--gradient-card)] text-champagne-deep shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:border-champagne/70">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <h4 className="font-display text-base font-semibold leading-tight text-foreground transition-colors group-hover:text-champagne-deep">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs leading-relaxed text-foreground-muted">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1 min-w-0">
-                  <h4 className="font-display text-sm font-bold text-foreground leading-tight group-hover:text-champagne-deep transition-colors">
-                    {item.title}
-                  </h4>
-                  <p className="text-xs text-foreground-muted leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerReveal>
       </Container>
     </section>
   );

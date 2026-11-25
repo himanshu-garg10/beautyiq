@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/navigation/Navbar";
 import { Footer } from "@/components/layout/footer";
+import { PageTransition } from "@/components/layout/page-transition";
 import { HeroSection as Hero } from "@/components/hero/HeroSection";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { PersonalizedDiscovery } from "@/components/recommendations/PersonalizedDiscovery";
@@ -12,14 +13,16 @@ export default function Home() {
     <>
       <Navbar />
       <main className="min-h-screen pt-[64px]">
-        {/* 1. Hero Section */}
-        <Hero />
+        <PageTransition>
+          {/* 1. Hero Section */}
+          <Hero />
 
-        <TrustStrip />
-        <HomeQuickStart />
-        <ConcernSpotlight />
-        <PersonalizedDiscovery />
-        <FinalCta />
+          <TrustStrip />
+          <HomeQuickStart />
+          <ConcernSpotlight />
+          <PersonalizedDiscovery />
+          <FinalCta />
+        </PageTransition>
       </main>
       <Footer />
     </>

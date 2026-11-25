@@ -2,6 +2,7 @@ import * as React from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { CustomerSidebar } from "@/components/layout/customer-sidebar";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { PageTransition } from "@/components/layout/page-transition";
 
 export default function CustomerLayout({
   children,
@@ -14,7 +15,9 @@ export default function CustomerLayout({
         <Navbar />
         <div className="container mx-auto flex flex-1 pt-[72px]">
           <CustomerSidebar className="hidden md:flex" />
-          <main className="min-w-0 flex-1 overflow-y-auto p-5 md:p-8">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto p-5 md:p-8">
+            <PageTransition>{children}</PageTransition>
+          </main>
         </div>
       </div>
     </ProtectedRoute>
