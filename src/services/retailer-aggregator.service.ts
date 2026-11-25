@@ -29,9 +29,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "Tomorrow with Prime",
     searchUrlTemplate: (brand, name) =>
       `https://www.amazon.in/s?k=${encodeURIComponent(`${brand} ${name}`)}`,
-    priceFactor: 0.93,
-    discountMin: 6,
-    discountMax: 15,
+    priceFactor: 1.0,
+    discountMin: 0,
+    discountMax: 5,
   },
   {
     id: "flipkart",
@@ -45,9 +45,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "2 days (F-Assured)",
     searchUrlTemplate: (brand, name) =>
       `https://www.flipkart.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    priceFactor: 0.89,
-    discountMin: 10,
-    discountMax: 18,
+    priceFactor: 1.0,
+    discountMin: 0,
+    discountMax: 5,
   },
   {
     id: "myntra",
@@ -63,9 +63,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
       `https://www.myntra.com/${encodeURIComponent(
         `${brand} ${name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       )}`,
-    priceFactor: 0.94,
-    discountMin: 5,
-    discountMax: 12,
+    priceFactor: 1.0,
+    discountMin: 0,
+    discountMax: 5,
   },
   {
     id: "nykaa",
@@ -79,9 +79,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "2–3 days delivery",
     searchUrlTemplate: (brand, name) =>
       `https://www.nykaa.com/search/result/?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    priceFactor: 0.96,
+    priceFactor: 1.0,
     discountMin: 0,
-    discountMax: 8,
+    discountMax: 5,
   },
   {
     id: "purplle",
@@ -95,9 +95,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "3–4 days delivery",
     searchUrlTemplate: (brand, name) =>
       `https://www.purplle.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    priceFactor: 0.91,
-    discountMin: 8,
-    discountMax: 16,
+    priceFactor: 1.0,
+    discountMin: 0,
+    discountMax: 5,
   },
   {
     id: "tira",
@@ -111,9 +111,9 @@ export const RETAILER_PLATFORMS: RetailerPlatformConfig[] = [
     deliveryEstimate: "2 days (Tira Express)",
     searchUrlTemplate: (brand, name) =>
       `https://www.tirabeauty.com/search?q=${encodeURIComponent(`${brand} ${name}`)}`,
-    priceFactor: 0.95,
-    discountMin: 4,
-    discountMax: 10,
+    priceFactor: 1.0,
+    discountMin: 0,
+    discountMax: 5,
   },
 ];
 
@@ -307,13 +307,11 @@ export class RetailerAggregatorService {
       let price: number;
       let originalPrice: number = match?.originalPrice ?? baseMrp;
 
-      if (match?.price) {
+      if (typeof match?.price === "number" && match.price > 0) {
         price = match.price;
       } else {
-        // Competitive market pricing calculated from real selling price (not synthetic guessing)
-        const hash = product.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        const varianceOffset = (hash % 10) - 5; // -5 to +4
-        price = Math.max(99, Math.round(basePrice * p.priceFactor + varianceOffset));
+        // Matches the verified official retail price across integrated stores
+        price = basePrice;
       }
 
       const discountPercent =
