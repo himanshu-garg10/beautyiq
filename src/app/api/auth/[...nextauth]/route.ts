@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { authOptions } from "@/lib/auth/auth-options";
 import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 const handler = NextAuth(authOptions);
 
 export const GET = handler;

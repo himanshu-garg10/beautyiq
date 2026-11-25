@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ComparisonService } from "@/services/comparison.service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const history = ComparisonService.getComparisonHistory();

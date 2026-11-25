@@ -3,6 +3,8 @@ import { WishlistService } from "@/services/wishlist.service";
 import { AuthGuard } from "@/lib/security/auth-guard";
 import { InputValidator } from "@/lib/security/input-validator";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

@@ -5,6 +5,8 @@ import { RateLimiter } from "@/lib/security/rate-limiter";
 import { InputValidator } from "@/lib/security/input-validator";
 import { mockUsers } from "@/lib/mock-data";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
