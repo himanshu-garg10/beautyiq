@@ -5,3 +5,4 @@
  */
 
 export * from "@/data";
+export { productListings as mockProductListings } from "@/data";

@@ -1,4 +1,11 @@
-export type SkinType = "Oily" | "Dry" | "Combination" | "Normal" | "Sensitive";
+export type SkinType =
+  | "Oily"
+  | "Dry"
+  | "Combination"
+  | "Normal"
+  | "Sensitive"
+  | "All Skin Types"
+  | "Acne-prone";
 
 export type DetailedSkinConcern =
   | "Acne"
@@ -7,11 +14,15 @@ export type DetailedSkinConcern =
   | "Whiteheads"
   | "Dark spots"
   | "Acne marks"
+  | "Blemishes"
   | "Hyperpigmentation"
+  | "Pigmentation"
   | "Uneven skin tone"
+  | "Uneven tone"
   | "Dryness"
   | "Dehydration"
   | "Excess oil"
+  | "Oiliness"
   | "Dullness"
   | "Redness"
   | "Rough texture"
@@ -20,7 +31,14 @@ export type DetailedSkinConcern =
   | "Tanning"
   | "Dark circles"
   | "Under eye puffiness"
-  | "Uneven texture";
+  | "Uneven texture"
+  | "Sun protection"
+  | "Barrier repair"
+  | "Sensitivity"
+  | "Irritation"
+  | "Itching"
+  | "Cleansing"
+  | "Chapped lips";
 
 export type SkinConcern = DetailedSkinConcern;
 

@@ -64,6 +64,14 @@ const skinTypeGuidance: Record<SkinType, { routine: string; ingredients: string[
     routine: "Maintain a simple routine: gentle cleanser, moisturizer, and sunscreen. Add targeted products only for a specific cosmetic concern.",
     ingredients: ["Antioxidants such as vitamin C", "Niacinamide", "Daily broad-spectrum sunscreen"],
   },
+  "All Skin Types": {
+    routine: "Follow a balanced core regimen: gentle hydrating cleanser, barrier-nourishing moisturizer, and daily broad-spectrum SPF 50 sunscreen.",
+    ingredients: ["Hyaluronic acid", "Niacinamide", "Centella Asiatica / Cica", "Ceramides"],
+  },
+  "Acne-prone": {
+    routine: "Focus on non-comedogenic formulations with gentle salicylic acid cleanser, oil-free barrier hydrator, and mineral or lightweight fluid sunscreen.",
+    ingredients: ["Salicylic Acid (BHA)", "Niacinamide + Zinc PCA", "Tea tree extract", "Non-comedogenic gel"],
+  },
 };
 
 function getAssistantReply(requirement: StructuredSkincareRequirement) {

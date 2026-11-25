@@ -6,6 +6,7 @@
  *   by the tests, and by `getDefaultCatalog()` only when DATABASE_URL is not configured (local dev).
  */
 import type { CatalogIngredient, CatalogPrice, CatalogProduct, CatalogProvider } from "./types";
+import type { ProductListing } from "@/types";
 import { products as seedProducts, mockProductListings } from "../../data/products";
 import { ingredients as seedIngredients } from "../../data/ingredients";
 import { findKnowledgeForIngredient } from "./ingredient-knowledge";
@@ -151,8 +152,8 @@ export function buildSeedCatalog(): CatalogProduct[] {
         ingredient: metaFor(n),
       })),
       prices: mockProductListings
-        .filter((l) => l.productId === p.id)
-        .map((l) => ({
+        .filter((l: ProductListing) => l.productId === p.id)
+        .map((l: ProductListing) => ({
           platform: l.platform,
           seller: l.seller,
           price: l.price,

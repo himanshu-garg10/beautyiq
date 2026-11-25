@@ -1,4 +1,4 @@
-import { products, categories, brandsList, mockProductListings, ingredients } from "@/lib/mock-data";
+import { products, categories, brandsList, productListings, ingredients } from "@/lib/mock-data";
 import { RetailerAggregatorService } from "./retailer-aggregator.service";
 import type {
   Product,
@@ -104,7 +104,7 @@ export class ProductService {
         summary: `Verified product for ${cleanName}`,
       };
     }
-    let allListings: ProductListing[] = mockProductListings;
+    let allListings: ProductListing[] = productListings;
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("beautyiq_admin_listings");
@@ -315,7 +315,7 @@ export class ProductService {
     // Filter by Availability
     if (filters.availability) {
       result = result.filter((p) => {
-        const listings = mockProductListings.filter((l) => l.productId === p.id);
+        const listings = productListings.filter((l) => l.productId === p.id);
         if (listings.length === 0) return filters.availability === "Not Available";
         return listings.some((l) => l.availability === filters.availability);
       });
@@ -495,7 +495,7 @@ export class ProductService {
       return createErrorResponse("NOT_FOUND", `Product with ID ${productId} was not found.`);
     }
 
-    const listings = mockProductListings.filter((l) => l.productId === productId);
+    const listings = productListings.filter((l) => l.productId === productId);
     const { ValueEngineService } = await import("./value-engine.service");
     const metrics = ValueEngineService.getNormalizedValueMetrics(product, listings);
 

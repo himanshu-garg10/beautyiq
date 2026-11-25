@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "catalog:import": "tsx scripts/import-open-beauty-facts.ts",
+    "sync:retailers": "tsx scripts/sync-retailer-apis.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "test": "tsx --test \"tests/**/*.test.ts\""
