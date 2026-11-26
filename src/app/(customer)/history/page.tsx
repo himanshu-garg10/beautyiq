@@ -243,8 +243,8 @@ export default function CustomerHistoryPage() {
               title="No Searches Yet"
               description="Start an AI skincare search or browse by product keyword to see your search history recorded here."
               icon={<Search className="h-8 w-8 text-foreground-faint" />}
-              actionLabel="Start AI Search"
-              onAction={() => router.push("/ai-search")}
+              actionLabel="Browse Products"
+              onAction={() => router.push("/products")}
             />
           ) : (
             <div className="space-y-3">

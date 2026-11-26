@@ -87,9 +87,9 @@ export default function AboutPage() {
                 Build Skin Profile
               </Button>
             </Link>
-            <Link href="/ai-search">
+            <Link href="/skin-scan">
               <Button variant="outline" size="lg">
-                Try AI Search
+                Try Skin Scan
               </Button>
             </Link>
           </div>

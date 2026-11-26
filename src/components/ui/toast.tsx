@@ -36,7 +36,7 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
   return (
     <div
       className={cn(
-        "flex w-full max-w-sm items-start gap-3 rounded border p-4 shadow-lg transition-all duration-300 animate-fade-in",
+        "flex w-full max-w-sm items-start gap-3 rounded-2xl border p-4 shadow-elevated backdrop-blur-md transition-all duration-300 animate-fade-in",
         toastStyles[toast.type]
       )}
     >
@@ -49,7 +49,7 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
       </div>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-foreground-faint hover:text-foreground p-0.5 rounded"
+        className="text-foreground-faint hover:text-foreground p-0.5 rounded-lg"
       >
         <X className="h-4 w-4" />
       </button>

@@ -138,7 +138,7 @@ function RecommendationsContent() {
   return (
     <Container className="py-6 md:py-8 space-y-6 max-w-6xl">
       <div className="flex justify-end border-b border-line pb-4">
-          <Link href="/ai-search">
+          <Link href="/">
             <Button variant="accent" size="sm" leftIcon={<Edit3 className="h-4 w-4" />}>
               Edit Requirements
             </Button>
@@ -217,7 +217,7 @@ function RecommendationsContent() {
               No products in our current database satisfy 100% of your explicit hard constraints (Category: <strong>{requirement?.category}</strong>, Max Budget: <strong>₹{requirement?.maxPrice}</strong>, Excluded Ingredients: <strong>{requirement?.avoidIngredients.join(", ") || "None"}</strong>).
             </p>
             <div className="pt-2 flex flex-wrap gap-3">
-              <Link href="/ai-search">
+              <Link href="/">
                 <Button variant="accent" size="sm" leftIcon={<RotateCcw className="h-4 w-4" />}>
                   Adjust &amp; Relax Requirements
                 </Button>

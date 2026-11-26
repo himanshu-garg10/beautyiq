@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WishlistService } from "@/services/wishlist.service";
 
+export const dynamic = "force-dynamic";
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { productId: string } }

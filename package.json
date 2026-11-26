@@ -5,9 +5,10 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=460 next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "catalog:import": "tsx scripts/import-open-beauty-facts.ts",
     "sync:retailers": "tsx scripts/sync-retailer-apis.ts",
     "db:push": "prisma db push",

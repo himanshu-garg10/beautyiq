@@ -34,12 +34,13 @@ export function Categories() {
               key={category.id}
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.03 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.35, delay: (i % 4) * 0.05 }}
             >
               <Link
                 href={`/products?category=${encodeURIComponent(category.name)}`}
-                className="group relative flex flex-col overflow-hidden rounded-xl border border-line bg-background-card shadow-subtle hover:shadow-md transition-all duration-300 hover:border-line-strong h-full"
+                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line/80 bg-background-card shadow-card transition-all duration-300 hover:border-champagne/60 hover:shadow-card-hover"
               >
                 <div className="relative h-32 w-full overflow-hidden bg-background-elevated">
                   <Image

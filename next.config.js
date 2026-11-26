@@ -2,6 +2,21 @@
 const path = require("path");
 
 const nextConfig = {
+  // ── Build memory reduction for Render free-tier (512 MB) ──────────────────
+  productionBrowserSourceMaps: false,
+  // Skip ESLint and TypeScript checks during build (run them locally instead)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["better-sqlite3", "bcryptjs"],
+    // Run only 1 worker so the build doesn't exhaust RAM on small hosts
+    cpus: 1,
+    workerThreads: false,
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -10,9 +25,6 @@ const nextConfig = {
         hostname: "images.unsplash.com",
       },
     ],
-  },
-  experimental: {
-    serverComponentsExternalPackages: ["better-sqlite3", "bcryptjs"],
   },
   webpack: (config, { dev }) => {
     if (dev) {

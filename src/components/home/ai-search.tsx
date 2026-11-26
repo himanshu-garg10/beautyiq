@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, Wand2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useChatContext } from "@/context/chat-context";
 
 const suggestions = [
   "Oily skin with acne, lightweight moisturizer under ₹800",
@@ -14,19 +14,21 @@ const suggestions = [
 ];
 
 export function AiSearch() {
-  const router = useRouter();
+  const { openChat, sendMessage } = useChatContext();
   const [value, setValue] = React.useState("");
   const [focused, setFocused] = React.useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const query = value.trim() || "I have oily skin with acne and want a lightweight moisturizer under ₹800";
-    router.push(`/ai-search?q=${encodeURIComponent(query)}`);
+    openChat();
+    void sendMessage(query);
   }
 
   function handleSuggestionClick(s: string) {
     setValue(s);
-    router.push(`/ai-search?q=${encodeURIComponent(s)}`);
+    openChat();
+    void sendMessage(s);
   }
 
   return (

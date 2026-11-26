@@ -4,27 +4,31 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-[0.9rem] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-deep focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-[0.9rem] font-medium tracking-wide transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]",
   {
     variants: {
       variant: {
+        default:
+          "bg-[image:var(--gradient-gold)] text-[#1A1510] font-semibold shadow-card hover:shadow-card-hover hover:brightness-[1.03]",
         primary:
-          "bg-foreground text-background hover:bg-sage-deep hover:text-white dark:bg-sage-deep dark:text-white dark:hover:bg-sage",
+          "bg-foreground text-background shadow-subtle hover:bg-sage-deep hover:text-white hover:shadow-card dark:bg-sage-deep dark:text-white dark:hover:bg-sage",
         outline:
-          "border border-line bg-transparent text-foreground hover:border-line-strong hover:bg-background-elevated",
+          "border border-line-strong/80 bg-background-card/70 text-foreground shadow-xs hover:border-champagne/60 hover:bg-background-elevated hover:shadow-subtle",
         ghost:
-          "bg-transparent text-foreground-muted hover:bg-background-elevated hover:text-foreground",
+          "bg-transparent text-foreground-muted hover:bg-background-elevated/80 hover:text-foreground",
+        "ghost-gold":
+          "bg-transparent text-champagne-deep dark:text-champagne hover:text-foreground underline-offset-4 hover:underline hover:decoration-champagne",
         accent:
-          "bg-sage-deep text-white hover:bg-foreground hover:text-background dark:bg-sage dark:hover:bg-sage-deep",
+          "bg-[image:var(--gradient-gold)] text-[#1A1510] font-semibold shadow-card hover:shadow-card-hover hover:brightness-[1.03]",
         clay:
-          "bg-clay text-white hover:bg-foreground dark:bg-clay dark:hover:bg-foreground",
+          "bg-clay text-white shadow-subtle hover:bg-foreground hover:text-background hover:shadow-card dark:bg-clay dark:hover:bg-foreground",
         danger:
-          "bg-status-error text-white hover:bg-red-700 dark:bg-status-error dark:hover:bg-red-600",
+          "bg-status-error text-white shadow-subtle hover:bg-red-700 dark:bg-status-error dark:hover:bg-red-600",
         success:
-          "bg-status-success text-white hover:bg-emerald-800 dark:bg-status-success",
+          "bg-status-success text-white shadow-subtle hover:bg-emerald-800 dark:bg-status-success",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
+        sm: "h-8 px-3.5 text-xs",
         md: "h-10 px-5 text-sm",
         lg: "h-12 px-7 text-base font-semibold",
         icon: "h-9 w-9 p-0",
@@ -76,7 +80,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           leftIcon
         )}
         <span>{children}</span>
-        {!isLoading && rightIcon}
+        {!isBusy && rightIcon}
       </button>
     );
   }

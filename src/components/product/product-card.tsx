@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Scale, Star, Heart, Check, Sparkles, ExternalLink, ShoppingBag, Tag, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Product, ProductListing } from "@/types";
@@ -117,9 +118,11 @@ export function ProductCard({
   };
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line/80 bg-background-card transition-all duration-300 hover:border-sage-soft/60 hover:shadow-xl hover:-translate-y-0.5 h-full",
+        "group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-line/80 bg-background-card shadow-card transition-all duration-300 hover:border-champagne/60 hover:shadow-card-hover",
         className
       )}
     >
@@ -129,13 +132,19 @@ export function ProductCard({
           href={`/products/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
           className="block h-full w-full"
         >
-          <Image
-            src={product.image}
-            alt={`${product.brand} ${product.name}`}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-          />
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative h-full w-full"
+          >
+            <Image
+              src={product.image}
+              alt={`${product.brand} ${product.name}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover"
+            />
+          </motion.div>
           {/* Subtle bottom gradient vignette for contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
         </Link>
@@ -198,7 +207,7 @@ export function ProductCard({
       <div className="flex flex-1 flex-col p-4 sm:p-5 space-y-3">
         {/* Brand & Star Rating Header */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-sage-deep truncate font-sans">
+          <span className="text-xs font-semibold uppercase tracking-wider text-foreground-faint truncate">
             {product.brand}
           </span>
 
@@ -470,6 +479,6 @@ export function ProductCard({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

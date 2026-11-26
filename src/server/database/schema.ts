@@ -79,5 +79,7 @@ export function initDatabaseSchema() {
   `);
 }
 
-// Auto-run schema migrations on import
-initDatabaseSchema();
+// Auto-run schema migrations on import — but skip during the Next.js build phase
+if (process.env.NEXT_PHASE !== "phase-production-build") {
+  initDatabaseSchema();
+}

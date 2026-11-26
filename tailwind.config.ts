@@ -65,8 +65,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "serif"],
-        sans: ["var(--font-sans)", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       maxWidth: {
@@ -78,11 +78,18 @@ const config: Config = {
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
         full: "var(--radius-full)",
+        "4xl": "2rem",
+        "5xl": "2.5rem",
       },
       boxShadow: {
+        xs: "0 1px 2px rgba(26, 21, 16, 0.04)",
         subtle: "var(--shadow-subtle)",
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
+        card: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06)",
+        "card-hover": "0 4px 8px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10)",
+        elevated: "0 8px 24px rgba(0,0,0,0.08), 0 24px 56px rgba(0,0,0,0.12)",
+        glass: "0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
       },
       keyframes: {
         "fade-up": {
@@ -97,11 +104,33 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        fadeInUp: {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "spin-slow": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
         "fade-in": "fade-in 0.3s ease-out forwards",
         "pulse-subtle": "pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        float: "float 5s ease-in-out infinite",
+        "float-delayed": "float 5s ease-in-out 1.5s infinite",
+        "float-slow": "float 7s ease-in-out 0.5s infinite",
+        shimmer: "shimmer 2s linear infinite",
+        "fade-in-up": "fadeInUp 0.5s ease-out forwards",
+        "spin-slow": "spin-slow 20s linear infinite",
       },
     },
   },

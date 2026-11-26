@@ -45,15 +45,15 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-background">
-      <div className="w-full max-w-md space-y-6 rounded border border-line bg-background-card p-8 shadow-md">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background to-background-elevated">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-line/40 bg-background-card p-8 shadow-elevated">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block">
-            <span className="font-display text-2xl tracking-tight text-foreground">
-              Beauty<span className="italic text-sage-deep">IQ</span>
+            <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+              Beauty<span className="italic text-gold-gradient">IQ</span>
             </span>
           </Link>
-          <h2 className="font-display text-2xl font-bold text-foreground">
+          <h2 className="font-display text-3xl font-semibold text-foreground">
             Reset Password
           </h2>
           <p className="text-xs text-foreground-muted">

@@ -4,6 +4,8 @@ import { AuthGuard } from "@/lib/security/auth-guard";
 import { RateLimiter } from "@/lib/security/rate-limiter";
 import { InputValidator } from "@/lib/security/input-validator";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));

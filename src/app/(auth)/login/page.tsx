@@ -132,9 +132,9 @@ function LoginForm() {
       </div>
 
       {/* Floating Popup Overlay over site background */}
-      <div className="fixed inset-0 z-40 bg-foreground/40 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-md flex items-center justify-center p-4">
         {/* Modal Card */}
-        <div className="relative z-10 w-full max-w-md rounded-3xl border border-line bg-background-card p-6 sm:p-8 shadow-2xl text-foreground my-auto max-h-[92vh] overflow-y-auto">
+        <div className="relative z-10 w-full max-w-md rounded-3xl border border-line/40 bg-background-card p-6 sm:p-8 shadow-elevated text-foreground my-auto max-h-[92vh] overflow-y-auto">
           {/* Close button that returns to home */}
           <Link
             href="/"
@@ -150,8 +150,8 @@ function LoginForm() {
               <Sparkles className="h-3 w-3" />
               <span>Skincare Intelligence</span>
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Sign In to Beauty<span className="italic text-sage-deep">IQ</span>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">
+              Sign In to Beauty<span className="italic text-gold-gradient">IQ</span>
             </h2>
             <p className="text-xs text-foreground-muted">
               Enter your Gmail address to access your skin profile, saved routine, and wishlist.

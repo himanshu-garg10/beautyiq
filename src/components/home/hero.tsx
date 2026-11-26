@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
+import { useChatContext } from "@/context/chat-context";
 
 export function Hero() {
+  const { openChat } = useChatContext();
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-background via-champagne-tint/30 to-background border-b border-line/60">
       {/* Subtle luxury ambient ambient glow */}
@@ -56,16 +58,16 @@ export function Hero() {
 
             {/* Primary & Secondary Call to Actions */}
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
-              <Link href="/ai-search">
-                <Button
-                  size="lg"
-                  variant="accent"
-                  className="rounded-full px-6 py-3 font-semibold text-sm shadow-md hover:shadow-lg transition-all gap-2 bg-foreground text-background hover:bg-foreground/90 dark:bg-champagne-deep dark:text-white"
-                >
-                  <span>Start AI Match</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                size="lg"
+                variant="accent"
+                onClick={() => openChat()}
+                className="rounded-full px-6 py-3 font-semibold text-sm shadow-md hover:shadow-lg transition-all gap-2 bg-foreground text-background hover:bg-foreground/90 dark:bg-champagne-deep dark:text-white"
+              >
+                <span>Ask BeautyIQ AI</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
 
               <Link href="/products">
                 <Button
@@ -231,13 +233,14 @@ export function Hero() {
                     </p>
                   </div>
                 </div>
-                <Link
-                  href="/ai-search"
+                <button
+                  type="button"
+                  onClick={() => openChat()}
                   className="shrink-0 text-[0.68rem] font-bold text-champagne-deep hover:underline flex items-center gap-0.5"
                 >
-                  <span>Quiz</span>
+                  <span>Ask AI</span>
                   <ArrowRight className="h-3 w-3" />
-                </Link>
+                </button>
               </motion.div>
 
               {/* FLOATING GLASS UI CARD 3: 3 Stores Compared */}

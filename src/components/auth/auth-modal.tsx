@@ -268,7 +268,7 @@ export function AuthModal() {
       {isAuthModalOpen && (
         <motion.div
           id="auth-modal-overlay"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -288,7 +288,7 @@ export function AuthModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-modal-title"
-            className="relative z-10 w-full max-w-md rounded-3xl border border-line bg-background-card p-6 sm:p-8 shadow-2xl text-foreground my-auto max-h-[92vh] overflow-y-auto"
+            className="relative z-10 w-full max-w-md rounded-3xl border border-line/40 bg-background-card p-6 sm:p-8 shadow-elevated text-foreground my-auto max-h-[92vh] overflow-y-auto"
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -311,8 +311,8 @@ export function AuthModal() {
                 <Sparkles className="h-3 w-3" />
                 <span>Skincare Intelligence</span>
               </div>
-              <h2 id="auth-modal-title" className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Beauty<span className="italic text-sage-deep">IQ</span>
+              <h2 id="auth-modal-title" className="font-display text-3xl font-semibold tracking-tight text-foreground">
+                Beauty<span className="italic text-gold-gradient">IQ</span>
               </h2>
               <p className="text-xs text-foreground-muted">
                 {mode === "login"

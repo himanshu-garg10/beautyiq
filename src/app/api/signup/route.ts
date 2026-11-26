@@ -5,6 +5,8 @@ import { enforceAuthRateLimit } from "@/lib/auth/rate-limit";
 import { InputValidator } from "@/lib/security/input-validator";
 import { createUser } from "@/lib/auth/user-store";
 
+export const dynamic = "force-dynamic";
+
 const BCRYPT_COST = 10;
 
 function isUniqueConstraintError(error: unknown): boolean {

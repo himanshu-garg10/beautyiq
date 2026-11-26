@@ -21,7 +21,6 @@ import { useAuth } from "@/context/auth-context";
 
 const customerNavLinks = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "AI Requirements", href: "/ai-search", icon: Sparkles },
   { label: "Browse Products", href: "/products", icon: Package },
   { label: "Recommendations", href: "/recommendations", icon: Award },
   { label: "Product Comparison", href: "/compare", icon: Scale },

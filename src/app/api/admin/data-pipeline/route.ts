@@ -4,6 +4,8 @@ import { DataSourceService } from "@/services/data-pipeline/data-source.service"
 import { PipelineOrchestratorService } from "@/services/data-pipeline/pipeline-orchestrator.service";
 import { RawStorageService } from "@/services/data-pipeline/raw-storage.service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const auth = checkAdminAuth(request);
   if (!auth.authorized) return auth.response!;

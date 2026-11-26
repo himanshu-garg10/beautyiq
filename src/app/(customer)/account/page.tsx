@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useSkinProfile } from "@/context/skin-profile-context";
+import { useChatContext } from "@/context/chat-context";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -31,6 +32,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { user, logout, sessionStatus } = useAuth();
   const { profile } = useSkinProfile();
+  const { openChat } = useChatContext();
   const [savedProducts, setSavedProducts] = React.useState<SavedProductRow[]>([]);
 
   React.useEffect(() => {
@@ -87,12 +89,16 @@ export default function AccountPage() {
           <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Keep products you want to revisit in one personal wishlist.</p>
         </Link>
 
-        <Link href="/ai-search" className="group rounded-2xl border border-line bg-background-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-champagne-deep/35 hover:shadow-md">
+        <button
+          type="button"
+          onClick={() => openChat()}
+          className="group rounded-2xl border border-line bg-background-card p-5 text-left shadow-subtle transition-all hover:-translate-y-0.5 hover:border-champagne-deep/35 hover:shadow-md"
+        >
           <div className="flex items-center justify-between"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-champagne-tint text-champagne-deep"><Sparkles className="h-5 w-5" /></div><ArrowRight className="h-4 w-4 text-foreground-faint transition-transform group-hover:translate-x-0.5 group-hover:text-champagne-deep" /></div>
           <p className="mt-5 text-xs font-bold uppercase tracking-[0.13em] text-foreground-faint">Need a suggestion?</p>
-          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">Ask AI Match</h2>
+          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">Ask BeautyIQ AI</h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Describe your concern naturally and get cosmetic guidance with products.</p>
-        </Link>
+        </button>
       </section>
 
       <section className="rounded-2xl border border-line bg-background-card p-5 shadow-subtle sm:p-6">

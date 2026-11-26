@@ -7,7 +7,6 @@ import { Container } from "@/components/layout/container";
 const pages: Record<string, { title: string; detail: string; icon: typeof Sparkles }> = {
   "/products": { title: "Product Discovery", detail: "Browse and filter the live BeautyIQ catalog", icon: Package },
   "/recommendations": { title: "AI Recommendations", detail: "Your personalised ingredient and product matches", icon: Sparkles },
-  "/ai-search": { title: "AI Requirement Assistant", detail: "Tell BeautyIQ what your skin needs", icon: Sparkles },
   "/compare": { title: "Product Comparison", detail: "Compare ingredients, suitability and verified offers", icon: Scale },
   "/ingredients": { title: "Ingredient Intelligence", detail: "Understand the ingredients behind each formula", icon: FlaskConical },
   "/categories": { title: "Skincare Categories", detail: "Explore products by routine step", icon: Layers },
