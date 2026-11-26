@@ -252,7 +252,37 @@ export async function POST(request: NextRequest) {
         }
       } catch (err) {
         console.error("Product search error:", err);
-        // Non-fatal — still return reply without products
+      }
+
+      // Catalog fallback if database search yielded 0 products or timed out
+      if (!products || products.length === 0) {
+        try {
+          const { products: catalogProducts } = await import("@/data/products");
+          const matched = catalogProducts
+            .filter((p) =>
+              searchTerms.some(
+                (term) =>
+                  (p.name || "").toLowerCase().includes(term) ||
+                  (p.category || "").toLowerCase().includes(term) ||
+                  (p.targetConcerns || []).some((c: string) => c.toLowerCase().includes(term)) ||
+                  (p.skinTypes || []).some((s: string) => s.toLowerCase().includes(term))
+              )
+            )
+            .slice(0, 4);
+
+          if (matched.length > 0) {
+            products = matched.map((p) => ({
+              id: p.id,
+              name: p.name,
+              brand: p.brand,
+              category: p.category,
+              rating: p.rating,
+              image: p.image,
+              slug: p.id,
+              price: (p as any).price ?? null,
+            }));
+          }
+        } catch {}
       }
     }
   }

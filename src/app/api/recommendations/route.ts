@@ -119,20 +119,41 @@ export async function POST(request: NextRequest) {
       where.category = { equals: requestedCategory };
     }
 
-    const rawProducts = await prisma.product.findMany({
-      where,
-      include: {
-        prices: true,
-        productIngredients: {
-          include: {
-            ingredient: true,
-          },
-          orderBy: {
-            orderIndex: "asc",
+    let rawProducts: any[] = [];
+    try {
+      rawProducts = await prisma.product.findMany({
+        where,
+        include: {
+          prices: true,
+          productIngredients: {
+            include: {
+              ingredient: true,
+            },
+            orderBy: {
+              orderIndex: "asc",
+            },
           },
         },
-      },
-    });
+      });
+    } catch {
+      rawProducts = [];
+    }
+
+    // Always ensure the rich 440-product verified catalog is included for recommendations
+    const { products: catalogProducts } = await import("@/data/products");
+    let filteredCatalog = [...catalogProducts];
+    if (requestedCategory && requestedCategory !== "All" && requestedCategory !== "") {
+      filteredCatalog = filteredCatalog.filter(
+        (p) => p.category.toLowerCase() === requestedCategory.toLowerCase()
+      );
+    }
+    const existingSlugs = new Set(rawProducts.map((p: any) => (p.slug || p.id || "").toLowerCase()));
+    for (const catP of filteredCatalog) {
+      if (!existingSlugs.has(catP.id.toLowerCase())) {
+        existingSlugs.add(catP.id.toLowerCase());
+        rawProducts.push(catP);
+      }
+    }
 
     if (rawProducts.length === 0) {
       return NextResponse.json({

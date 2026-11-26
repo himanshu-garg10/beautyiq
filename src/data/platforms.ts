@@ -6,7 +6,7 @@ export const mockPlatforms: Platform[] = [
     name: "Amazon India",
     baseUrl: "https://www.amazon.in",
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
     logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg",
   },
   {
@@ -14,7 +14,7 @@ export const mockPlatforms: Platform[] = [
     name: "Flipkart",
     baseUrl: "https://www.flipkart.com",
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
     logoUrl: "https://seeklogo.com/images/F/flipkart-logo-3F33927DAA-seeklogo.com.png",
   },
   {
@@ -22,7 +22,7 @@ export const mockPlatforms: Platform[] = [
     name: "Myntra",
     baseUrl: "https://www.myntra.com",
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
     logoUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d5/Myntra_logo.png",
   },
   {
@@ -30,7 +30,7 @@ export const mockPlatforms: Platform[] = [
     name: "Nykaa",
     baseUrl: "https://www.nykaa.com",
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
     logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/00/Nykaa_New_Logo.svg",
   },
   {
@@ -38,7 +38,7 @@ export const mockPlatforms: Platform[] = [
     name: "Purplle",
     baseUrl: "https://www.purplle.com",
     status: "active",
-    listingCount: 11,
+    listingCount: 440,
     logoUrl: "https://media6.ppl-media.com/mediafiles/ecomm/home/1543234842_purplle-logo.png",
   },
   {
@@ -46,7 +46,7 @@ export const mockPlatforms: Platform[] = [
     name: "Tira Beauty",
     baseUrl: "https://www.tirabeauty.com",
     status: "active",
-    listingCount: 10,
+    listingCount: 440,
     logoUrl: "https://www.tirabeauty.com/assets/images/tira_logo.svg",
   },
   {
@@ -54,7 +54,7 @@ export const mockPlatforms: Platform[] = [
     name: "BeMinimalist Direct",
     baseUrl: "https://beminimalist.co",
     status: "active",
-    listingCount: 6,
+    listingCount: 95,
     logoUrl: "https://beminimalist.co/cdn/shop/files/logo_180x.png",
   },
   {
@@ -62,7 +62,7 @@ export const mockPlatforms: Platform[] = [
     name: "Dot & Key Direct",
     baseUrl: "https://www.dotandkey.com",
     status: "active",
-    listingCount: 4,
+    listingCount: 88,
     logoUrl: "https://www.dotandkey.com/cdn/shop/files/dot-and-key-logo_180x.png",
   },
   {
@@ -70,7 +70,7 @@ export const mockPlatforms: Platform[] = [
     name: "The Derma Co Direct",
     baseUrl: "https://thedermaco.com",
     status: "active",
-    listingCount: 4,
+    listingCount: 65,
     logoUrl: "https://thedermaco.com/images/derma-logo.png",
   },
   {
@@ -78,7 +78,7 @@ export const mockPlatforms: Platform[] = [
     name: "Dr. Sheth's Direct",
     baseUrl: "https://www.drsheths.com",
     status: "active",
-    listingCount: 3,
+    listingCount: 52,
     logoUrl: "https://www.drsheths.com/cdn/shop/files/dr-sheths-logo.png",
   },
   {
@@ -86,7 +86,7 @@ export const mockPlatforms: Platform[] = [
     name: "Plum Goodness Direct",
     baseUrl: "https://plumgoodness.com",
     status: "active",
-    listingCount: 3,
+    listingCount: 78,
     logoUrl: "https://plumgoodness.com/cdn/shop/files/plum-logo.png",
   },
   {
@@ -94,7 +94,7 @@ export const mockPlatforms: Platform[] = [
     name: "Maccaron Beauty",
     baseUrl: "https://maccaron.in",
     status: "active",
-    listingCount: 5,
+    listingCount: 440,
     logoUrl: "https://maccaron.in/static/media/logo.svg",
   },
   {
@@ -102,7 +102,7 @@ export const mockPlatforms: Platform[] = [
     name: "Brand Direct Store",
     baseUrl: "https://beminimalist.co",
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
   },
 ];
 
@@ -113,7 +113,7 @@ export const mockSellers: Seller[] = [
     platformId: "amazon",
     rating: 4.8,
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
   },
   {
     id: "seller-flipkart-supercom",
@@ -121,7 +121,7 @@ export const mockSellers: Seller[] = [
     platformId: "flipkart",
     rating: 4.6,
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
   },
   {
     id: "seller-myntra-fashion",
@@ -129,7 +129,7 @@ export const mockSellers: Seller[] = [
     platformId: "myntra",
     rating: 4.7,
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
   },
   {
     id: "seller-nykaa-retail",
@@ -137,7 +137,7 @@ export const mockSellers: Seller[] = [
     platformId: "nykaa",
     rating: 4.9,
     status: "active",
-    listingCount: 13,
+    listingCount: 440,
   },
   {
     id: "seller-purplle-direct",
@@ -145,7 +145,7 @@ export const mockSellers: Seller[] = [
     platformId: "purplle",
     rating: 4.5,
     status: "active",
-    listingCount: 11,
+    listingCount: 440,
   },
   {
     id: "seller-tira-reliance",

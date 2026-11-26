@@ -269,12 +269,43 @@ async function main() {
 
   console.log(`✅ Seeded ${allIngredientsToSeed.length} ingredients.`);
 
-  // 3. Seed Products (p1 to p13)
-  const seededProductsMap = new Map<string, string>(); // legacy id "p1" -> ObjectId
+  // 3. Seed Products (upserting all 440 products)
+  const seededProductsMap = new Map<string, string>();
 
   for (const p of products) {
-    const createdProduct = await prisma.product.create({
-      data: {
+    const createdProduct = await prisma.product.upsert({
+      where: { slug: p.id },
+      update: {
+        name: p.name,
+        brand: p.brand,
+        category: p.category,
+        description: p.description,
+        images: JSON.stringify(p.images),
+        image: p.image,
+        quantity: p.quantity,
+        unit: p.unit,
+        rating: p.rating,
+        reviewCount: p.reviewCount,
+        productStatus: p.productStatus,
+        dataConfidence: p.dataConfidence,
+        source: p.source,
+        lastUpdated: p.lastUpdated,
+        compatibilityScore: p.compatibilityScore ?? null,
+        skinTypes: JSON.stringify(p.skinTypes),
+        targetConcerns: JSON.stringify(p.targetConcerns),
+        pHLevel: p.pHLevel ?? null,
+        crueltyFree: p.crueltyFree,
+        vegan: p.vegan,
+        fragranceFree: p.fragranceFree,
+        parabenFree: p.parabenFree,
+        siliconeFree: p.siliconeFree,
+        usageTime: p.usageTime,
+        summary: p.summary,
+        whyRecommended: p.whyRecommended ? JSON.stringify(p.whyRecommended) : null,
+        warnings: p.warnings ? JSON.stringify(p.warnings) : null,
+        isVerified: p.isVerified ?? true,
+      },
+      create: {
         slug: p.id,
         legacyId: p.id,
         name: p.name,

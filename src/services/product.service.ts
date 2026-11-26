@@ -109,7 +109,10 @@ export class ProductService {
       try {
         const stored = localStorage.getItem("beautyiq_admin_listings");
         if (stored) {
-          allListings = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length >= productListings.length) {
+            allListings = parsed;
+          }
         }
       } catch {}
     }

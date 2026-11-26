@@ -80,19 +80,22 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Check if real production database is configured (otherwise serve immediately from local catalog to avoid timeouts)
+    // Always load the complete, calibrated 440-product catalog as the baseline source of truth
+    const { products: catalogProducts, productListings: catalogListings } = await import("@/data/products");
+    const allSavedListings = Array.isArray(catalogListings) ? catalogListings : [];
+
+    // Check if real production database is configured (otherwise serve immediately from verified catalog)
     const isLocalMockDb =
       !process.env.DATABASE_URL ||
       process.env.DATABASE_URL.includes("localhost") ||
       process.env.DATABASE_URL.includes("127.0.0.1") ||
       process.env.DATABASE_URL.includes("cluster0.xxxxx");
 
-    let rawProducts: any[] = [];
+    let dbCustomProducts: any[] = [];
 
     if (!isLocalMockDb) {
       try {
         const dbPromise = prisma.product.findMany({
-          where,
           include: {
             prices: true,
             productIngredients: {
@@ -108,101 +111,85 @@ export async function GET(request: NextRequest) {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("DB_TIMEOUT")), 600)
         );
-        rawProducts = (await Promise.race([dbPromise, timeoutPromise])) as any[];
-      } catch {
-        rawProducts = [];
-      }
-    }
+        const dbRows = (await Promise.race([dbPromise, timeoutPromise])) as any[];
 
-    // Seamless fallback to the rich in-memory catalog
-    if (!rawProducts || rawProducts.length === 0) {
-      const { products, productListings } = await import("@/data/products");
-      let filtered = [...products] as any[];
-      const allSavedListings = Array.isArray(productListings) ? productListings : [];
+        if (Array.isArray(dbRows) && dbRows.length > 0) {
+          const catalogIdSet = new Set(catalogProducts.map((p) => p.id.toLowerCase()));
+          const legacyDemoIds = new Set(["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13"]);
 
-      if (categories.length) {
-        filtered = filtered.filter((p) =>
-          categories.some((c) => p.category.toLowerCase() === c.toLowerCase())
-        );
-      }
-      if (brands.length) {
-        filtered = filtered.filter((p) =>
-          brands.some((b) => p.brand.toLowerCase() === b.toLowerCase())
-        );
-      }
-      if (query && query.trim()) {
-        const q = query.trim().toLowerCase();
-        filtered = filtered.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.brand.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            (p.allIngredients && p.allIngredients.some((i: string) => i.toLowerCase().includes(q)))
-        );
-      }
-      if (crueltyFree) filtered = filtered.filter((p) => p.crueltyFree);
-      if (vegan) filtered = filtered.filter((p) => p.vegan);
-      if (fragranceFree) filtered = filtered.filter((p) => p.fragranceFree);
-      if (parabenFree) filtered = filtered.filter((p) => p.parabenFree);
-      if (minRating !== undefined && !isNaN(minRating)) {
-        filtered = filtered.filter((p) => (p.rating ?? 0) >= minRating);
-      }
-
-      // Ensure every fallback product has live multi-retailer comparative prices attached
-      rawProducts = filtered.map((p) => {
-        const existingForProduct = allSavedListings.filter((l) => l.productId === p.id);
-        const listings =
-          existingForProduct.length >= 7
-            ? existingForProduct
-            : RetailerAggregatorService.generateListingsForProduct(p, existingForProduct);
-        return {
-          ...p,
-          prices: listings.map((l) => ({
-            id: l.id,
-            productId: p.id,
-            platformId: l.platform,
-            platform: l.platform,
-            price: l.price,
-            originalPrice: l.originalPrice,
-            discountPercent: l.discountPercent,
-            productUrl: l.productUrl,
-            availability: l.availability,
-            deliveryEstimate: l.deliveryEstimate,
-            seller: l.seller,
-            isBestPrice: l.isBestPrice,
-            isBestValue: l.isBestValue,
-            lastUpdated: new Date().toISOString(),
-          })),
-        };
-      });
-    } else {
-      // For products from DB, ensure prices array is present
-      rawProducts = rawProducts.map((p) => {
-        if (!p.prices || p.prices.length === 0) {
-          const listings = RetailerAggregatorService.generateListingsForProduct(p);
-          return {
-            ...p,
-            prices: listings.map((l) => ({
-              id: l.id,
-              productId: p.id,
-              platformId: l.platform,
-              platform: l.platform,
-              price: l.price,
-              originalPrice: l.originalPrice,
-              discountPercent: l.discountPercent,
-              productUrl: l.productUrl,
-              availability: l.availability,
-              deliveryEstimate: l.deliveryEstimate,
-              seller: l.seller,
-              isBestPrice: l.isBestPrice,
-              isBestValue: l.isBestValue,
-              lastUpdated: new Date().toISOString(),
-            })),
-          };
+          for (const dbP of dbRows) {
+            const idKey = (dbP.slug || dbP.legacyId || dbP.id || "").toLowerCase();
+            // Filter out old demo products (p1..p13) and test imports (obf-) so they don't replace or duplicate catalog items
+            if (!catalogIdSet.has(idKey) && !legacyDemoIds.has(idKey) && !idKey.startsWith("obf-")) {
+              catalogIdSet.add(idKey);
+              dbCustomProducts.push(dbP);
+            }
+          }
         }
-        return p;
-      });
+      } catch {
+        dbCustomProducts = [];
+      }
     }
+
+    // Unified product list: always contains all 440 verified products plus any valid custom admin additions
+    let rawProducts: any[] = [...catalogProducts, ...dbCustomProducts];
+
+    // Apply primary filters
+    if (categories.length) {
+      rawProducts = rawProducts.filter((p) =>
+        categories.some((c) => (p.category || "").toLowerCase() === c.toLowerCase())
+      );
+    }
+    if (brands.length) {
+      rawProducts = rawProducts.filter((p) =>
+        brands.some((b) => (p.brand || "").toLowerCase() === b.toLowerCase())
+      );
+    }
+    if (query && query.trim()) {
+      const q = query.trim().toLowerCase();
+      rawProducts = rawProducts.filter(
+        (p) =>
+          (p.name || "").toLowerCase().includes(q) ||
+          (p.brand || "").toLowerCase().includes(q) ||
+          (p.category || "").toLowerCase().includes(q) ||
+          (p.allIngredients && p.allIngredients.some((i: string) => i.toLowerCase().includes(q)))
+      );
+    }
+    if (crueltyFree) rawProducts = rawProducts.filter((p) => p.crueltyFree);
+    if (vegan) rawProducts = rawProducts.filter((p) => p.vegan);
+    if (fragranceFree) rawProducts = rawProducts.filter((p) => p.fragranceFree);
+    if (parabenFree) rawProducts = rawProducts.filter((p) => p.parabenFree);
+    if (minRating !== undefined && !isNaN(minRating)) {
+      rawProducts = rawProducts.filter((p) => (p.rating ?? 0) >= minRating);
+    }
+
+    // Ensure every product has live multi-retailer comparative prices attached
+    rawProducts = rawProducts.map((p) => {
+      const existingForProduct = allSavedListings.filter((l) => l.productId === p.id);
+      const listings =
+        existingForProduct.length >= 7
+          ? existingForProduct
+          : RetailerAggregatorService.generateListingsForProduct(p, existingForProduct);
+      return {
+        ...p,
+        prices: listings.map((l) => ({
+          id: l.id,
+          productId: p.id,
+          platformId: l.platform,
+          platform: l.platform,
+          price: l.price,
+          originalPrice: l.originalPrice,
+          discountPercent: l.discountPercent,
+          productUrl: l.productUrl,
+          availability: l.availability,
+          deliveryEstimate: l.deliveryEstimate,
+          seller: l.seller,
+          isBestPrice: l.isBestPrice,
+          isBestValue: l.isBestValue,
+          lastUpdated: new Date().toISOString(),
+        })),
+      };
+    });
 
     // Safe helper to extract string array whether stored as JSON string or raw array
     const extractList = (val: any): string[] => {

@@ -61,7 +61,14 @@ export class AdminDataService {
         localStorage.setItem(key, JSON.stringify(seedData));
         return seedData;
       }
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Auto-upgrade stale cache: if seedData has expanded (e.g. from 13/60 to 440 products),
+      // update localStorage so user browsers are never trapped in outdated smaller counts
+      if (Array.isArray(parsed) && Array.isArray(seedData) && parsed.length < seedData.length) {
+        localStorage.setItem(key, JSON.stringify(seedData));
+        return seedData;
+      }
+      return parsed;
     } catch {
       return seedData;
     }

@@ -183,14 +183,22 @@ export class PrismaCatalog implements CatalogProvider {
 
   async getProducts(): Promise<CatalogProduct[]> {
     if (this.cache && Date.now() - this.cache.at < this.ttlMs) return this.cache.items;
-    const { prisma } = await import("../prisma");
-    const rows = await prisma.product.findMany({
-      include: {
-        prices: true,
-        productIngredients: { include: { ingredient: true }, orderBy: { orderIndex: "asc" } },
-      },
-    });
-    const items = rows.map((r: any) => toCatalogProduct(r as RawProductRow));
+    try {
+      const { prisma } = await import("../prisma");
+      const rows = await prisma.product.findMany({
+        include: {
+          prices: true,
+          productIngredients: { include: { ingredient: true }, orderBy: { orderIndex: "asc" } },
+        },
+      });
+      if (rows && rows.length >= seedProducts.length) {
+        const items = rows.map((r: any) => toCatalogProduct(r as RawProductRow));
+        this.cache = { at: Date.now(), items };
+        return items;
+      }
+    } catch {}
+    // If DB is offline, cold, or has only legacy demo rows, use the full 440-item calibrated catalog
+    const items = buildSeedCatalog();
     this.cache = { at: Date.now(), items };
     return items;
   }

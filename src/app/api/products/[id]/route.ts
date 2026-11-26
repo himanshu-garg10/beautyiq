@@ -23,62 +23,62 @@ export async function GET(
       );
     }
 
-    // Lookup by stable slug, legacyId (e.g. "p1"), or MongoDB ObjectId
-    const isLocalMockDb =
-      !process.env.DATABASE_URL ||
-      process.env.DATABASE_URL.includes("localhost") ||
-      process.env.DATABASE_URL.includes("127.0.0.1") ||
-      process.env.DATABASE_URL.includes("cluster0.xxxxx");
-
     let rawProduct: any = null;
 
-    if (!isLocalMockDb) {
-      try {
-        const dbPromise = prisma.product.findFirst({
-          where: {
-            OR: [
-              { slug: rawId },
-              { legacyId: rawId },
-              ...(isValidObjectId(rawId) ? [{ id: rawId }] : []),
-            ],
-          },
-          include: {
-            prices: true,
-            productIngredients: {
-              include: {
-                ingredient: true,
-              },
-              orderBy: {
-                orderIndex: "asc",
+    // 1. First check the verified 440-product catalog for instant response and calibrated prices
+    const { products, productListings } = await import("@/data/products");
+    const found = products.find(
+      (p) => p.id === rawId || p.id.toLowerCase() === rawId.toLowerCase()
+    );
+
+    if (found) {
+      const allSaved = Array.isArray(productListings) ? productListings : [];
+      const existingForProduct = allSaved.filter((l) => l.productId === found.id);
+      const listings =
+        existingForProduct.length >= 7
+          ? existingForProduct
+          : RetailerAggregatorService.generateListingsForProduct(found, existingForProduct);
+      rawProduct = {
+        ...found,
+        prices: listings,
+      };
+    } else {
+      // 2. If not found in core catalog, check database for custom admin additions
+      const isLocalMockDb =
+        !process.env.DATABASE_URL ||
+        process.env.DATABASE_URL.includes("localhost") ||
+        process.env.DATABASE_URL.includes("127.0.0.1") ||
+        process.env.DATABASE_URL.includes("cluster0.xxxxx");
+
+      if (!isLocalMockDb) {
+        try {
+          const dbPromise = prisma.product.findFirst({
+            where: {
+              OR: [
+                { slug: rawId },
+                { legacyId: rawId },
+                ...(isValidObjectId(rawId) ? [{ id: rawId }] : []),
+              ],
+            },
+            include: {
+              prices: true,
+              productIngredients: {
+                include: {
+                  ingredient: true,
+                },
+                orderBy: {
+                  orderIndex: "asc",
+                },
               },
             },
-          },
-        });
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("DB_TIMEOUT")), 600)
-        );
-        rawProduct = await Promise.race([dbPromise, timeoutPromise]);
-      } catch {
-        rawProduct = null;
-      }
-    }
-
-    if (!rawProduct) {
-      const { products, productListings } = await import("@/data/products");
-      const found = products.find(
-        (p) => p.id === rawId || p.id.toLowerCase() === rawId.toLowerCase()
-      );
-      if (found) {
-        const allSaved = Array.isArray(productListings) ? productListings : [];
-        const existingForProduct = allSaved.filter((l) => l.productId === found.id);
-        const listings =
-          existingForProduct.length >= 7
-            ? existingForProduct
-            : RetailerAggregatorService.generateListingsForProduct(found, existingForProduct);
-        rawProduct = {
-          ...found,
-          prices: listings,
-        };
+          });
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("DB_TIMEOUT")), 600)
+          );
+          rawProduct = await Promise.race([dbPromise, timeoutPromise]);
+        } catch {
+          rawProduct = null;
+        }
       }
     }
 
