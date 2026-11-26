@@ -20,6 +20,22 @@ import { Container } from "@/components/layout/container";
 import { Input } from "@/components/ui/input";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
+// Real product counts from src/data/products.json (440 total)
+const CATEGORY_COUNTS: Record<string, number> = {
+  "Face Wash": 115,
+  "Treatment Products": 81,
+  "Serum": 79,
+  "Sunscreen": 66,
+  "Moisturizer": 51,
+  "Toner": 15,
+  "Exfoliator": 10,
+  "Cleanser": 8,
+  "Face Masks": 8,
+  "Eye Care": 4,
+  "Lip Care": 2,
+  "Acne Focused Products": 1,
+};
+
 const categories = [
   {
     name: "Face Wash",
@@ -33,17 +49,6 @@ const categories = [
     image: "/images/categories/face-wash.jpg",
   },
   {
-    name: "Cleanser",
-    category: "Cleanser",
-    icon: Waves,
-    points: [
-      "Gentle impurity cleansing",
-      "Dissolves makeup and pollution",
-      "Supports healthy skin barrier",
-    ],
-    image: "/images/categories/cleanser.jpg",
-  },
-  {
     name: "Serum",
     category: "Serum",
     icon: Sparkles,
@@ -55,15 +60,15 @@ const categories = [
     image: "/images/categories/serum.jpg",
   },
   {
-    name: "Moisturizer",
-    category: "Moisturizer",
-    icon: Droplets,
+    name: "Treatment Products",
+    category: "Treatment Products",
+    icon: Sparkles,
     points: [
-      "Locks in deep hydration",
-      "Gel, cream and lotion textures",
-      "Calms and softens skin surface",
+      "Targeted intensive skincare formulas",
+      "Potent retinoids and spot treatments",
+      "Improves elasticity & tone",
     ],
-    image: "/images/categories/moisturizer.jpg",
+    image: "/images/categories/treatment-products.jpg",
   },
   {
     name: "Sunscreen",
@@ -75,6 +80,17 @@ const categories = [
       "Essential daily morning step",
     ],
     image: "/images/categories/sunscreen.jpg",
+  },
+  {
+    name: "Moisturizer",
+    category: "Moisturizer",
+    icon: Droplets,
+    points: [
+      "Locks in deep hydration",
+      "Gel, cream and lotion textures",
+      "Calms and softens skin surface",
+    ],
+    image: "/images/categories/moisturizer.jpg",
   },
   {
     name: "Toner",
@@ -99,15 +115,15 @@ const categories = [
     image: "/images/categories/exfoliator.jpg",
   },
   {
-    name: "Acne Focused Products",
-    category: "Acne Focused Products",
-    icon: ShieldCheck,
+    name: "Cleanser",
+    category: "Cleanser",
+    icon: Waves,
     points: [
-      "Targets breakouts and redness",
-      "Salicylic acid & benzoyl peroxide",
-      "Prevents post-acne blemishes",
+      "Gentle impurity cleansing",
+      "Dissolves makeup and pollution",
+      "Supports healthy skin barrier",
     ],
-    image: "/images/categories/acne-focused.jpg",
+    image: "/images/categories/cleanser.jpg",
   },
   {
     name: "Face Masks",
@@ -121,17 +137,6 @@ const categories = [
     image: "/images/categories/face-masks.jpg",
   },
   {
-    name: "Lip Care",
-    category: "Lip Care",
-    icon: Smile,
-    points: [
-      "Hydrating balms and overnight butter",
-      "Soothes dry, chapped lips",
-      "SPF protection for everyday wear",
-    ],
-    image: "/images/categories/lip-care.jpg",
-  },
-  {
     name: "Eye Care",
     category: "Eye Care",
     icon: Eye,
@@ -143,15 +148,26 @@ const categories = [
     image: "/images/categories/eye-care.jpg",
   },
   {
-    name: "Treatment Products",
-    category: "Treatment Products",
-    icon: Sparkles,
+    name: "Acne Focused Products",
+    category: "Acne Focused Products",
+    icon: ShieldCheck,
     points: [
-      "Targeted intensive skincare formulas",
-      "Potent retinoids and spot treatments",
-      "Improves elasticity & tone",
+      "Targets breakouts and redness",
+      "Salicylic acid & benzoyl peroxide",
+      "Prevents post-acne blemishes",
     ],
-    image: "/images/categories/treatment-products.jpg",
+    image: "/images/categories/acne-focused.jpg",
+  },
+  {
+    name: "Lip Care",
+    category: "Lip Care",
+    icon: Smile,
+    points: [
+      "Hydrating balms and overnight butter",
+      "Soothes dry, chapped lips",
+      "SPF protection for everyday wear",
+    ],
+    image: "/images/categories/lip-care.jpg",
   },
 ];
 
@@ -221,6 +237,11 @@ export function CategoriesBrowser() {
                     <h2 className="font-display text-xl font-bold text-white drop-shadow-md tracking-tight group-hover:text-champagne transition-colors">
                       {item.name}
                     </h2>
+                    {CATEGORY_COUNTS[item.category] !== undefined && (
+                      <p className="text-[0.68rem] font-medium text-white/75 mt-0.5 drop-shadow">
+                        {CATEGORY_COUNTS[item.category]} products
+                      </p>
+                    )}
                   </div>
                 </div>
 

@@ -23,6 +23,116 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+// ─── Tiny safe markdown renderer ─────────────────────────────────────────────
+// Handles: **bold**, *italic*, `code`, # headings, bullet lists (- / *), numbered lists, paragraphs.
+// No dangerouslySetInnerHTML — purely React elements.
+
+function renderInline(text: string): React.ReactNode[] {
+  // Split on **bold** and `code` spans
+  const parts: React.ReactNode[] = [];
+  const re = /(\*\*(.+?)\*\*|`([^`]+)`|\*([^*\n]+)\*)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    if (m[2] !== undefined) {
+      parts.push(<strong key={m.index} className="font-semibold text-foreground">{m[2]}</strong>);
+    } else if (m[3] !== undefined) {
+      parts.push(<code key={m.index} className="rounded bg-background px-1 py-0.5 text-[0.8em] font-mono text-champagne-deep">{m[3]}</code>);
+    } else if (m[4] !== undefined) {
+      parts.push(<em key={m.index} className="italic">{m[4]}</em>);
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
+function MarkdownText({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let ulItems: string[] = [];
+  let olItems: string[] = [];
+
+  function flushUl() {
+    if (ulItems.length === 0) return;
+    nodes.push(
+      <ul key={`ul-${nodes.length}`} className="mt-1 space-y-1 pl-0">
+        {ulItems.map((item, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span className="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-deep" />
+            <span>{renderInline(item)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+    ulItems = [];
+  }
+
+  function flushOl() {
+    if (olItems.length === 0) return;
+    nodes.push(
+      <ol key={`ol-${nodes.length}`} className="mt-1 space-y-1 pl-0">
+        {olItems.map((item, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span className="mt-[0.1em] shrink-0 text-[0.75em] font-bold text-champagne-deep">{i + 1}.</span>
+            <span>{renderInline(item)}</span>
+          </li>
+        ))}
+      </ol>
+    );
+    olItems = [];
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Bullet list
+    if (/^[-*]\s+/.test(trimmed)) {
+      flushOl();
+      ulItems.push(trimmed.replace(/^[-*]\s+/, ""));
+      continue;
+    }
+    // Numbered list
+    if (/^\d+\.\s+/.test(trimmed)) {
+      flushUl();
+      olItems.push(trimmed.replace(/^\d+\.\s+/, ""));
+      continue;
+    }
+
+    flushUl();
+    flushOl();
+
+    // Blank line → spacing
+    if (trimmed === "") {
+      if (nodes.length > 0) nodes.push(<div key={`sp-${i}`} className="h-1.5" />);
+      continue;
+    }
+
+    // Headings
+    const h2 = trimmed.match(/^##\s+(.*)/);
+    const h1 = trimmed.match(/^#\s+(.*)/);
+    if (h1) {
+      nodes.push(<p key={i} className="font-semibold text-foreground mt-1">{renderInline(h1[1])}</p>);
+      continue;
+    }
+    if (h2) {
+      nodes.push(<p key={i} className="font-semibold text-foreground/90 mt-1 text-[0.9em]">{renderInline(h2[1])}</p>);
+      continue;
+    }
+
+    // Regular paragraph line
+    nodes.push(<span key={i} className="block leading-relaxed">{renderInline(trimmed)}</span>);
+  }
+  flushUl();
+  flushOl();
+
+  return <div className="space-y-0.5">{nodes}</div>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-1 px-4 py-3 rounded-2xl rounded-bl-sm bg-background-elevated max-w-[85%] w-fit">
@@ -106,13 +216,13 @@ function MessageBubble({
     <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
-          "px-4 py-2.5 text-sm leading-relaxed max-w-[85%] whitespace-pre-wrap",
+          "px-4 py-2.5 text-sm leading-relaxed max-w-[85%]",
           isUser
-            ? "bg-foreground text-background rounded-2xl rounded-br-sm max-w-[80%]"
+            ? "bg-foreground text-background rounded-2xl rounded-br-sm max-w-[80%] whitespace-pre-wrap"
             : "bg-background-elevated text-foreground rounded-2xl rounded-bl-sm"
         )}
       >
-        {message.content}
+        {isUser ? message.content : <MarkdownText content={message.content} />}
       </div>
       {message.action === "skin-scan" && (
         <Link
