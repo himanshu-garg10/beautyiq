@@ -170,16 +170,9 @@ async function calibrate() {
     ],
   };
 
-  const catalogFilePath = path.join(process.cwd(), "src/data/products.ts");
-  const fileContent =
-    `import type { Product, ProductListing } from "@/types";\n\n` +
-    `export const products: Product[] = ${JSON.stringify(calibratedProducts, null, 2)};\n\n` +
-    `export const productListings: ProductListing[] = ${JSON.stringify(mergedListings, null, 2)};\n\n` +
-    `export const mockProductListings = productListings;\n\n` +
-    `export const priceComparison = ${JSON.stringify(accurateComparison, null, 2)};\n`;
-
-  fs.writeFileSync(catalogFilePath, fileContent, "utf-8");
-  console.log(`✅ Saved ${calibratedProducts.length} calibrated products and ${mergedListings.length} matching store listings!`);
+  const jsonFilePath = path.join(process.cwd(), "src/data/products.json");
+  fs.writeFileSync(jsonFilePath, JSON.stringify(calibratedProducts, null, 2), "utf-8");
+  console.log(`✅ Saved ${calibratedProducts.length} calibrated products to products.json!`);
 }
 
 calibrate().catch(console.error);
