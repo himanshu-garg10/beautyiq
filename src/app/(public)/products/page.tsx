@@ -190,7 +190,7 @@ function ProductsCatalogContent() {
       parabenFreeOnly,
       sortBy,
       page,
-      pageSize: 9,
+      pageSize: 12,
     }).then((res) => {
       if (res.data) {
         setDataResult(res.data);
@@ -294,83 +294,41 @@ function ProductsCatalogContent() {
     router.replace(catalogReturnTo, { scroll: false });
   }, [catalogReturnTo, router]);
 
+  const resultsTopRef = React.useRef<HTMLDivElement>(null);
+
+  const handlePageChange = React.useCallback((nextPage: number) => {
+    setPage(nextPage);
+    resultsTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const paginationItems = React.useMemo(() => {
+    const totalPages = dataResult?.totalPages ?? 1;
+    const current = dataResult?.page ?? page;
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const items: Array<number | "ellipsis-start" | "ellipsis-end"> = [1];
+    const start = Math.max(2, current - 1);
+    const end = Math.min(totalPages - 1, current + 1);
+    if (start > 2) items.push("ellipsis-start");
+    for (let p = start; p <= end; p++) items.push(p);
+    if (end < totalPages - 1) items.push("ellipsis-end");
+    items.push(totalPages);
+    return items;
+  }, [dataResult?.page, dataResult?.totalPages, page]);
+
   return (
     <Container className="max-w-[1500px] px-3 sm:px-5 lg:px-6 py-4 md:py-6 space-y-6">
-      {/* Multi-Store Comparison Ticker / Banner */}
-      <div className="rounded-2xl border border-line/80 bg-gradient-to-r from-background-elevated/70 via-background-card to-background-elevated/70 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-bold text-sm shadow-xs">
-            ⚡
-          </div>
-          <div>
-            <p className="text-xs sm:text-sm font-bold text-foreground">
-              Multi-Retailer Price Engine Active
-            </p>
-            <p className="text-[0.72rem] text-foreground-muted truncate">
-              Comparing live checkout prices across Amazon, Flipkart, Myntra, Nykaa, Purplle, Tira &amp; Direct Stores (Minimalist, Dot &amp; Key).
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/25">
-            📦 Amazon
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 font-bold border border-blue-500/25">
-            ⚡ Flipkart
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-700 dark:text-pink-400 font-bold border border-pink-500/25">
-            👗 Myntra
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-400 font-bold border border-rose-500/25">
-            💄 Nykaa
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-400 font-bold border border-purple-500/25">
-            💜 Purplle
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-stone-500/10 text-stone-800 dark:text-stone-300 font-bold border border-stone-500/25">
-            💎 Tira
-          </span>
-          <span className="text-[0.68rem] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/30">
-            🌿 Brand Stores
-          </span>
-        </div>
-      </div>
-
-      {/* Prominent Multi-Store Search & Compare Bar with Search Button */}
-      <div className="rounded-2xl border border-sage-deep/30 bg-background-card p-4 sm:p-5 shadow-sm space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h2 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-              <Search className="h-4 w-4 text-sage-deep" />
-              <span>Search Products &amp; Compare Live Store Prices</span>
-            </h2>
-            <p className="text-xs text-foreground-muted">
-              Enter any product, brand, or active ingredient. We fetch real-time offers across Amazon, Flipkart, Nykaa, Myntra, Purplle, Tira &amp; Direct Stores with direct buying links.
-            </p>
-          </div>
-          {searchQuery && (
-            <button
-              onClick={() => {
-                setSearchInputText("");
-                setSearchQuery("");
-                setPage(1);
-              }}
-              className="text-xs text-sage-deep font-semibold hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
-            >
-              <RotateCcw className="h-3 w-3" />
-              <span>Clear Search</span>
-            </button>
-          )}
-        </div>
-
+      {/* Clean Full-Width Search Bar */}
+      <div className="space-y-2">
         <form onSubmit={handleTopSearchSubmit} className="flex flex-col sm:flex-row items-stretch gap-2">
           <div className="relative flex-1">
             <input
               type="text"
               value={searchInputText}
               onChange={(e) => setSearchInputText(e.target.value)}
-              placeholder="Search product, brand, or active (e.g. Minimalist Salicylic Acid, Dot & Key, CeraVe, Vitamin C)..."
-              className="w-full rounded-xl border border-line bg-background-elevated/70 px-4 py-2.5 pl-10 text-sm text-foreground placeholder:text-foreground-faint focus:border-sage-deep focus:bg-background focus:outline-none focus:ring-2 focus:ring-sage-deep/20 transition-all font-medium"
+              placeholder="Search products, brands or ingredients"
+              className="w-full rounded-xl border border-line bg-background-card px-4 py-2.5 pl-10 pr-9 text-sm text-foreground placeholder:text-foreground-faint focus:border-sage-deep focus:bg-background focus:outline-none focus:ring-2 focus:ring-sage-deep/20 transition-all"
             />
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-foreground-faint" />
             {searchInputText && (
@@ -381,56 +339,27 @@ function ProductsCatalogContent() {
                   setSearchQuery("");
                   setPage(1);
                 }}
-                className="absolute right-3.5 top-3 text-foreground-faint hover:text-foreground p-0.5"
+                aria-label="Clear search"
+                className="absolute right-3 top-2.5 text-foreground-faint hover:text-foreground p-0.5"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
               </button>
             )}
           </div>
           <Button
             type="submit"
-            variant="accent"
-            className="rounded-xl px-5 font-bold shadow-xs flex items-center justify-center gap-2 shrink-0 bg-sage-deep text-white hover:bg-sage-deep/90 h-[42px]"
+            variant="primary"
+            className="rounded-xl px-6 shrink-0 h-[42px]"
           >
             <Search className="h-4 w-4" />
-            <span>Search &amp; Compare</span>
+            <span>Search</span>
           </Button>
         </form>
-
-        {/* Quick Search Tag Suggestions */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-xs text-foreground-muted">
-          <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-foreground-faint">
-            Popular:
-          </span>
-          {[
-            "Minimalist 10% Niacinamide",
-            "Salicylic Acid Face Wash",
-            "Dot & Key Watermelon",
-            "CeraVe Cleanser",
-            "The Ordinary Niacinamide",
-            "SPF 50 Sunscreen",
-            "Vitamin C Serum",
-            "Neutrogena Hydro Boost",
-          ].map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => {
-                setSearchInputText(tag);
-                setSearchQuery(tag);
-                setPage(1);
-              }}
-              className={cn(
-                "rounded-full border px-2.5 py-0.5 text-[0.7rem] font-medium transition-all",
-                searchQuery.toLowerCase() === tag.toLowerCase()
-                  ? "bg-sage-deep text-white border-sage-deep font-semibold"
-                  : "bg-background-elevated hover:bg-sage-tint hover:text-sage-deep text-foreground-muted border-line"
-              )}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+        {dataResult && (
+          <p className="text-xs text-foreground-muted px-1">
+            Showing <strong className="text-foreground">{dataResult.total}</strong> products
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end lg:hidden">
@@ -444,7 +373,7 @@ function ProductsCatalogContent() {
       </div>
 
       {/* Main Layout: Sidebar Filters + Products Catalog */}
-      <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-8 xl:gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-6 xl:gap-8 items-start">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block space-y-6 rounded-2xl border border-line bg-background-card p-5 shadow-subtle sticky top-24">
           <div className="flex items-center justify-between border-b border-line pb-3">
@@ -624,7 +553,7 @@ function ProductsCatalogContent() {
         )}
 
         {/* Products Results Area */}
-        <div className="space-y-6">
+        <div ref={resultsTopRef} className="space-y-6 scroll-mt-24">
           {catalogError ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-status-error/30 bg-status-error-bg/20 px-4 py-3 text-sm text-status-error">
               <span>{catalogError}</span>
@@ -749,7 +678,7 @@ function ProductsCatalogContent() {
             </div>
           </div>
 
-          {/* Live Search & Similar Products Cross-Website Comparison Matrix */}
+          {/* Similar Products Cross-Website Comparison Matrix */}
           {searchQuery.trim().length > 0 && (
             <SearchComparisonWidget
               searchQuery={searchQuery}
@@ -757,16 +686,16 @@ function ProductsCatalogContent() {
             />
           )}
 
-          {/* Direct Live Retailer Search Panel */}
+          {/* Direct Retailer Search Panel */}
           {searchQuery.trim().length > 0 && (
             <div className="rounded-xl border border-sage-deep/30 bg-sage-tint/25 p-4 space-y-2.5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <span className="font-semibold text-xs text-foreground flex items-center gap-1.5">
                   <ExternalLink className="h-3.5 w-3.5 text-sage-deep" />
-                  Search &quot;{searchQuery}&quot; Live on Top Retailers:
+                  Search &quot;{searchQuery}&quot; on Top Retailers:
                 </span>
                 <span className="text-[0.68rem] text-foreground-faint">
-                  Opens live search results directly on merchant stores
+                  Opens search results directly on merchant stores
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -840,10 +769,10 @@ function ProductsCatalogContent() {
 
           {/* Grid Content / Loading Skeletons / Empty State */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 xl:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="h-88 rounded border border-line bg-background-card animate-pulse p-4 space-y-4">
-                  <div className="h-44 bg-background-elevated rounded" />
+                <div key={n} className="h-88 rounded-2xl border border-line bg-background-card animate-pulse p-4 space-y-4">
+                  <div className="h-44 bg-background-elevated rounded-xl" />
                   <div className="h-4 w-3/4 bg-background-elevated rounded" />
                   <div className="h-3 w-1/2 bg-background-elevated rounded" />
                 </div>
@@ -857,7 +786,7 @@ function ProductsCatalogContent() {
               onAction={handleResetFilters}
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5">
               {dataResult.products.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -869,43 +798,94 @@ function ProductsCatalogContent() {
             </div>
           )}
 
-          {/* Pagination Controls */}
+          {/* Compact Pagination Controls */}
           {dataResult && dataResult.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-line pt-6">
-              <span className="text-xs text-foreground-muted font-mono">
-                Page {dataResult.page} of {dataResult.totalPages}
-              </span>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-line pt-6">
+              <div className="text-xs text-foreground-muted text-center sm:text-left">
+                <span>
+                  Page <strong className="text-foreground">{dataResult.page}</strong> of{" "}
+                  <strong className="text-foreground">{dataResult.totalPages}</strong>
+                </span>
+                <span className="mx-2 text-line-strong">·</span>
+                <span>
+                  Showing{" "}
+                  <strong className="text-foreground">
+                    {(dataResult.page - 1) * dataResult.pageSize + 1}
+                    &ndash;
+                    {Math.min(dataResult.page * dataResult.pageSize, dataResult.total)}
+                  </strong>{" "}
+                  of <strong className="text-foreground">{dataResult.total}</strong> products
+                </span>
+              </div>
 
-              <div className="flex items-center gap-2">
+              {/* Mobile Pagination: Previous | Page X of Y | Next */}
+              <div className="flex sm:hidden items-center justify-between w-full gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={dataResult.page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, dataResult.page - 1))}
+                  leftIcon={<ChevronLeft className="h-4 w-4" />}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs font-medium text-foreground-muted whitespace-nowrap">
+                  Page {dataResult.page} of {dataResult.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={dataResult.page >= dataResult.totalPages}
+                  onClick={() => handlePageChange(Math.min(dataResult.totalPages, dataResult.page + 1))}
+                  rightIcon={<ChevronRight className="h-4 w-4" />}
+                >
+                  Next
+                </Button>
+              </div>
+
+              {/* Desktop / Tablet Compact Pagination */}
+              <div className="hidden sm:flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={dataResult.page <= 1}
+                  onClick={() => handlePageChange(Math.max(1, dataResult.page - 1))}
                   leftIcon={<ChevronLeft className="h-4 w-4" />}
                 >
                   Previous
                 </Button>
 
-                {Array.from({ length: dataResult.totalPages }, (_, i) => i + 1).map((pg) => (
-                  <button
-                    key={pg}
-                    onClick={() => setPage(pg)}
-                    className={`h-8 w-8 rounded text-xs font-semibold transition-colors ${
-                      pg === dataResult.page
-                        ? "bg-sage-deep text-white"
-                        : "border border-line bg-background-card text-foreground-muted hover:border-line-strong"
-                    }`}
-                  >
-                    {pg}
-                  </button>
-                ))}
+                {paginationItems.map((item) =>
+                  typeof item === "string" ? (
+                    <span
+                      key={item}
+                      className="px-1.5 text-xs font-medium text-foreground-faint select-none"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => handlePageChange(item)}
+                      aria-current={item === dataResult.page ? "page" : undefined}
+                      className={cn(
+                        "h-8 min-w-[2rem] px-2 rounded-lg text-xs font-semibold transition-colors",
+                        item === dataResult.page
+                          ? "bg-sage-deep text-white shadow-xs"
+                          : "border border-line bg-background-card text-foreground-muted hover:border-line-strong hover:text-foreground"
+                      )}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
 
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={dataResult.page >= dataResult.totalPages}
-                  onClick={() => setPage((p) => Math.min(dataResult.totalPages, p + 1))}
+                  onClick={() => handlePageChange(Math.min(dataResult.totalPages, dataResult.page + 1))}
                   rightIcon={<ChevronRight className="h-4 w-4" />}
                 >
                   Next
